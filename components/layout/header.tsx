@@ -30,7 +30,7 @@ export function Header() {
         "fixed top-0 left-0 right-0 z-50 w-full transition-all duration-500 ease-in-out",
         isScrolled
           ? "bg-[#0d1330]/90 shadow-xl backdrop-blur-sm border-b border-white/10"
-          : "bg-[#0d1330]/75 shadow-md backdrop-blur-sm border-b border-white/10"
+          : "bg-transparent backdrop-blur-none border-b border-transparent"
       )}
     >
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">

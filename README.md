@@ -39,6 +39,14 @@ npm run build
 npm start
 ```
 
+### Environment (Supabase submissions)
+
+Set these for the submissions API:
+- `NEXT_PUBLIC_SUPABASE_URL`
+- `SUPABASE_SERVICE_ROLE_KEY`
+
+If they are missing, `/api/submissions` will return a configuration error. Schema SQL: `supabase/schema-submissions.sql`.
+
 ## Project Structure
 
 ```

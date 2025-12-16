@@ -31,17 +31,37 @@ export function FeedbackForm() {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
+    setError(null);
 
-    // TODO: Submit to API endpoint
-    // For now, just log the data
-    console.log("Feedback submitted:", formData);
+    try {
+      const payload = {
+        type: formData.type,
+        message: formData.message,
+        name: formData.name,
+        email: formData.email,
+        rating: formData.rating ? Number(formData.rating) : undefined,
+      };
 
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+      const res = await fetch("/api/submissions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data?.error || "Αποτυχία αποστολής");
+      }
+    } catch (err: any) {
+      setError(err.message || "Κάτι πήγε στραβά");
+      setIsSubmitting(false);
+      return;
+    }
 
     setIsSubmitting(false);
     setIsSubmitted(true);
@@ -75,6 +95,12 @@ export function FeedbackForm() {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
+      {error && (
+        <div className="rounded-card border border-destructive/40 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+          {error}
+        </div>
+      )}
+
       {/* Feedback Type */}
       <div className="space-y-2">
         <Label htmlFor="feedback-type" className="text-base font-semibold text-text-dark">
