@@ -1,34 +1,40 @@
 import Link from "next/link";
 import { Youtube, Instagram, Facebook, Music } from "lucide-react";
 import { Container } from "@/components/ui/container";
+import { Button } from "@/components/ui/button";
+import Image from "next/image";
 
 export function Footer() {
   const currentYear = new Date().getFullYear();
+
+  const navItems = [
+    { href: "/", label: "Αρχική" },
+    { href: "/sxetika", label: "Σχετικά" },
+    { href: "/drastiriotites", label: "Δραστηριότητες" },
+    { href: "/epikoinonia", label: "Επικοινωνία" },
+    { href: "/gia-goneis", label: "Για Γονείς" },
+  ];
 
   const socialLinks = [
     {
       name: "YouTube",
       icon: Youtube,
-      href: "https://youtube.com",
-      color: "hover:text-red-600",
+      href: "https://www.youtube.com/@MikroiMathites",
     },
     {
       name: "Instagram",
       icon: Instagram,
-      href: "https://instagram.com",
-      color: "hover:text-pink-600",
+      href: "https://www.instagram.com/mikroimathites/",
     },
     {
       name: "Facebook",
       icon: Facebook,
-      href: "https://facebook.com",
-      color: "hover:text-blue-600",
+      href: "https://www.facebook.com/profile.php?id=61553477665097",
     },
     {
       name: "TikTok",
       icon: Music,
-      href: "https://tiktok.com",
-      color: "hover:text-black",
+      href: "https://www.tiktok.com/@mikroimathites",
     },
   ];
 
@@ -36,74 +42,83 @@ export function Footer() {
     <footer className="bg-[#1a1f3a] text-white">
       <Container>
         <div className="py-12 md:py-16">
-          <div className="grid grid-cols-1 gap-8 md:grid-cols-4">
-            <div className="space-y-4">
-              <h3 className="text-lg font-semibold text-white">
-                Μικροί Μαθητές
-              </h3>
-              <p className="text-sm text-white/80">
-                Parent Hub για γονείς με παιδιά 0-6 ετών
-              </p>
-            </div>
-            <div className="space-y-4">
-              <h4 className="text-sm font-semibold text-white">Σύνδεσμοι</h4>
-              <ul className="space-y-2 text-sm text-white/80">
-                <li>
-                  <Link href="/" className="hover:text-accent-yellow transition-colors">
-                    Αρχική
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/gia-goneis" className="hover:text-accent-yellow transition-colors">
-                    Για Γονείς
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/drastiriotites" className="hover:text-accent-yellow transition-colors">
-                    Δραστηριότητες
-                  </Link>
-                </li>
-              </ul>
-            </div>
-            <div className="space-y-4">
-              <h4 className="text-sm font-semibold text-white">Πληροφορίες</h4>
-              <ul className="space-y-2 text-sm text-white/80">
-                <li>
-                  <Link href="/sxetika" className="hover:text-accent-yellow transition-colors">
-                    Σχετικά
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/epikoinonia" className="hover:text-accent-yellow transition-colors">
-                    Επικοινωνία
-                  </Link>
-                </li>
-              </ul>
-            </div>
-            <div className="space-y-4">
-              <h4 className="text-sm font-semibold text-white">Ακολουθήστε μας</h4>
-              <div className="flex flex-wrap gap-4">
-                {socialLinks.map((social) => {
-                  const Icon = social.icon;
-                  return (
-                    <a
-                      key={social.name}
-                      href={social.href}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className={`flex items-center gap-2 text-white/80 transition-colors ${social.color}`}
-                      aria-label={social.name}
-                    >
-                      <Icon className="h-5 w-5" />
-                      <span className="text-sm hidden sm:inline">{social.name}</span>
-                    </a>
-                  );
-                })}
-              </div>
-            </div>
+          {/* Top Navigation */}
+          <nav className="flex flex-wrap justify-center gap-6 mb-12">
+            {navItems.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                className="text-base font-bold text-white hover:text-accent-yellow transition-colors"
+              >
+                {item.label}
+              </Link>
+            ))}
+          </nav>
+
+          {/* Newsletter Section */}
+          <div className="text-center mb-12">
+            <p className="text-sm text-white mb-4">Νέα από τη γωνία...</p>
+            <Button
+              className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-bold px-8 py-3 rounded-lg"
+              size="lg"
+            >
+              Εγγραφή στο Newsletter
+            </Button>
           </div>
-          <div className="mt-8 border-t border-white/10 pt-8 text-center text-sm text-white/60">
-            <p>© {currentYear} Μικροί Μαθητές. Όλα τα δικαιώματα κατοχυρωμένα.</p>
+
+          {/* Social Media Icons */}
+          <div className="flex justify-center gap-6 mb-12">
+            {socialLinks.map((social) => {
+              const Icon = social.icon;
+              return (
+                <a
+                  key={social.name}
+                  href={social.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-white hover:text-accent-yellow transition-colors"
+                  aria-label={social.name}
+                >
+                  <Icon className="h-6 w-6" />
+                </a>
+              );
+            })}
+          </div>
+
+          {/* Branding */}
+          <div className="flex flex-col items-center gap-3">
+            <div className="relative w-[350px] h-48">
+              <Image
+                src="/images/logo.png"
+                alt="Μικροί Μαθητές"
+                fill
+            //    className="object-contain"
+              />
+            </div>
+            <span className="text-lg font-bold text-white">ΜΙΚΡΟΙ ΜΑΘΗΤΕΣ</span>
+            <p className="text-sm text-white/80">
+              © Μικροί Μαθητές {currentYear}
+            </p>
+          </div>
+
+          {/* Bottom Links */}
+          <div className="flex flex-wrap justify-center gap-6 text-sm text-white mb-4">
+            <Link href="/epikoinonia" className="hover:text-accent-yellow transition-colors">
+              Επικοινωνία
+            </Link>
+            <Link href="/privacy" className="hover:text-accent-yellow transition-colors">
+              Απόρρητο
+            </Link>
+            <Link href="/terms" className="hover:text-accent-yellow transition-colors">
+              Όροι & Προϋποθέσεις
+            </Link>
+          </div>
+
+          {/* Cookie Settings */}
+          <div className="text-left">
+            <button className="text-sm font-bold text-white uppercase hover:text-accent-yellow transition-colors">
+              ΡΥΘΜΙΣΕΙΣ COOKIES
+            </button>
           </div>
         </div>
       </Container>

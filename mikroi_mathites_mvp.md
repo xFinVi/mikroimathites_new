@@ -108,6 +108,11 @@ Build a **Parent Hub** that:
 - ✅ Basic page templates with placeholders
 - ✅ Navigation menu working
 - ✅ Footer component
+- ✅ Custom 404 page (Greek copy + CTA)
+- ✅ SEO baseline per route (title/description + Open Graph/Twitter)
+- ✅ Shared composition primitives (PageWrapper, PageHeader) to avoid Header/Footer duplication
+- ✅ No repeated layout code; pages use shared wrappers/components
+- ✅ Structured, flexible page composition to allow per-page creativity with a consistent philosophy
 - ✅ 404 page
 - ✅ Basic SEO meta tags structure
 
@@ -118,6 +123,9 @@ Build a **Parent Hub** that:
 - Navigation works between pages
 - Pages have basic structure (header, content area, footer)
 - No broken links
+- 404 page renders with Greek messaging and CTA to home
+- Route metadata present (title, description, OG/Twitter)
+- Layout duplication removed via shared wrappers/components
 
 ---
 
