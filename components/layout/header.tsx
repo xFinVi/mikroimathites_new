@@ -29,8 +29,8 @@ export function Header() {
       className={cn(
         "fixed top-0 left-0 right-0 z-50 w-full transition-all duration-500 ease-in-out",
         isScrolled
-          ? "bg-[#1a1f3a] shadow-xl backdrop-blur-sm border-b border-white/10" // Dark blue like Bing when scrolled
-          : "bg-transparent backdrop-blur-none border-b border-transparent" // Transparent at top
+          ? "bg-[#0d1330]/90 shadow-xl backdrop-blur-sm border-b border-white/10"
+          : "bg-[#0d1330]/75 shadow-md backdrop-blur-sm border-b border-white/10"
       )}
     >
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">

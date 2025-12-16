@@ -16,7 +16,7 @@ export function Navigation() {
   const pathname = usePathname();
 
   return (
-    <nav className="flex items-center space-x-6 lg:space-x-8">
+    <nav className="flex items-center space-x-4 sm:space-x-6 lg:space-x-8">
       {navItems.map((item) => {
         const isActive = pathname === item.href;
         return (
