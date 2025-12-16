@@ -39,6 +39,13 @@ npm run build
 npm start
 ```
 
+### Environment (Sanity)
+- `SANITY_PROJECT_ID`
+- `SANITY_DATASET`
+- `SANITY_API_VERSION` (e.g., 2024-03-01)
+- `SANITY_READ_TOKEN` or `SANITY_TOKEN` (optional, for drafts/authed reads)
+- `SANITY_REVALIDATE_SECRET` (for webhook revalidation)
+
 ### Environment (Supabase submissions)
 
 Set these for the submissions API:
