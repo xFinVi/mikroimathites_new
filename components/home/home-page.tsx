@@ -120,7 +120,6 @@ export function HomePage() {
             fill
             className="object-cover object-center"
             priority
-            quality={85}
             sizes="100vw"
           />
           <div className="absolute inset-0 bg-gradient-to-b from-black/5 via-transparent to-black/20" />

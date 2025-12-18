@@ -16,8 +16,7 @@ export async function POST(req: Request) {
 
   // For now, revalidate everything coarse-grained; can be refined per payload
   try {
-    revalidatePath("/"); // main landing
-    revalidateTag("content"); // optional tag if used
+    revalidatePath("/", "page"); // main landing
     return NextResponse.json({ revalidated: true, now: Date.now() });
   } catch (err) {
     return NextResponse.json({ error: "Failed to revalidate", details: String(err) }, { status: 500 });

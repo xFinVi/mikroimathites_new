@@ -8,7 +8,7 @@ Modern Parent Hub built with Next.js 16, TypeScript, Tailwind CSS, and shadcn/ui
 - **Language:** TypeScript
 - **Styling:** Tailwind CSS
 - **UI Components:** shadcn/ui
-- **CMS:** Sanity (to be configured)
+- **CMS:** Sanity (configured)
 - **Database:** Supabase (to be configured)
 
 ## Getting Started
@@ -40,11 +40,17 @@ npm start
 ```
 
 ### Environment (Sanity)
-- `SANITY_PROJECT_ID`
-- `SANITY_DATASET`
-- `SANITY_API_VERSION` (e.g., 2024-03-01)
+
+Create a `.env.local` file with:
+- `SANITY_PROJECT_ID` - Your Sanity project ID
+- `SANITY_DATASET` - Your dataset name (e.g., "production")
+- `SANITY_API_VERSION` - API version (e.g., "2024-03-01")
 - `SANITY_READ_TOKEN` or `SANITY_TOKEN` (optional, for drafts/authed reads)
 - `SANITY_REVALIDATE_SECRET` (for webhook revalidation)
+
+**Access Sanity Studio:**
+- Visit `http://localhost:3000/studio` to manage content
+- No separate CMS UI needed - Studio is embedded in the Next.js app
 
 ### Environment (Supabase submissions)
 
@@ -73,7 +79,13 @@ If they are missing, `/api/submissions` will return a configuration error. Schem
 │       └── navigation.tsx
 ├── lib/
 │   ├── utils.ts           # Utility functions (cn helper)
-│   └── design-tokens.ts   # Design system tokens
+│   ├── design-tokens.ts   # Design system tokens
+│   ├── content/           # Content provider layer (Sanity)
+│   ├── sanity/            # Sanity client, queries, image URL builder
+│   └── seo/               # SEO metadata generation
+├── sanity/
+│   ├── config.ts          # Sanity Studio configuration
+│   └── schemas/           # Content schemas (Article, Activity, etc.)
 └── public/                # Static assets
 ```
 

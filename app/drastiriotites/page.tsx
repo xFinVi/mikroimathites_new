@@ -2,12 +2,15 @@ import { Container } from "@/components/ui/container";
 import { PageWrapper } from "@/components/pages/page-wrapper";
 import { PageHeader } from "@/components/pages/page-header";
 import { generateMetadataFor } from "@/lib/seo/generate-metadata";
+import { getActivities } from "@/lib/content";
+import { ActivityCard } from "@/components/activities/activity-card";
 import Image from "next/image";
 import Link from "next/link";
 
 export const metadata = generateMetadataFor("drastiriotites");
 
-export default function DrastiriotitesPage() {
+export default async function DrastiriotitesPage() {
+  const activities = await getActivities();
   return (
     <PageWrapper>
       {/* Hero */}
@@ -51,28 +54,39 @@ export default function DrastiriotitesPage() {
           <p className="text-text-medium text-sm">Τα φίλτρα θα συνδεθούν με CMS (Sanity) και API layer.</p>
         </section>
 
-        {/* Featured grid placeholder */}
+        {/* Activities grid from Sanity */}
         <section className="space-y-6">
           <div className="flex items-center justify-between gap-4">
-            <h2 className="text-2xl sm:text-3xl font-bold text-text-dark">Προτεινόμενα</h2>
-            <span className="text-sm text-text-medium">Σύντομα από CMS</span>
+            <h2 className="text-2xl sm:text-3xl font-bold text-text-dark">
+              {activities.length > 0 ? "Δραστηριότητες" : "Δραστηριότητες"}
+            </h2>
+            {activities.length > 0 && (
+              <span className="text-sm text-text-medium">{activities.length} δραστηριότητες</span>
+            )}
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {Array.from({ length: 6 }).map((_, idx) => (
-              <div
-                key={idx}
-                className="bg-background-white rounded-card p-5 shadow-subtle border border-border/50 space-y-3"
+          {activities.length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {activities.map((activity) => (
+                <ActivityCard key={activity._id} activity={activity} />
+              ))}
+            </div>
+          ) : (
+            <div className="bg-background-white rounded-card p-12 shadow-subtle border border-border/50 text-center">
+              <p className="text-text-medium mb-4">
+                Δεν υπάρχουν δραστηριότητες ακόμα. Προσθέστε περιεχόμενο από το{" "}
+                <Link href="/studio" className="text-secondary-blue hover:underline font-semibold">
+                  Sanity Studio
+                </Link>
+                .
+              </p>
+              <Link
+                href="/studio"
+                className="inline-flex items-center gap-2 rounded-button bg-secondary-blue px-5 py-3 text-white hover:bg-secondary-blue/90 transition"
               >
-                <div className="h-36 w-full rounded-lg bg-background-light animate-pulse" />
-                <div className="h-5 w-3/4 rounded bg-text-medium/15" />
-                <div className="h-4 w-1/2 rounded bg-text-medium/10" />
-                <div className="flex items-center gap-2 text-sm text-text-light">
-                  <span className="px-2 py-1 bg-accent-green/20 text-accent-green rounded-full">CMS</span>
-                  <span className="px-2 py-1 bg-accent-yellow/20 text-accent-yellow rounded-full">Placeholder</span>
-                </div>
-              </div>
-            ))}
-          </div>
+                Άνοιγμα Studio
+              </Link>
+            </div>
+          )}
         </section>
 
         {/* CTA to activities page (once CMS live) */}
