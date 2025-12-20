@@ -2,15 +2,66 @@ import { Container } from "@/components/ui/container";
 import { PageWrapper } from "@/components/pages/page-wrapper";
 import { PageHeader } from "@/components/pages/page-header";
 import { generateMetadataFor } from "@/lib/seo/generate-metadata";
-import { getActivities } from "@/lib/content";
+import { getActivities, getPrintables, getAgeGroups, getCategories } from "@/lib/content";
 import { ActivityCard } from "@/components/activities/activity-card";
+import { ContentFilters } from "@/components/content/content-filters";
+import { SearchBar } from "@/components/content/search-bar";
+import { ActivitiesList } from "@/components/activities/activities-list";
 import Image from "next/image";
 import Link from "next/link";
+import { urlFor } from "@/lib/sanity/image-url";
 
 export const metadata = generateMetadataFor("drastiriotites");
 
-export default async function DrastiriotitesPage() {
-  const activities = await getActivities();
+interface PageProps {
+  searchParams: Promise<{ age?: string; category?: string; type?: string; search?: string }>;
+}
+
+export default async function DrastiriotitesPage({ searchParams }: PageProps) {
+  const params = await searchParams;
+  const [activities, printables, ageGroups, categories] = await Promise.all([
+    getActivities(),
+    getPrintables(),
+    getAgeGroups(),
+    getCategories(),
+  ]);
+
+  // Combine activities and printables
+  let allItems = [
+    ...activities.map((a) => ({ ...a, _contentType: "activity" as const })),
+    ...printables.map((p) => ({ ...p, _contentType: "printable" as const })),
+  ];
+
+  // Search filter
+  if (params.search) {
+    const searchLower = params.search.toLowerCase();
+    allItems = allItems.filter(
+      (item) =>
+        item.title.toLowerCase().includes(searchLower) ||
+        item.summary?.toLowerCase().includes(searchLower) ||
+        (item._contentType === "activity" && 
+          (item as any).goals?.some((g: string) => g.toLowerCase().includes(searchLower)))
+    );
+  }
+
+  // Filter by age
+  if (params.age) {
+    allItems = allItems.filter((item) =>
+      item.ageGroups?.some((ag) => ag.slug === params.age)
+    );
+  }
+
+  // Filter by category
+  if (params.category) {
+    allItems = allItems.filter((item) => item.category?.slug === params.category);
+  }
+
+  // Filter by type
+  if (params.type === "activity") {
+    allItems = allItems.filter((item) => item._contentType === "activity");
+  } else if (params.type === "printable") {
+    allItems = allItems.filter((item) => item._contentType === "printable");
+  }
   return (
     <PageWrapper>
       {/* Hero */}
@@ -37,57 +88,18 @@ export default async function DrastiriotitesPage() {
       </div>
 
       <Container className="py-10 sm:py-14 md:py-16 space-y-12">
-        {/* Filters placeholder */}
-        <section className="bg-background-white rounded-card p-6 shadow-subtle border border-border/50 space-y-4">
-          <div className="flex flex-wrap gap-3 items-center">
-            <span className="text-sm font-semibold text-text-dark">Φίλτρα (CMS ready):</span>
-            <div className="px-3 py-2 rounded-full bg-primary-pink/10 text-primary-pink text-sm">
-              Ηλικίες (0-2, 2-4, 4-6, Εξωτερικό)
-            </div>
-            <div className="px-3 py-2 rounded-full bg-secondary-blue/10 text-secondary-blue text-sm">
-              Τύπος (Δραστηριότητα / Εκτυπώσιμο)
-            </div>
-            <div className="px-3 py-2 rounded-full bg-accent-yellow/10 text-accent-yellow text-sm">
-              Διάρκεια (5’ / 10’ / 15’+)
-            </div>
-          </div>
-          <p className="text-text-medium text-sm">Τα φίλτρα θα συνδεθούν με CMS (Sanity) και API layer.</p>
-        </section>
+        {/* Search and Filters */}
+        <div className="space-y-4">
+          <SearchBar />
+          <ContentFilters
+            ageGroups={ageGroups}
+            categories={categories}
+            showTypeFilter={true}
+          />
+        </div>
 
-        {/* Activities grid from Sanity */}
-        <section className="space-y-6">
-          <div className="flex items-center justify-between gap-4">
-            <h2 className="text-2xl sm:text-3xl font-bold text-text-dark">
-              {activities.length > 0 ? "Δραστηριότητες" : "Δραστηριότητες"}
-            </h2>
-            {activities.length > 0 && (
-              <span className="text-sm text-text-medium">{activities.length} δραστηριότητες</span>
-            )}
-          </div>
-          {activities.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {activities.map((activity) => (
-                <ActivityCard key={activity._id} activity={activity} />
-              ))}
-            </div>
-          ) : (
-            <div className="bg-background-white rounded-card p-12 shadow-subtle border border-border/50 text-center">
-              <p className="text-text-medium mb-4">
-                Δεν υπάρχουν δραστηριότητες ακόμα. Προσθέστε περιεχόμενο από το{" "}
-                <Link href="/studio" className="text-secondary-blue hover:underline font-semibold">
-                  Sanity Studio
-                </Link>
-                .
-              </p>
-              <Link
-                href="/studio"
-                className="inline-flex items-center gap-2 rounded-button bg-secondary-blue px-5 py-3 text-white hover:bg-secondary-blue/90 transition"
-              >
-                Άνοιγμα Studio
-              </Link>
-            </div>
-          )}
-        </section>
+        {/* Activities and Printables List */}
+        <ActivitiesList items={allItems} />
 
         {/* CTA to activities page (once CMS live) */}
         <section className="bg-background-white rounded-card p-6 shadow-subtle border border-border/50">

@@ -6,6 +6,7 @@ export const printable = defineType({
   title: "Printable",
   type: "document",
   fields: [
+    // Standardized fields
     defineField({
       name: "title",
       title: "Title",
@@ -26,18 +27,6 @@ export const printable = defineType({
       rows: 3,
     }),
     defineField({
-      name: "file",
-      title: "File (PDF)",
-      type: "file",
-      options: { storeOriginalFilename: true },
-    }),
-    defineField({
-      name: "previewImages",
-      title: "Preview Images",
-      type: "array",
-      of: [{ type: "image", options: { hotspot: true } }],
-    }),
-    defineField({
       name: "coverImage",
       title: "Cover Image",
       type: "image",
@@ -50,16 +39,56 @@ export const printable = defineType({
       of: [{ type: "reference", to: [{ type: "ageGroup" }] }],
     }),
     defineField({
+      name: "tags",
+      title: "Tags",
+      type: "array",
+      of: [{ type: "reference", to: [{ type: "tag" }] }],
+    }),
+    defineField({
       name: "publishedAt",
       title: "Published at",
       type: "datetime",
+    }),
+    defineField({
+      name: "featured",
+      title: "Featured",
+      type: "boolean",
+      initialValue: false,
     }),
     defineField({
       name: "seo",
       title: "SEO",
       type: "seo",
     }),
+    defineField({
+      name: "relatedContent",
+      title: "Related Content",
+      type: "array",
+      of: [
+        { type: "reference", name: "relatedArticle", to: [{ type: "article" }] },
+        { type: "reference", name: "relatedRecipe", to: [{ type: "recipe" }] },
+        { type: "reference", name: "relatedActivity", to: [{ type: "activity" }] },
+      ],
+    }),
+    // Printable-specific fields
+    defineField({
+      name: "file",
+      title: "File (PDF)",
+      type: "file",
+      options: {
+        storeOriginalFilename: true,
+        accept: ".pdf",
+      },
+      description: "Upload a PDF file",
+    }),
+    defineField({
+      name: "previewImages",
+      title: "Preview Images",
+      type: "array",
+      of: [{ type: "image", options: { hotspot: true } }],
+    }),
   ],
 });
+
 
 

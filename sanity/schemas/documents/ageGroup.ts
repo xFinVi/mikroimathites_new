@@ -18,6 +18,24 @@ export const ageGroup = defineType({
       options: { source: "title", maxLength: 96 },
       validation: (Rule) => Rule.required(),
     }),
+    defineField({
+      name: "description",
+      title: "Description",
+      type: "text",
+    }),
+    defineField({
+      name: "order",
+      title: "Order",
+      type: "number",
+      description: "For sorting",
+      initialValue: 0,
+    }),
+    defineField({
+      name: "color",
+      title: "Color (hex)",
+      type: "string",
+      description: "Hex color code for UI",
+    }),
   ],
 });
 

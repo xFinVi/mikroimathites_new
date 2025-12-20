@@ -6,6 +6,7 @@ export const activity = defineType({
   title: "Activity",
   type: "document",
   fields: [
+    // Standardized fields
     defineField({
       name: "title",
       title: "Title",
@@ -26,29 +27,6 @@ export const activity = defineType({
       rows: 3,
     }),
     defineField({
-      name: "duration",
-      title: "Duration (minutes)",
-      type: "number",
-    }),
-    defineField({
-      name: "goals",
-      title: "Goals",
-      type: "array",
-      of: [{ type: "string" }],
-    }),
-    defineField({
-      name: "materials",
-      title: "Materials",
-      type: "array",
-      of: [{ type: "string" }],
-    }),
-    defineField({
-      name: "steps",
-      title: "Steps",
-      type: "array",
-      of: [{ type: "block" }, { type: "image", options: { hotspot: true } }],
-    }),
-    defineField({
       name: "coverImage",
       title: "Cover Image",
       type: "image",
@@ -67,16 +45,90 @@ export const activity = defineType({
       of: [{ type: "reference", to: [{ type: "ageGroup" }] }],
     }),
     defineField({
+      name: "tags",
+      title: "Tags",
+      type: "array",
+      of: [{ type: "reference", to: [{ type: "tag" }] }],
+    }),
+    defineField({
       name: "publishedAt",
       title: "Published at",
       type: "datetime",
+    }),
+    defineField({
+      name: "featured",
+      title: "Featured",
+      type: "boolean",
+      initialValue: false,
     }),
     defineField({
       name: "seo",
       title: "SEO",
       type: "seo",
     }),
+    defineField({
+      name: "relatedContent",
+      title: "Related Content",
+      type: "array",
+      of: [
+        { type: "reference", name: "relatedArticle", to: [{ type: "article" }] },
+        { type: "reference", name: "relatedRecipe", to: [{ type: "recipe" }] },
+        { type: "reference", name: "relatedActivity", to: [{ type: "activity" }] },
+      ],
+    }),
+    // Activity-specific fields
+    defineField({
+      name: "duration",
+      title: "Duration",
+      type: "string",
+      description: 'e.g., "5 minutes", "10-15 minutes"',
+    }),
+    defineField({
+      name: "goals",
+      title: "Goals",
+      type: "array",
+      of: [{ type: "string" }],
+    }),
+    defineField({
+      name: "materials",
+      title: "Materials",
+      type: "array",
+      of: [{ type: "string" }],
+    }),
+    defineField({
+      name: "steps",
+      title: "Steps",
+      type: "array",
+      of: [
+        { type: "block" },
+        { type: "image", options: { hotspot: true } },
+        {
+          type: "object",
+          name: "videoEmbed",
+          title: "Video Embed",
+          fields: [
+            defineField({
+              name: "url",
+              title: "Video URL (YouTube/Vimeo)",
+              type: "url",
+              validation: (Rule) => Rule.required(),
+            }),
+            defineField({
+              name: "caption",
+              title: "Caption",
+              type: "string",
+            }),
+          ],
+        },
+      ],
+    }),
+    defineField({
+      name: "safetyNotes",
+      title: "Safety Notes",
+      type: "text",
+    }),
   ],
 });
+
 
 

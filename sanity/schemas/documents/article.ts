@@ -6,6 +6,7 @@ export const article = defineType({
   title: "Article",
   type: "document",
   fields: [
+    // Standardized fields
     defineField({
       name: "title",
       title: "Title",
@@ -26,18 +27,6 @@ export const article = defineType({
       rows: 3,
     }),
     defineField({
-      name: "body",
-      title: "Body",
-      type: "array",
-      of: [{ type: "block" }, { type: "image", options: { hotspot: true } }],
-    }),
-    defineField({
-      name: "readingTime",
-      title: "Reading Time (minutes)",
-      type: "number",
-      validation: (Rule) => Rule.min(1).max(60),
-    }),
-    defineField({
       name: "coverImage",
       title: "Cover Image",
       type: "image",
@@ -56,16 +45,58 @@ export const article = defineType({
       of: [{ type: "reference", to: [{ type: "ageGroup" }] }],
     }),
     defineField({
+      name: "tags",
+      title: "Tags",
+      type: "array",
+      of: [{ type: "reference", to: [{ type: "tag" }] }],
+    }),
+    defineField({
       name: "publishedAt",
       title: "Published at",
       type: "datetime",
+    }),
+    defineField({
+      name: "featured",
+      title: "Featured",
+      type: "boolean",
+      initialValue: false,
     }),
     defineField({
       name: "seo",
       title: "SEO",
       type: "seo",
     }),
+    defineField({
+      name: "relatedContent",
+      title: "Related Content",
+      type: "array",
+      of: [
+        { type: "reference", name: "relatedArticle", to: [{ type: "article" }] },
+        { type: "reference", name: "relatedRecipe", to: [{ type: "recipe" }] },
+        { type: "reference", name: "relatedActivity", to: [{ type: "activity" }] },
+      ],
+    }),
+    // Article-specific fields
+    defineField({
+      name: "body",
+      title: "Body",
+      type: "array",
+      of: [{ type: "block" }, { type: "image", options: { hotspot: true } }],
+    }),
+    defineField({
+      name: "readingTime",
+      title: "Reading Time (minutes)",
+      type: "number",
+      validation: (Rule) => Rule.min(1).max(60),
+    }),
+    defineField({
+      name: "author",
+      title: "Author",
+      type: "reference",
+      to: [{ type: "author" }],
+    }),
   ],
 });
+
 
 

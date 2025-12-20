@@ -60,12 +60,12 @@ export function Carousel({ slides, autoPlay = true, autoPlayInterval = 5000 }: C
 
   return (
     <div 
-      className="relative w-full"
+      className="relative w-full overflow-hidden"
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
     >
       {/* Slides Container */}
-      <div className="relative overflow-hidden rounded-2xl sm:rounded-3xl">
+      <div className="relative overflow-hidden rounded-2xl sm:rounded-3xl w-full">
         <div
           className="flex transition-transform duration-500 ease-in-out"
           style={{ transform: `translateX(-${currentIndex * 100}%)` }}
@@ -73,38 +73,39 @@ export function Carousel({ slides, autoPlay = true, autoPlayInterval = 5000 }: C
           {slides.map((slide) => (
             <div
               key={slide.id}
-              className="min-w-full flex-shrink-0"
+              className="min-w-full flex-shrink-0 w-full"
+              style={{ width: '100%' }}
             >
-              <div className="relative bg-white/80 backdrop-blur-md rounded-2xl sm:rounded-3xl p-6 sm:p-8 md:p-12 shadow-2xl border border-white/20">
+              <div className="relative bg-white/80 backdrop-blur-md rounded-2xl sm:rounded-3xl p-6 sm:p-8 md:p-12 shadow-2xl border border-white/20 w-full box-border overflow-hidden">
                 {/* Abstract Decorative Shapes */}
-                <div className="absolute top-0 right-0 w-32 h-32 bg-primary-pink/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
-                <div className="absolute bottom-0 left-0 w-24 h-24 bg-secondary-blue/10 rounded-full blur-2xl translate-y-1/2 -translate-x-1/2" />
-                <div className="absolute top-1/2 left-1/4 w-16 h-16 bg-accent-yellow/10 rounded-full blur-xl" />
+                <div className="absolute top-0 right-0 w-32 h-32 bg-primary-pink/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none" />
+                <div className="absolute bottom-0 left-0 w-24 h-24 bg-secondary-blue/10 rounded-full blur-2xl translate-y-1/2 -translate-x-1/2 pointer-events-none" />
+                <div className="absolute top-1/2 left-1/4 w-16 h-16 bg-accent-yellow/10 rounded-full blur-xl pointer-events-none" />
                 
                 {/* Content */}
-                <div className="relative z-10 text-center space-y-6 md:space-y-8">
+                <div className="relative z-10 text-center space-y-6 md:space-y-8 w-full">
                   {slide.badge && (
                     <div className="inline-block px-4 py-2 bg-primary-pink/20 text-primary-pink rounded-full text-sm font-semibold">
                       {slide.badge}
                     </div>
                   )}
-                  <div className="space-y-4">
-                    <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-text-dark leading-tight">
+                  <div className="space-y-4 w-full">
+                    <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-text-dark leading-tight break-words">
                       {slide.title}
                     </h2>
                     {slide.subtitle && (
-                      <p className="text-lg sm:text-xl md:text-2xl text-text-medium font-medium">
+                      <p className="text-lg sm:text-xl md:text-2xl text-text-medium font-medium break-words">
                         {slide.subtitle}
                       </p>
                     )}
                   </div>
                   {slide.description && (
-                    <p className="text-base sm:text-lg md:text-xl text-text-medium max-w-2xl mx-auto">
+                    <p className="text-base sm:text-lg md:text-xl text-text-medium max-w-2xl mx-auto break-words px-4">
                       {slide.description}
                     </p>
                   )}
                   {(slide.ctaText || slide.secondaryCtaText) && (
-                    <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
+                    <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4 px-4">
                       {slide.ctaText && (
                         <Button 
                           size="lg" 

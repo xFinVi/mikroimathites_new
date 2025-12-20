@@ -92,7 +92,7 @@ export function Footer() {
                 src="/images/logo.png"
                 alt="Μικροί Μαθητές"
                 fill
-                className="object-contain"
+            //    className="object-contain"
               />
             </div>
             <span className="text-lg font-bold text-white">ΜΙΚΡΟΙ ΜΑΘΗΤΕΣ</span>

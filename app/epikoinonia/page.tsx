@@ -2,12 +2,16 @@ import { Container } from "@/components/ui/container";
 import { PageWrapper } from "@/components/pages/page-wrapper";
 import { PageHeader } from "@/components/pages/page-header";
 import { generateMetadataFor } from "@/lib/seo/generate-metadata";
+import { UnifiedContactForm } from "@/components/forms/unified-contact-form";
+import { QAPreview } from "@/components/qa/qa-preview";
+import { getQAItems } from "@/lib/content";
 import Image from "next/image";
 import Link from "next/link";
 
 export const metadata = generateMetadataFor("epikoinonia");
 
-export default function EpikoinoniaPage() {
+export default async function EpikoinoniaPage() {
+  const qaItems = await getQAItems();
   return (
     <PageWrapper>
       {/* Hero */}
@@ -34,55 +38,52 @@ export default function EpikoinoniaPage() {
       </div>
 
       <Container className="py-10 sm:py-14 md:py-16 space-y-10">
-        {/* Tabs placeholder */}
-        <section className="bg-background-white rounded-card p-6 shadow-subtle border border-border/50 space-y-4">
-          <div className="flex flex-wrap gap-3 items-center">
-            <span className="text-sm font-semibold text-text-dark">Φόρμες (CMS/DB ready):</span>
-            {["Ιδέα για βίντεο", "Feedback", "Ερώτηση (Q&A)"].map((label) => (
-              <div
-                key={label}
-                className="px-3 py-2 rounded-full bg-primary-pink/10 text-primary-pink text-sm"
-              >
-                {label}
-              </div>
-            ))}
+        {/* Unified Contact Form */}
+        <section className="max-w-4xl mx-auto">
+          <div className="bg-background-white rounded-card p-6 sm:p-8 shadow-subtle border border-border/50">
+            <UnifiedContactForm />
           </div>
-          <p className="text-text-medium text-sm">
-            Οι φόρμες θα συνδεθούν με Supabase (submissions) + Sanity (δημοσίευση Q&A).
-          </p>
         </section>
 
-        {/* Placeholder form blocks */}
-        <section className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {[
-            { title: "Ιδέα για βίντεο", note: "Αποθήκευση σε Supabase, status workflow." },
-            { title: "Feedback", note: "Καταγραφή + αξιολόγηση (1-5)." },
-            { title: "Ερώτηση (Q&A)", note: "Έγκριση πριν δημοσίευση (Sanity Q&A)." },
-          ].map((item, idx) => (
-            <div
-              key={idx}
-              className="bg-background-white rounded-card p-5 shadow-subtle border border-border/50 space-y-2"
-            >
-              <h3 className="text-lg font-semibold text-text-dark">{item.title}</h3>
-              <p className="text-text-medium text-sm">{item.note}</p>
-              <div className="text-xs text-text-light">Σύντομα διαθέσιμο</div>
-            </div>
-          ))}
+        {/* Q&A Preview Section */}
+        {qaItems.length > 0 && <QAPreview items={qaItems} />}
+
+        {/* Safety Rules Section */}
+        <section className="max-w-4xl mx-auto bg-background-white rounded-card p-6 shadow-subtle border border-border/50">
+          <h3 className="text-xl font-bold text-text-dark mb-4">Κανόνες & Ασφάλεια</h3>
+          <ul className="space-y-3 text-text-medium">
+            <li className="flex items-start gap-3">
+              <span className="text-primary-pink mt-1">•</span>
+              <span>Δεν δημοσιεύουμε προσωπικές πληροφορίες για παιδιά</span>
+            </li>
+            <li className="flex items-start gap-3">
+              <span className="text-primary-pink mt-1">•</span>
+              <span>Οι Q&A δημοσιεύονται μόνο μετά από έγκριση</span>
+            </li>
+            <li className="flex items-start gap-3">
+              <span className="text-primary-pink mt-1">•</span>
+              <span>Δεν παρέχουμε ιατρικές διαγνώσεις - για σοβαρές ανησυχίες, συμβουλευτείτε επαγγελματία</span>
+            </li>
+            <li className="flex items-start gap-3">
+              <span className="text-primary-pink mt-1">•</span>
+              <span>Όλες οι υποβολές αποθηκεύονται ασφαλώς και χρησιμοποιούνται μόνο για βελτίωση της υπηρεσίας</span>
+            </li>
+          </ul>
         </section>
 
-        {/* CTA to newsletter/support */}
-        <section className="bg-background-white rounded-card p-6 shadow-subtle border border-border/50 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+        {/* Alternative Contact */}
+        <section className="max-w-4xl mx-auto bg-background-white rounded-card p-6 shadow-subtle border border-border/50 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
           <div>
-            <h3 className="text-xl font-bold text-text-dark">Χρειάζεστε κάτι συγκεκριμένο;</h3>
+            <h3 className="text-xl font-bold text-text-dark mb-2">Εναλλακτικοί τρόποι επικοινωνίας</h3>
             <p className="text-text-medium">
-              Γράψτε μας ή αφήστε τα στοιχεία σας — θα συνδεθεί με Supabase submissions.
+              Προτιμάτε email; Μπορείτε να μας στείλετε email απευθείας.
             </p>
           </div>
           <Link
-            href="/epikoinonia"
-            className="inline-flex items-center gap-2 rounded-button bg-primary-pink px-5 py-3 text-white hover:bg-primary-pink/90 transition"
+            href="mailto:info@mikroimathites.gr"
+            className="inline-flex items-center gap-2 rounded-button bg-secondary-blue px-5 py-3 text-white hover:bg-secondary-blue/90 transition"
           >
-            Μετάβαση στη φόρμα
+            Στείλτε Email
           </Link>
         </section>
       </Container>

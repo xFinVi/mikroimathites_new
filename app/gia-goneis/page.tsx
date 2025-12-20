@@ -2,12 +2,65 @@ import { Container } from "@/components/ui/container";
 import { PageWrapper } from "@/components/pages/page-wrapper";
 import { PageHeader } from "@/components/pages/page-header";
 import { generateMetadataFor } from "@/lib/seo/generate-metadata";
+import { getFeaturedArticles, getArticles, getCategories, getAgeGroups, getCuratedCollectionByPlacement } from "@/lib/content";
+import { ArticleCard } from "@/components/articles/article-card";
+import { ContentFilters } from "@/components/content/content-filters";
+import { SearchBar } from "@/components/content/search-bar";
+import { ArticlesList } from "@/components/articles/articles-list";
 import Image from "next/image";
 import Link from "next/link";
 
 export const metadata = generateMetadataFor("gia-goneis");
 
-export default function GiaGoneisPage() {
+interface PageProps {
+  searchParams: Promise<{ age?: string; category?: string; search?: string }>;
+}
+
+export default async function GiaGoneisPage({ searchParams }: PageProps) {
+  const params = await searchParams;
+  const [featuredArticles, allArticles, categories, ageGroups, quickTips] = await Promise.all([
+    getFeaturedArticles(),
+    getArticles(),
+    getCategories(),
+    getAgeGroups(),
+    getCuratedCollectionByPlacement("quick-tips"),
+  ]);
+
+  // Filter articles based on search params
+  let filteredArticles = allArticles;
+  
+  // Search filter
+  if (params.search) {
+    const searchLower = params.search.toLowerCase();
+    filteredArticles = filteredArticles.filter(
+      (article) =>
+        article.title.toLowerCase().includes(searchLower) ||
+        article.excerpt?.toLowerCase().includes(searchLower) ||
+        article.body?.toString().toLowerCase().includes(searchLower)
+    );
+  }
+  
+  // Age filter
+  if (params.age) {
+    filteredArticles = filteredArticles.filter((article) =>
+      article.ageGroups?.some((ag) => ag.slug === params.age)
+    );
+  }
+  
+  // Category filter
+  if (params.category) {
+    filteredArticles = filteredArticles.filter(
+      (article) => article.category?.slug === params.category
+    );
+  }
+
+  // Show featured articles if no filters/search, otherwise show filtered results
+  const articlesToShow = 
+    params.age || params.category || params.search
+      ? filteredArticles
+      : featuredArticles.length > 0
+      ? featuredArticles
+      : allArticles.slice(0, 6);
   return (
     <PageWrapper>
       {/* Hero with background image */}
@@ -35,73 +88,105 @@ export default function GiaGoneisPage() {
       </div>
 
       <Container className="py-10 sm:py-14 md:py-16 space-y-12">
-        {/* CMS-ready Featured Categories */}
-        <section className="space-y-6">
-          <div className="flex items-center justify-between gap-4">
-            <h2 className="text-2xl sm:text-3xl font-bold text-text-dark">Κύριες ενότητες</h2>
-            <span className="text-sm text-text-medium">Σύντομα από CMS (Sanity)</span>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[
-              { title: "Ύπνος & Ρουτίνες", desc: "Τελετουργίες, ύπνος, ηρεμία" },
-              { title: "Ομιλία & Λεξιλόγιο", desc: "Γλώσσα, παιχνίδια ομιλίας" },
-              { title: "Διατροφή & Επιλογές", desc: "Προτάσεις και ιδέες χωρίς πίεση" },
-            ].map((item, idx) => (
-              <div
-                key={idx}
-                className="bg-background-white rounded-card p-6 shadow-subtle border border-border/50"
-              >
-                <div className="text-2xl font-semibold text-text-dark mb-2">{item.title}</div>
-                <p className="text-text-medium text-sm">{item.desc}</p>
-              </div>
-            ))}
-          </div>
-        </section>
+        {/* Search and Filters */}
+        <div className="space-y-4">
+          <SearchBar />
+          <ContentFilters ageGroups={ageGroups} categories={categories} />
+        </div>
 
-        {/* CMS-ready Featured Articles grid */}
-        <section className="space-y-6">
-          <div className="flex items-center justify-between gap-4">
-            <h2 className="text-2xl sm:text-3xl font-bold text-text-dark">Προτεινόμενα άρθρα</h2>
-            <span className="text-sm text-text-medium">Θα συνδεθεί με CMS</span>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {Array.from({ length: 6 }).map((_, idx) => (
-              <div
-                key={idx}
-                className="bg-background-white rounded-card p-5 shadow-subtle border border-border/50 space-y-3"
-              >
-                <div className="h-3 w-24 rounded-full bg-accent-yellow/50" />
-                <div className="h-5 w-3/4 rounded bg-text-medium/15" />
-                <div className="h-4 w-2/3 rounded bg-text-medium/10" />
-                <div className="text-sm text-text-light">CMS placeholder</div>
-              </div>
-            ))}
-          </div>
-        </section>
+        {/* Featured Categories */}
+        {categories && categories.length > 0 && (
+          <section className="space-y-6">
+            <h2 className="text-2xl sm:text-3xl font-bold text-text-dark">Κύριες ενότητες</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {categories.slice(0, 6).map((category) => (
+                <Link
+                  key={category._id}
+                  href={`/gia-goneis?category=${category.slug}`}
+                  className="bg-background-white rounded-card p-6 shadow-subtle border border-border/50 hover:shadow-md transition-all"
+                >
+                  <div className="text-2xl font-semibold text-text-dark mb-2">
+                    {category.title}
+                  </div>
+                  {category.description && (
+                    <p className="text-text-medium text-sm">{category.description}</p>
+                  )}
+                </Link>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* Articles grid */}
+        <ArticlesList
+          articles={articlesToShow}
+          title={
+            params.age || params.category || params.search
+              ? `Αποτελέσματα (${articlesToShow.length})`
+              : featuredArticles.length > 0
+              ? "Προτεινόμενα άρθρα"
+              : "Τελευταία άρθρα"
+          }
+        />
 
         {/* Quick Tips list */}
-        <section className="space-y-6">
-          <div className="flex items-center justify-between gap-4">
-            <h2 className="text-2xl sm:text-3xl font-bold text-text-dark">Γρήγορες λύσεις (5’)</h2>
-            <span className="text-sm text-text-medium">Σύντομα από CMS</span>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {[
-              "3 φράσεις για ήρεμες μεταβάσεις",
-              "Μικρά παιχνίδια λεξιλογίου",
-              "Απαλά όρια χωρίς θυμούς",
-              "Ρουτίνα ύπνου σε 4 βήματα",
-            ].map((tip, idx) => (
-              <div
-                key={idx}
-                className="bg-background-white rounded-card p-4 shadow-subtle border border-border/50 flex items-center gap-3"
-              >
-                <span className="text-lg font-semibold text-primary-pink">{idx + 1}.</span>
-                <p className="text-text-dark">{tip}</p>
-              </div>
-            ))}
-          </div>
-        </section>
+        {quickTips && quickTips.items && quickTips.items.length > 0 ? (
+          <section className="space-y-6">
+            <div className="flex items-center justify-between gap-4">
+              <h2 className="text-2xl sm:text-3xl font-bold text-text-dark">
+                {quickTips.title || "Γρήγορες λύσεις (5')"}
+              </h2>
+            </div>
+            {quickTips.description && (
+              <p className="text-text-medium">{quickTips.description}</p>
+            )}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {quickTips.items.map((item, idx) => (
+                <Link
+                  key={item._id}
+                  href={
+                    item._type === "article"
+                      ? `/gia-goneis/${item.slug}`
+                      : item._type === "activity"
+                      ? `/drastiriotites/${item.slug}`
+                      : item._type === "printable"
+                      ? `/drastiriotites/printables/${item.slug}`
+                      : "#"
+                  }
+                  className="bg-background-white rounded-card p-4 shadow-subtle border border-border/50 hover:shadow-md transition-all flex items-center gap-3"
+                >
+                  <span className="text-lg font-semibold text-primary-pink">{idx + 1}.</span>
+                  <p className="text-text-dark">{item.title}</p>
+                </Link>
+              ))}
+            </div>
+          </section>
+        ) : (
+          <section className="space-y-6">
+            <div className="flex items-center justify-between gap-4">
+              <h2 className="text-2xl sm:text-3xl font-bold text-text-dark">Γρήγορες λύσεις (5')</h2>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {[
+                "3 φράσεις για ήρεμες μεταβάσεις",
+                "Μικρά παιχνίδια λεξιλογίου",
+                "Απαλά όρια χωρίς θυμούς",
+                "Ρουτίνα ύπνου σε 4 βήματα",
+              ].map((tip, idx) => (
+                <div
+                  key={idx}
+                  className="bg-background-white rounded-card p-4 shadow-subtle border border-border/50 flex items-center gap-3"
+                >
+                  <span className="text-lg font-semibold text-primary-pink">{idx + 1}.</span>
+                  <p className="text-text-dark">{tip}</p>
+                </div>
+              ))}
+            </div>
+            <p className="text-sm text-text-light text-center">
+              Προσθέστε μια Curated Collection με placement "quick-tips" στο Sanity Studio για να εμφανίζονται εδώ
+            </p>
+          </section>
+        )}
 
         {/* Support / CTA */}
         <section className="space-y-4 bg-background-white rounded-card p-6 shadow-subtle border border-border/50">

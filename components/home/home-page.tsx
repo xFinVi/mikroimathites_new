@@ -7,6 +7,11 @@ import { Container } from "@/components/ui/container";
 import { Carousel } from "@/components/ui/carousel";
 import { FeedbackForm } from "@/components/feedback-form";
 import { PageWrapper } from "@/components/pages/page-wrapper";
+import { Article, Activity, Printable } from "@/lib/content";
+import { ArticleCard } from "@/components/articles/article-card";
+import { ActivityCard } from "@/components/activities/activity-card";
+import { NewsletterSection } from "@/components/newsletter/newsletter-section";
+import { urlFor } from "@/lib/sanity/image-url";
 
 const heroSlides = [
   {
@@ -70,7 +75,13 @@ const heroSlides = [
   },
 ];
 
-export function HomePage() {
+interface HomePageProps {
+  featuredArticles?: Article[];
+  featuredActivities?: Activity[];
+  featuredPrintables?: Printable[];
+}
+
+export function HomePage({ featuredArticles = [], featuredActivities = [], featuredPrintables = [] }: HomePageProps) {
   const heroRef = useRef<HTMLDivElement>(null);
   const backgroundRef = useRef<HTMLDivElement>(null);
 
@@ -131,9 +142,9 @@ export function HomePage() {
       </section>
 
       {/* Carousel Section - Moved below hero */}
-      <section className="bg-gradient-to-b from-background-light to-background-white py-12 md:py-16">
+      <section className="bg-gradient-to-b from-background-light to-background-white py-12 md:py-16 overflow-hidden">
         <Container>
-          <div className="max-w-5xl mx-auto">
+          <div className="max-w-5xl mx-auto w-full">
             <Carousel slides={heroSlides} autoPlay={true} autoPlayInterval={6000} />
           </div>
         </Container>
@@ -164,32 +175,27 @@ export function HomePage() {
         </Container>
       </section>
 
-      {/* Preview Sections */}
-      <section className="py-16 bg-background-white">
-        <Container>
-          <h2 className="text-3xl font-bold text-text-dark text-center mb-12">
-            Για Γονείς
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {[
-              { title: "Ύπνος & Ρουτίνες", icon: "😴" },
-              { title: "Ομιλία & Λεξιλόγιο", icon: "💬" },
-              { title: "Διατροφή", icon: "🍎" },
-            ].map((item) => (
-              <div
-                key={item.title}
-                className="bg-background-light rounded-card p-6 hover:shadow-subtle transition-shadow cursor-pointer"
+      {/* Preview Sections - For Parents */}
+      {featuredArticles.length > 0 && (
+        <section className="py-16 bg-background-white">
+          <Container>
+            <div className="flex items-center justify-between mb-12">
+              <h2 className="text-3xl font-bold text-text-dark">Για Γονείς</h2>
+              <Link
+                href="/gia-goneis"
+                className="text-secondary-blue hover:text-secondary-blue/80 font-semibold text-lg transition-colors"
               >
-                <div className="text-4xl mb-4">{item.icon}</div>
-                <h3 className="text-xl font-semibold text-text-dark mb-2">
-                  {item.title}
-                </h3>
-                <p className="text-text-medium">Πρακτικές συμβουλές</p>
-              </div>
-            ))}
-          </div>
-        </Container>
-      </section>
+                Δείτε όλα →
+              </Link>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {featuredArticles.map((article) => (
+                <ArticleCard key={article._id} article={article} />
+              ))}
+            </div>
+          </Container>
+        </section>
+      )}
 
       {/* Activities & Creations Section */}
       <section className="py-16 bg-gradient-to-b from-background-white to-background-light">
@@ -207,49 +213,52 @@ export function HomePage() {
             </Link>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {[
-              {
-                title: "Χειροτεχνίες",
-                description: "Δημιουργικές ιδέες για παιδιά",
-                icon: "🎨",
-                color: "bg-primary-pink",
-                link: "/drastiriotites",
-              },
-              {
-                title: "Εκτυπώσιμα",
-                description: "Δωρεάν εκτυπώσιμα φύλλα",
-                icon: "📄",
-                color: "bg-secondary-blue",
-                link: "/drastiriotites",
-              },
-              {
-                title: "Παιχνίδια",
-                description: "Εκπαιδευτικά παιχνίδια",
-                icon: "🧩",
-                color: "bg-accent-yellow",
-                link: "/drastiriotites",
-              },
-              {
-                title: "Συνταγές",
-                description: "Συνταγές για παιδιά",
-                icon: "🍪",
-                color: "bg-accent-green",
-                link: "/drastiriotites",
-              },
-            ].map((item, index) => (
-              <Link key={index} href={item.link} className="group block">
-                <div
-                  className={`${item.color} rounded-card p-6 text-white hover:scale-105 transition-all duration-300 shadow-subtle hover:shadow-lg h-full flex flex-col`}
-                >
-                  <div className="text-5xl mb-4">{item.icon}</div>
-                  <h3 className="text-xl font-bold mb-2">{item.title}</h3>
-                  <p className="text-white/90 text-sm flex-grow">{item.description}</p>
-                  <div className="mt-4 text-white/80 group-hover:text-white transition-colors text-sm font-medium">
-                    Δείτε περισσότερα →
-                  </div>
-                </div>
-              </Link>
+            {featuredActivities.map((activity) => (
+              <ActivityCard key={activity._id} activity={activity} />
             ))}
+            {featuredPrintables.map((printable) => {
+              const imageUrl = printable.coverImage
+                ? urlFor(printable.coverImage).width(400).height(250).url()
+                : null;
+              return (
+                <Link
+                  key={printable._id}
+                  href={`/drastiriotites/printables/${printable.slug}`}
+                  className="bg-background-white rounded-card overflow-hidden shadow-subtle border border-border/50 hover:shadow-lg transition-shadow"
+                >
+                  {imageUrl && (
+                    <div className="relative w-full h-48 bg-background-light">
+                      <Image
+                        src={imageUrl}
+                        alt={printable.title}
+                        fill
+                        className="object-cover"
+                      />
+                    </div>
+                  )}
+                  <div className="p-5 space-y-3">
+                    <div className="text-xs font-semibold text-primary-pink">Εκτυπώσιμο</div>
+                    <h3 className="text-xl font-semibold text-text-dark line-clamp-2">
+                      {printable.title}
+                    </h3>
+                    {printable.summary && (
+                      <p className="text-text-medium text-sm line-clamp-2">
+                        {printable.summary}
+                      </p>
+                    )}
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+        </Container>
+      </section>
+
+      {/* Newsletter Section */}
+      <section className="py-16 bg-gradient-to-b from-background-light to-background-white">
+        <Container>
+          <div className="max-w-2xl mx-auto">
+            <NewsletterSection />
           </div>
         </Container>
       </section>
