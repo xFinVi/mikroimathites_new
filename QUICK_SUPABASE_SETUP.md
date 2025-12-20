@@ -3,10 +3,7 @@
 ## ✅ Step 1: Fix Environment Variables
 
 Your `.env.local` file should look like this (remove the "service=" prefix from the key):
-
-```bash
-NEXT_PUBLIC_SUPABASE_URL=https://abqefajosdwcakypnbhd.supabase.co
-SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFicWVmYWpvc2R3Y2FreXBuYmhkIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2NjIwMzgwNywiZXhwIjoyMDgxNzc5ODA3fQ.ZoZ891mJVTCEQtQqX1k15y1QD48hWGDDaV_0WdBL3DY
+3DY
 ```
 
 **Important:** 
