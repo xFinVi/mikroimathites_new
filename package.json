@@ -7,7 +7,6 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "seed": "node scripts/seed-sample-data.js",
     "create-collections": "tsx scripts/create-curated-collections.ts"
   },
   "dependencies": {
