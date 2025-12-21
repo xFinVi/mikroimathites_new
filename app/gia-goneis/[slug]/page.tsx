@@ -82,18 +82,19 @@ export default async function ArticlePage({ params }: PageProps) {
               alt={article.title}
               fill
               className="object-cover"
+              style={{ objectPosition: 'center top' }}
               priority
             />
             <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-background-light" />
           </div>
         )}
 
-        <Container className="py-8 sm:py-12 md:py-16">
+        <Container className={`py-8 sm:py-12 md:py-16 ${!coverImageUrl ? 'pt-16 sm:pt-20 md:pt-24' : ''}`}>
           <div className="max-w-4xl mx-auto">
             {/* Back Link */}
             <Link
               href="/gia-goneis"
-              className="inline-flex items-center gap-2 text-text-medium hover:text-primary-pink transition mb-6"
+              className="inline-flex items-center gap-2 text-text-medium hover:text-primary-pink transition mb-6 relative z-10 cursor-pointer py-2 -ml-2 pl-2 pr-4 rounded-md hover:bg-background-white"
             >
               <svg
                 className="w-4 h-4"

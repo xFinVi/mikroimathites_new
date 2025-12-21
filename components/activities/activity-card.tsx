@@ -1,17 +1,15 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Activity } from "@/lib/content";
-import { urlFor } from "@/lib/sanity/image-url";
 import { Card, CardContent } from "@/components/ui/card";
 
 interface ActivityCardProps {
-  activity: Activity;
+  activity: Activity & { imageUrl?: string | null };
 }
 
 export function ActivityCard({ activity }: ActivityCardProps) {
-  const imageUrl = activity.coverImage
-    ? urlFor(activity.coverImage).width(400).height(250).url()
-    : null;
+  // Use pre-generated imageUrl from server, or fallback to null
+  const imageUrl = activity.imageUrl || null;
 
   // Fallback image if coverImage is missing
   const hasImage = !!imageUrl;

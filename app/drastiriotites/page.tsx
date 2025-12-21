@@ -25,10 +25,18 @@ export default async function DrastiriotitesPage({ searchParams }: PageProps) {
     getAgeGroups(),
   ]);
 
-  // Combine activities and printables
+  // Pre-generate image URLs to avoid hydration mismatches
+  const pregenerateImageUrl = <T extends { coverImage?: unknown }>(item: T): T & { imageUrl: string | null } => {
+    return {
+      ...item,
+      imageUrl: item.coverImage ? urlFor(item.coverImage as any).width(400).height(250).url() : null,
+    };
+  };
+
+  // Combine activities and printables with pre-generated image URLs
   let allItems = [
-    ...activities.map((a) => ({ ...a, _contentType: "activity" as const })),
-    ...printables.map((p) => ({ ...p, _contentType: "printable" as const })),
+    ...activities.map((a) => ({ ...pregenerateImageUrl(a), _contentType: "activity" as const })),
+    ...printables.map((p) => ({ ...pregenerateImageUrl(p), _contentType: "printable" as const })),
   ];
 
   // Search filter

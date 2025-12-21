@@ -101,15 +101,23 @@ export default async function GiaGoneisPage({ searchParams }: PageProps) {
     });
   }
 
+  // Pre-generate image URLs for all content to avoid hydration mismatches
+  const pregenerateImageUrl = <T extends { coverImage?: unknown }>(item: T): T & { imageUrl: string | null } => {
+    return {
+      ...item,
+      imageUrl: item.coverImage ? urlFor(item.coverImage as any).width(400).height(250).url() : null,
+    };
+  };
+
   // Show mixed content when no filters/search, otherwise show filtered results
   const contentToShow = 
     params.age || params.category || params.search
-      ? filteredContent
+      ? filteredContent.map(pregenerateImageUrl)
       : (() => {
           // Mix of content: 5 articles, 5 recipes, 5 activities (or available amounts)
-          const articlesToShow = allArticles.slice(0, 5);
-          const recipesToShow = allRecipes.slice(0, 5);
-          const activitiesToShow = allActivities.slice(0, 5);
+          const articlesToShow = allArticles.slice(0, 5).map(pregenerateImageUrl);
+          const recipesToShow = allRecipes.slice(0, 5).map(pregenerateImageUrl);
+          const activitiesToShow = allActivities.slice(0, 5).map(pregenerateImageUrl);
           
           return [
             ...articlesToShow.map((article) => ({ ...article, _contentType: 'article' as const })),

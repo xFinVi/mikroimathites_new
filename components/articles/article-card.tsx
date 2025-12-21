@@ -1,20 +1,17 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Article } from "@/lib/content";
-import { urlFor } from "@/lib/sanity/image-url";
 import { format } from "date-fns";
 import { Info, User } from "lucide-react";
 
 interface ArticleCardProps {
-  article: Article;
+  article: Article & { imageUrl?: string | null };
   compact?: boolean;
 }
 
 export function ArticleCard({ article, compact = false }: ArticleCardProps) {
-  // Use pre-generated image URL if available (from server), otherwise generate on client
-  const imageUrl = (article as any).imageUrl || (article.coverImage
-    ? urlFor(article.coverImage).width(400).height(250).url()
-    : null);
+  // Use pre-generated image URL from server (no client-side generation)
+  const imageUrl = article.imageUrl || null;
 
   const publishedDate = article.publishedAt
     ? format(new Date(article.publishedAt), "d MMM yyyy")

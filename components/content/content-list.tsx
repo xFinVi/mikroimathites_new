@@ -3,19 +3,17 @@ import { ArticleCard } from "@/components/articles/article-card";
 import { ActivityCard } from "@/components/activities/activity-card";
 import Link from "next/link";
 import Image from "next/image";
-import { urlFor } from "@/lib/sanity/image-url";
 
-type ContentItem = (Article & { _contentType?: 'article' }) | (Recipe & { _contentType?: 'recipe' }) | (Activity & { _contentType?: 'activity' });
+type ContentItem = (Article & { _contentType?: 'article'; imageUrl?: string | null }) | (Recipe & { _contentType?: 'recipe'; imageUrl?: string | null }) | (Activity & { _contentType?: 'activity'; imageUrl?: string | null });
 
 interface ContentListProps {
   items: ContentItem[];
   title: string;
 }
 
-function RecipeCard({ recipe }: { recipe: Recipe }) {
-  const imageUrl = recipe.coverImage
-    ? urlFor(recipe.coverImage).width(400).height(250).url()
-    : null;
+function RecipeCard({ recipe }: { recipe: Recipe & { imageUrl?: string | null } }) {
+  // Use pre-generated image URL from server (no client-side generation)
+  const imageUrl = recipe.imageUrl || null;
 
   return (
     <Link href={`/gia-goneis/recipes/${recipe.slug}`}>
@@ -63,10 +61,9 @@ function RecipeCard({ recipe }: { recipe: Recipe }) {
   );
 }
 
-function ActivityCardCompact({ activity }: { activity: Activity }) {
-  const imageUrl = activity.coverImage
-    ? urlFor(activity.coverImage).width(400).height(250).url()
-    : null;
+function ActivityCardCompact({ activity }: { activity: Activity & { imageUrl?: string | null } }) {
+  // Use pre-generated image URL from server (no client-side generation)
+  const imageUrl = activity.imageUrl || null;
 
   return (
     <Link href={`/drastiriotites/${activity.slug}`}>

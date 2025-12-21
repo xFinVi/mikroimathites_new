@@ -11,8 +11,9 @@ import { ArticleCard } from "@/components/articles/article-card";
 import { ActivityCard } from "@/components/activities/activity-card";
 import { NewsletterSection } from "@/components/newsletter/newsletter-section";
 import { FeaturedBanner as FeaturedBannerComponent } from "@/components/home/featured-banner";
-import { urlFor } from "@/lib/sanity/image-url";
 import { User } from "lucide-react";
+import { HOME_PAGE_LIMITS } from "@/lib/constants/home-page";
+import { getAgeGroupColor, filterAgeGroups } from "@/lib/utils/age-groups";
 
 const heroSlides = [
   {
@@ -86,6 +87,11 @@ interface FeaturedContentItem {
   imageUrl?: string | null; // Pre-generated image URL from server
   summary?: string;
   excerpt?: string;
+  author?: {
+    _id: string;
+    name: string;
+    slug?: string;
+  };
   category?: {
     _id: string;
     title: string;
@@ -96,9 +102,9 @@ interface FeaturedContentItem {
 interface HomePageProps {
   featuredBanner?: FeaturedBanner;
   featuredContent?: FeaturedContentItem[];
-  featuredArticles?: Article[];
-  featuredActivities?: Activity[];
-  featuredPrintables?: Printable[];
+  featuredArticles?: (Article & { imageUrl?: string | null })[];
+  featuredActivities?: (Activity & { imageUrl?: string | null })[];
+  featuredPrintables?: (Printable & { imageUrl?: string | null })[];
   ageGroups?: AgeGroup[];
 }
 
@@ -175,16 +181,14 @@ export function HomePage({
 
       {/* Section 3: Carousel */}
       <section className="relative bg-[#0d1330] py-16 md:py-20 overflow-hidden">
-        <Container className="relative z-10">
-          <div className="max-w-5xl mx-auto">
-            <Carousel slides={heroSlides} autoPlay={true} autoPlayInterval={3000} />
-          </div>
-        </Container>
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          <Carousel slides={heroSlides} autoPlay={true} autoPlayInterval={3000} />
+        </div>
       </section>
 
       {/* Section 4: Featured Content Grid - Standalone Section */}
       {featuredContent.length > 0 && (
-        <section className="relative bg-[#E8F4F8] py-16 md:py-20 overflow-hidden w-full">
+        <section className="relative bg-[#E8F4F8] pb-16 md:pb-20 overflow-hidden w-full">
           {/* Dark Blue Header Section */}
           <div className="bg-[#1a1f3a] py-12 md:py-16 mb-12">
             <Container>
@@ -199,12 +203,10 @@ export function HomePage({
             </Container>
           </div>
           <Container>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10 md:gap-12" style={{ minHeight: '400px' }}>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10 md:gap-12 min-h-[400px]">
               {featuredContent.map((item) => {
-                // Use pre-generated image URL from server, fallback to generating on client if needed
-                const imageUrl = item.imageUrl || (item.coverImage
-                  ? urlFor(item.coverImage).width(600).height(400).url()
-                  : null);
+                // Use pre-generated image URL from server (no client-side generation)
+                const imageUrl = item.imageUrl || null;
                 // All items are articles now
                 const href = `/gia-goneis/${item.slug}`;
                 
@@ -212,8 +214,7 @@ export function HomePage({
                   <Link
                     key={item._id}
                     href={href}
-                    className="bg-background-white rounded-[20px] overflow-hidden border-2 border-white hover:shadow-lg transition-all duration-300 cursor-pointer group flex flex-col h-full"
-                    style={{ display: 'block' }}
+                    className="bg-background-white rounded-[20px] overflow-hidden border-2 border-white hover:shadow-lg transition-all duration-300 cursor-pointer group flex flex-col h-full block"
                   >
                     {/* Image Section */}
                     <div className="relative w-full h-64 bg-background-light overflow-hidden flex-shrink-0">
@@ -243,11 +244,11 @@ export function HomePage({
                       </h3>
                       
                       {/* Author */}
-                      {(item as any).author?.name && (
+                      {item.author?.name && (
                         <div className="flex items-center gap-1.5 mt-auto">
                           <User className="w-3 h-3 text-text-medium flex-shrink-0" />
                           <p className="text-xs text-text-medium">
-                            {(item as any).author.name}
+                            {item.author.name}
                           </p>
                         </div>
                       )}
@@ -273,43 +274,29 @@ export function HomePage({
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto mb-12">
             {ageGroups.length > 0 ? (
-              ageGroups
-                .filter((ageGroup) => {
-                  const slug = ageGroup.slug.toLowerCase();
-                  return !slug.includes("abroad") && !slug.includes("greek") && !slug.includes("εξωτερικό");
-                })
-                .map((ageGroup) => {
-                  const getColor = (slug: string) => {
-                    if (slug.includes("0") || slug === "0-2" || slug === "0_2") return "bg-primary-pink";
-                    if (slug.includes("2") && !slug.includes("4") || slug === "2-4" || slug === "2_4") return "bg-secondary-blue";
-                    if (slug.includes("4") || slug === "4-6" || slug === "4_6") return "bg-accent-yellow";
-                    return "bg-primary-pink";
-                  };
-
-                  return (
-                    <Link
-                      key={ageGroup._id}
-                      href={`/age/${ageGroup.slug}`}
-                      className={`${getColor(ageGroup.slug)} rounded-card p-8 text-white hover:scale-105 transition-all duration-300 cursor-pointer shadow-lg hover:shadow-xl block`}
-                    >
-                      <h3 className="text-3xl font-bold mb-3">{ageGroup.title}</h3>
-                      <p className="text-white/90 text-lg mb-4">Δείτε περιεχόμενο</p>
-                      <div className="flex items-center gap-2 text-white/80 text-sm">
-                        <span>Εξερευνήστε →</span>
-                      </div>
-                    </Link>
-                  );
-                })
+              filterAgeGroups(ageGroups).map((ageGroup) => (
+                <Link
+                  key={ageGroup._id}
+                  href={`/age/${ageGroup.slug}`}
+                  className={`${getAgeGroupColor(ageGroup.slug)} rounded-card p-8 text-white hover:scale-105 transition-all duration-300 cursor-pointer shadow-lg hover:shadow-xl block`}
+                >
+                  <h3 className="text-3xl font-bold mb-3">{ageGroup.title}</h3>
+                  <p className="text-white/90 text-lg mb-4">Δείτε περιεχόμενο</p>
+                  <div className="flex items-center gap-2 text-white/80 text-sm">
+                    <span>Εξερευνήστε →</span>
+                  </div>
+                </Link>
+              ))
             ) : (
               [
-                { age: "0-2", label: "0-2 έτη", color: "bg-primary-pink", slug: "0-2" },
-                { age: "2-4", label: "2-4 έτη", color: "bg-secondary-blue", slug: "2-4" },
-                { age: "4-6", label: "4-6 έτη", color: "bg-accent-yellow", slug: "4-6" },
+                { age: "0-2", label: "0-2 έτη", slug: "0-2" },
+                { age: "2-4", label: "2-4 έτη", slug: "2-4" },
+                { age: "4-6", label: "4-6 έτη", slug: "4-6" },
               ].map((item) => (
                 <Link
                   key={item.age}
                   href={`/age/${item.slug}`}
-                  className={`${item.color} rounded-card p-8 text-white hover:scale-105 transition-all duration-300 cursor-pointer shadow-lg hover:shadow-xl block`}
+                  className={`${getAgeGroupColor(item.slug)} rounded-card p-8 text-white hover:scale-105 transition-all duration-300 cursor-pointer shadow-lg hover:shadow-xl block`}
                 >
                   <h3 className="text-3xl font-bold mb-3">{item.label}</h3>
                   <p className="text-white/90 text-lg mb-4">Δείτε περιεχόμενο</p>
@@ -352,7 +339,7 @@ export function HomePage({
         <Container className="relative z-10">
           {featuredArticles.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10 md:gap-12">
-              {featuredArticles.slice(0, 6).map((article) => (
+              {featuredArticles.slice(0, HOME_PAGE_LIMITS.FEATURED_ARTICLES).map((article) => (
                 <ArticleCard key={article._id} article={article} compact={true} />
               ))}
             </div>
@@ -390,13 +377,12 @@ export function HomePage({
           </div>
           {(featuredActivities.length > 0 || featuredPrintables.length > 0) ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              {featuredActivities.slice(0, 4).map((activity) => (
+              {featuredActivities.slice(0, HOME_PAGE_LIMITS.FEATURED_ACTIVITIES).map((activity) => (
                 <ActivityCard key={activity._id} activity={activity} />
               ))}
-              {featuredPrintables.slice(0, 4).map((printable) => {
-                const imageUrl = printable.coverImage
-                  ? urlFor(printable.coverImage).width(400).height(250).url()
-                  : null;
+              {featuredPrintables.slice(0, HOME_PAGE_LIMITS.FEATURED_PRINTABLES).map((printable) => {
+                // Use pre-generated image URL from server (no client-side generation)
+                const imageUrl = printable.imageUrl || null;
                 return (
                   <Link
                     key={printable._id}
@@ -439,7 +425,7 @@ export function HomePage({
       </section>
 
       {/* Section 8: Newsletter */}
-      <section className="relative bg-[#EDE9FE] py-16 md:py-20 overflow-hidden">
+      <section id="newsletter" className="relative bg-[#EDE9FE] py-16 md:py-20 overflow-hidden">
         <Container className="relative z-10">
           <div className="max-w-2xl mx-auto">
             <NewsletterSection />

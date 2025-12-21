@@ -1,10 +1,9 @@
 import { Activity, Printable } from "@/lib/content";
 import { ActivityCard } from "./activity-card";
-import { urlFor } from "@/lib/sanity/image-url";
 import Image from "next/image";
 import Link from "next/link";
 
-type ContentItem = (Activity | Printable) & { _contentType: "activity" | "printable" };
+type ContentItem = (Activity | Printable) & { _contentType: "activity" | "printable"; imageUrl?: string | null };
 
 interface ActivitiesListProps {
   items: ContentItem[];
@@ -43,10 +42,9 @@ export function ActivitiesList({ items }: ActivitiesListProps) {
             return <ActivityCard key={item._id} activity={item as Activity} />;
           } else {
             // Printable card
-            const printable = item as Printable;
-            const imageUrl = printable.coverImage
-              ? urlFor(printable.coverImage).width(400).height(250).url()
-              : null;
+            const printable = item as Printable & { imageUrl?: string | null };
+            // Use pre-generated image URL from server (no client-side generation)
+            const imageUrl = printable.imageUrl || null;
             return (
               <Link
                 key={printable._id}

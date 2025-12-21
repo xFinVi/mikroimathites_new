@@ -3,12 +3,11 @@
 import Image from "next/image";
 import Link from "next/link";
 import { FeaturedBanner } from "@/lib/content";
-import { urlFor } from "@/lib/sanity/image-url";
 import { Container } from "@/components/ui/container";
 import { Play } from "lucide-react";
 
 interface FeaturedBannerProps {
-  banner: FeaturedBanner;
+  banner: FeaturedBanner & { imageUrl?: string | null };
 }
 
 export function FeaturedBanner({ banner }: FeaturedBannerProps) {
@@ -20,34 +19,23 @@ export function FeaturedBanner({ banner }: FeaturedBannerProps) {
     ? banner.customBackgroundColor || "#1a1f3a"
     : banner.backgroundColor || "#1a1f3a";
 
-  // Determine image/video source based on type
-  let imageUrl: string | null = null;
+  // Use pre-generated image URL from server (no client-side generation)
+  let imageUrl: string | null = banner.imageUrl || null;
   let videoUrl: string | null = null;
   let contentHref: string | null = null;
 
   if (banner.type === "youtube" && banner.youtubeVideo?.videoId) {
-    // YouTube thumbnail
-    imageUrl = banner.youtubeVideo.thumbnail
-      ? urlFor(banner.youtubeVideo.thumbnail).width(800).height(600).url()
-      : `https://img.youtube.com/vi/${banner.youtubeVideo.videoId}/maxresdefault.jpg`;
+    // YouTube thumbnail - use pre-generated URL or fallback to YouTube CDN
+    if (!imageUrl) {
+      imageUrl = `https://img.youtube.com/vi/${banner.youtubeVideo.videoId}/maxresdefault.jpg`;
+    }
     videoUrl = `https://www.youtube.com/watch?v=${banner.youtubeVideo.videoId}`;
   } else if (banner.type === "article" && banner.contentRef) {
-    imageUrl = banner.contentRef.coverImage
-      ? urlFor(banner.contentRef.coverImage).width(800).height(600).url()
-      : null;
     contentHref = `/gia-goneis/${banner.contentRef.slug}`;
   } else if (banner.type === "activity" && banner.contentRef) {
-    imageUrl = banner.contentRef.coverImage
-      ? urlFor(banner.contentRef.coverImage).width(800).height(600).url()
-      : null;
     contentHref = `/drastiriotites/${banner.contentRef.slug}`;
   } else if (banner.type === "recipe" && banner.contentRef) {
-    imageUrl = banner.contentRef.coverImage
-      ? urlFor(banner.contentRef.coverImage).width(800).height(600).url()
-      : null;
     contentHref = `/gia-goneis/recipes/${banner.contentRef.slug}`;
-  } else if (banner.type === "custom" && banner.customImage) {
-    imageUrl = urlFor(banner.customImage).width(800).height(600).url();
   }
 
   const primaryCtaLink = banner.primaryCta?.link || contentHref || videoUrl || "#";

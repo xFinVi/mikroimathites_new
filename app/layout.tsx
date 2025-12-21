@@ -16,7 +16,19 @@ const poppins = Poppins({
   display: "swap",
 });
 
+// Get base URL for metadata
+const getBaseUrl = () => {
+  if (process.env.NEXT_PUBLIC_SITE_URL) {
+    return process.env.NEXT_PUBLIC_SITE_URL;
+  }
+  if (process.env.VERCEL_URL) {
+    return `https://${process.env.VERCEL_URL}`;
+  }
+  return 'http://localhost:3000';
+};
+
 export const metadata: Metadata = {
+  metadataBase: new URL(getBaseUrl()),
   title: "Μικροί Μαθητές",
   description: "Parent Hub - Practical tips and activities for parents with children 0-6 years old",
 };
