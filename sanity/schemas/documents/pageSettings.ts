@@ -1,5 +1,6 @@
 import { defineField, defineType } from "sanity";
 import { hero } from "../objects/hero";
+import { featuredBanner } from "../objects/featuredBanner";
 
 export const pageSettings = defineType({
   name: "pageSettings",
@@ -17,6 +18,12 @@ export const pageSettings = defineType({
           name: "hero",
           title: "Hero",
           type: "hero",
+        }),
+        defineField({
+          name: "featuredBanner",
+          title: "Featured Banner (Section 2)",
+          type: "featuredBanner",
+          description: "Large featured banner shown after the hero image. Can display YouTube videos, featured articles, or custom content.",
         }),
         defineField({
           name: "seasonalBanner",

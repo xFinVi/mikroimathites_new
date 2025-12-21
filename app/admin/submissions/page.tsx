@@ -8,7 +8,6 @@ export default function AdminSubmissionsPage() {
     <PageWrapper>
       <Container className="py-10 sm:py-14 md:py-16">
         <PageHeader
-          eyebrow="Admin"
           title="Submissions Management"
           description="View and manage user submissions (video ideas, feedback, Q&A)"
         />

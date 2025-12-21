@@ -29,7 +29,6 @@ export default async function EpikoinoniaPage() {
         <Container className="relative py-12 sm:py-16 md:py-20">
           <div className="max-w-4xl mx-auto">
             <PageHeader
-              eyebrow="Support / Contact"
               title="Επικοινωνία"
               description="Η γνώμη σας μετράει - Στείλτε ιδέα για βίντεο, feedback ή ερώτηση"
             />

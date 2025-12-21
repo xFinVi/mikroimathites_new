@@ -29,7 +29,6 @@ export default async function SxetikaPage() {
         <Container className="relative py-12 sm:py-16 md:py-20">
           <div className="max-w-4xl mx-auto">
             <PageHeader
-              eyebrow="About"
               title="Σχετικά"
               description="Γεια σας! Είμαστε οι Μικροί Μαθητές"
             />

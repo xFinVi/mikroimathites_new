@@ -27,11 +27,44 @@ export const curatedCollection = defineType({
       name: "items",
       title: "Items",
       type: "array",
+      description: "Add articles, activities, recipes, or printables. Only published documents with slugs will work.",
       of: [
-        { type: "reference", name: "collectionArticle", to: [{ type: "article" }] },
-        { type: "reference", name: "collectionRecipe", to: [{ type: "recipe" }] },
-        { type: "reference", name: "collectionActivity", to: [{ type: "activity" }] },
-        { type: "reference", name: "collectionPrintable", to: [{ type: "printable" }] },
+        { 
+          type: "reference", 
+          name: "collectionArticle", 
+          title: "Article",
+          to: [{ type: "article" }],
+          options: {
+            filter: '!(_id in path("drafts.**")) && defined(slug.current)',
+          },
+        },
+        { 
+          type: "reference", 
+          name: "collectionRecipe",
+          title: "Recipe",
+          to: [{ type: "recipe" }],
+          options: {
+            filter: '!(_id in path("drafts.**")) && defined(slug.current)',
+          },
+        },
+        { 
+          type: "reference", 
+          name: "collectionActivity",
+          title: "Activity",
+          to: [{ type: "activity" }],
+          options: {
+            filter: '!(_id in path("drafts.**")) && defined(slug.current)',
+          },
+        },
+        { 
+          type: "reference", 
+          name: "collectionPrintable",
+          title: "Printable",
+          to: [{ type: "printable" }],
+          options: {
+            filter: '!(_id in path("drafts.**")) && defined(slug.current)',
+          },
+        },
       ],
       validation: (Rule) => Rule.required().min(1),
     }),
@@ -44,6 +77,7 @@ export const curatedCollection = defineType({
           { title: "Home Featured", value: "homeFeatured" },
           { title: "Parents Page Top", value: "parentsPageTop" },
           { title: "Parents Page Quick Tips", value: "parentsPageQuickTips" },
+          { title: "Quick Tips (Parents Page)", value: "quick-tips" },
           { title: "Activities Page Featured", value: "activitiesPageFeatured" },
           { title: "Sleep Start Here", value: "sleepStartHere" },
           { title: "Speech Start Here", value: "speechStartHere" },
@@ -56,20 +90,6 @@ export const curatedCollection = defineType({
         ],
       },
       validation: (Rule) => Rule.required(),
-    }),
-    defineField({
-      name: "ageGroup",
-      title: "Age Group (Filter)",
-      type: "reference",
-      to: [{ type: "ageGroup" }],
-      description: "Optional: Filter by age group",
-    }),
-    defineField({
-      name: "category",
-      title: "Category (Filter)",
-      type: "reference",
-      to: [{ type: "category" }],
-      description: "Optional: Filter by category",
     }),
     defineField({
       name: "order",

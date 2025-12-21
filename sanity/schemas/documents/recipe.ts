@@ -32,6 +32,14 @@ export const recipe = defineType({
       title: "Cover Image",
       type: "image",
       options: { hotspot: true },
+      validation: (Rule) => Rule.required().error("Cover image is required for featured content"),
+    }),
+    defineField({
+      name: "secondaryImage",
+      title: "Secondary Image (Optional)",
+      type: "image",
+      options: { hotspot: true },
+      description: "An additional image for the recipe (optional)",
     }),
     defineField({
       name: "category",

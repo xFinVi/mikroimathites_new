@@ -13,17 +13,27 @@ export function ActivityCard({ activity }: ActivityCardProps) {
     ? urlFor(activity.coverImage).width(400).height(250).url()
     : null;
 
+  // Fallback image if coverImage is missing
+  const hasImage = !!imageUrl;
+
   return (
     <Link href={`/drastiriotites/${activity.slug}`}>
       <Card className="h-full hover:shadow-lg transition-shadow cursor-pointer overflow-hidden">
-        {imageUrl && (
+        {hasImage ? (
           <div className="relative w-full h-48 bg-background-light">
             <Image
-              src={imageUrl}
+              src={imageUrl!}
               alt={activity.title}
               fill
               className="object-cover"
             />
+          </div>
+        ) : (
+          <div className="relative w-full h-48 bg-gradient-to-br from-primary-pink/20 via-secondary-blue/20 to-accent-yellow/20 flex items-center justify-center">
+            <div className="text-center p-4">
+              <div className="text-4xl mb-2">🎨</div>
+              <div className="text-xs text-text-medium font-medium">No Image</div>
+            </div>
           </div>
         )}
         <CardContent className="p-5 space-y-3">

@@ -2,7 +2,7 @@ import { Container } from "@/components/ui/container";
 import { PageWrapper } from "@/components/pages/page-wrapper";
 import { PageHeader } from "@/components/pages/page-header";
 import { generateMetadataFor } from "@/lib/seo/generate-metadata";
-import { getActivities, getPrintables, getAgeGroups, getCategories } from "@/lib/content";
+import { getActivities, getPrintables, getAgeGroups } from "@/lib/content";
 import { ActivityCard } from "@/components/activities/activity-card";
 import { ContentFilters } from "@/components/content/content-filters";
 import { SearchBar } from "@/components/content/search-bar";
@@ -14,16 +14,15 @@ import { urlFor } from "@/lib/sanity/image-url";
 export const metadata = generateMetadataFor("drastiriotites");
 
 interface PageProps {
-  searchParams: Promise<{ age?: string; category?: string; type?: string; search?: string }>;
+  searchParams: Promise<{ age?: string; type?: string; search?: string }>;
 }
 
 export default async function DrastiriotitesPage({ searchParams }: PageProps) {
   const params = await searchParams;
-  const [activities, printables, ageGroups, categories] = await Promise.all([
+  const [activities, printables, ageGroups] = await Promise.all([
     getActivities(),
     getPrintables(),
     getAgeGroups(),
-    getCategories(),
   ]);
 
   // Combine activities and printables
@@ -51,11 +50,6 @@ export default async function DrastiriotitesPage({ searchParams }: PageProps) {
     );
   }
 
-  // Filter by category
-  if (params.category) {
-    allItems = allItems.filter((item) => item.category?.slug === params.category);
-  }
-
   // Filter by type
   if (params.type === "activity") {
     allItems = allItems.filter((item) => item._contentType === "activity");
@@ -79,7 +73,6 @@ export default async function DrastiriotitesPage({ searchParams }: PageProps) {
         <Container className="relative py-12 sm:py-16 md:py-20">
           <div className="max-w-5xl mx-auto">
             <PageHeader
-              eyebrow="Activities & Printables"
               title="Δραστηριότητες & Εκτυπώσιμα"
               description="Διασκεδαστικές δραστηριότητες και εκτυπώσιμα για παιδιά 0-6 ετών"
             />
@@ -93,8 +86,8 @@ export default async function DrastiriotitesPage({ searchParams }: PageProps) {
           <SearchBar />
           <ContentFilters
             ageGroups={ageGroups}
-            categories={categories}
             showTypeFilter={true}
+            showCategoryFilter={false}
           />
         </div>
 

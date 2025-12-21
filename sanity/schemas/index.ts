@@ -12,6 +12,7 @@ import { pageSettings } from "./documents/pageSettings";
 import { seo } from "./objects/seo";
 import { hero } from "./objects/hero";
 import { ingredient } from "./objects/ingredient";
+import { featuredBanner } from "./objects/featuredBanner";
 
 // Register all schema types here
 const schemas = [
@@ -31,6 +32,7 @@ const schemas = [
   seo,
   hero,
   ingredient,
+  featuredBanner,
 ];
 
 export default schemas;

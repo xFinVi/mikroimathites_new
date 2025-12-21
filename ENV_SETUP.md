@@ -5,8 +5,8 @@
 You only need **2 variables** for the MVP:
 
 ```bash
-NEXT_PUBLIC_SUPABASE_URL=https://abqefajosdwcakypnbhd.supabase.co
-SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFicWVmYWpvc2R3Y2FreXBuYmhkIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2NjIwMzgwNywiZXhwIjoyMDgxNzc5ODA3fQ.ZoZ891mJVTCEQtQqX1k15y1QD48hWGDDaV_0WdBL3DY
+NEXT_PUBLIC_SUPABASE_URL=https://your-project-ref.supabase.co
+SUPABASE_SERVICE_ROLE_KEY=your_service_role_key_here
 ```
 
 ## Important Notes
@@ -24,12 +24,12 @@ I noticed your `env.local` file has:
 
 **Wrong:**
 ```bash
-SUPABASE_SERVICE_ROLE_KEY=service=eyJhbGci...
+SUPABASE_SERVICE_ROLE_KEY=service=your_key_here
 ```
 
 **Correct:**
 ```bash
-SUPABASE_SERVICE_ROLE_KEY=eyJhbGci...
+SUPABASE_SERVICE_ROLE_KEY=your_key_here
 ```
 
 ## How to Fix

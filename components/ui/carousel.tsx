@@ -76,14 +76,14 @@ export function Carousel({ slides, autoPlay = true, autoPlayInterval = 5000 }: C
               className="min-w-full flex-shrink-0 w-full"
               style={{ width: '100%' }}
             >
-              <div className="relative bg-white/80 backdrop-blur-md rounded-2xl sm:rounded-3xl p-6 sm:p-8 md:p-12 shadow-2xl border border-white/20 w-full box-border overflow-hidden">
+              <div className="relative bg-white rounded-2xl sm:rounded-3xl p-6 sm:p-8 md:p-12 border border-white/20 w-full box-border overflow-hidden h-full min-h-[400px] flex flex-col">
                 {/* Abstract Decorative Shapes */}
                 <div className="absolute top-0 right-0 w-32 h-32 bg-primary-pink/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none" />
                 <div className="absolute bottom-0 left-0 w-24 h-24 bg-secondary-blue/10 rounded-full blur-2xl translate-y-1/2 -translate-x-1/2 pointer-events-none" />
                 <div className="absolute top-1/2 left-1/4 w-16 h-16 bg-accent-yellow/10 rounded-full blur-xl pointer-events-none" />
                 
                 {/* Content */}
-                <div className="relative z-10 text-center space-y-6 md:space-y-8 w-full">
+                <div className="relative z-10 text-center space-y-6 md:space-y-8 w-full flex-1 flex flex-col justify-center">
                   {slide.badge && (
                     <div className="inline-block px-4 py-2 bg-primary-pink/20 text-primary-pink rounded-full text-sm font-semibold">
                       {slide.badge}

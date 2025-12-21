@@ -73,6 +73,7 @@ export interface Article {
   body?: unknown;
   readingTime?: number;
   coverImage?: unknown;
+  secondaryImage?: unknown;
   ageGroups?: AgeGroup[];
   tags?: Tag[];
   category?: Category;
@@ -94,6 +95,7 @@ export interface Recipe {
   slug: string;
   summary?: string;
   coverImage?: unknown;
+  secondaryImage?: unknown;
   difficulty: "easy" | "medium" | "hard";
   prepTime: number;
   cookTime: number;
@@ -126,6 +128,7 @@ export interface Activity {
   steps?: unknown;
   safetyNotes?: string;
   coverImage?: unknown;
+  secondaryImage?: unknown;
   ageGroups?: AgeGroup[];
   tags?: Tag[];
   category?: Category;
@@ -143,6 +146,7 @@ export interface Printable {
   file?: unknown;
   previewImages?: unknown[];
   coverImage?: unknown;
+  secondaryImage?: unknown;
   ageGroups?: AgeGroup[];
   tags?: Tag[];
   publishedAt?: string;
@@ -168,9 +172,39 @@ export interface CuratedCollection {
   placement: string;
   order?: number;
   items?: RelatedContentItem[];
-  ageGroup?: AgeGroup;
-  category?: Category;
   publishedAt?: string;
+}
+
+export interface FeaturedBanner {
+  enabled?: boolean;
+  type?: "youtube" | "article" | "activity" | "recipe" | "custom";
+  title?: string;
+  subtitle?: string;
+  description?: string;
+  primaryCta?: {
+    text?: string;
+    link?: string;
+  };
+  secondaryCta?: {
+    text?: string;
+    link?: string;
+  };
+  contentRef?: {
+    _type: string;
+    _id: string;
+    title: string;
+    slug: string;
+    coverImage?: unknown;
+    excerpt?: string;
+    summary?: string;
+  };
+  youtubeVideo?: {
+    videoId?: string;
+    thumbnail?: unknown;
+  };
+  customImage?: unknown;
+  backgroundColor?: string;
+  customBackgroundColor?: string;
 }
 
 export interface PageSettings {
@@ -197,6 +231,7 @@ export interface PageSettings {
         alignment?: "left" | "center" | "right";
       };
     };
+    featuredBanner?: FeaturedBanner;
     seasonalBanner?: {
       enabled?: boolean;
       title?: string;
@@ -324,9 +359,21 @@ export async function getCuratedCollectionByPlacement(
   placement: string
 ): Promise<CuratedCollection | null> {
   if (!safeClient) return null;
-  return safeClient.fetch<CuratedCollection | null>(curatedCollectionByPlacementQuery, {
+  const result = await safeClient.fetch<CuratedCollection | null>(curatedCollectionByPlacementQuery, {
     placement,
   });
+  // Filter out null items, drafts, and items without required fields
+  if (result && result.items) {
+    result.items = result.items.filter((item: any) => {
+      if (!item || !item._id) return false;
+      // Check if it's a draft (draft IDs start with "drafts.")
+      if (item._id.startsWith('drafts.')) return false;
+      // Check if it has required fields
+      if (!item.slug || !item.title) return false;
+      return true;
+    });
+  }
+  return result;
 }
 
 export async function getCuratedCollectionsByPlacement(

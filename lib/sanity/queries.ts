@@ -6,6 +6,7 @@ const commonFields = `
   title,
   "slug": slug.current,
   coverImage,
+  secondaryImage,
   "ageGroups": ageGroups[]-> { _id, title, "slug": slug.current },
   "tags": tags[]-> { _id, title, "slug": slug.current },
   publishedAt,
@@ -102,24 +103,24 @@ export const QAItemFields = `
 `;
 
 // Article queries
-export const articlesQuery = groq`*[_type == "article" && defined(slug.current)]|order(publishedAt desc)[0...10]{${articleFields}}`;
-export const articleBySlugQuery = groq`*[_type == "article" && slug.current == $slug][0]{${articleFields}}`;
-export const featuredArticlesQuery = groq`*[_type == "article" && featured == true && defined(slug.current)]|order(publishedAt desc)[0...10]{${articleFields}}`;
+export const articlesQuery = groq`*[_type == "article" && defined(slug.current) && !(_id in path("drafts.**"))]|order(publishedAt desc){${articleFields}}`;
+export const articleBySlugQuery = groq`*[_type == "article" && slug.current == $slug && !(_id in path("drafts.**"))][0]{${articleFields}}`;
+export const featuredArticlesQuery = groq`*[_type == "article" && featured == true && defined(slug.current) && !(_id in path("drafts.**"))]|order(publishedAt desc)[0...10]{${articleFields}}`;
 
 // Recipe queries
-export const recipesQuery = groq`*[_type == "recipe" && defined(slug.current)]|order(publishedAt desc)[0...10]{${recipeFields}}`;
-export const recipeBySlugQuery = groq`*[_type == "recipe" && slug.current == $slug][0]{${recipeFields}}`;
-export const featuredRecipesQuery = groq`*[_type == "recipe" && featured == true && defined(slug.current)]|order(publishedAt desc)[0...10]{${recipeFields}}`;
+export const recipesQuery = groq`*[_type == "recipe" && defined(slug.current) && !(_id in path("drafts.**"))]|order(publishedAt desc){${recipeFields}}`;
+export const recipeBySlugQuery = groq`*[_type == "recipe" && slug.current == $slug && !(_id in path("drafts.**"))][0]{${recipeFields}}`;
+export const featuredRecipesQuery = groq`*[_type == "recipe" && featured == true && defined(slug.current) && defined(coverImage) && !(_id in path("drafts.**"))]|order(publishedAt desc)[0...10]{${recipeFields}}`;
 
 // Activity queries
-export const activitiesQuery = groq`*[_type == "activity" && defined(slug.current)]|order(publishedAt desc)[0...10]{${activityFields}}`;
-export const activityBySlugQuery = groq`*[_type == "activity" && slug.current == $slug][0]{${activityFields}}`;
-export const featuredActivitiesQuery = groq`*[_type == "activity" && featured == true && defined(slug.current)]|order(publishedAt desc)[0...10]{${activityFields}}`;
+export const activitiesQuery = groq`*[_type == "activity" && defined(slug.current) && !(_id in path("drafts.**"))]|order(publishedAt desc){${activityFields}}`;
+export const activityBySlugQuery = groq`*[_type == "activity" && slug.current == $slug && !(_id in path("drafts.**"))][0]{${activityFields}}`;
+export const featuredActivitiesQuery = groq`*[_type == "activity" && featured == true && defined(slug.current) && defined(coverImage) && !(_id in path("drafts.**"))]|order(publishedAt desc)[0...10]{${activityFields}}`;
 
 // Printable queries
-export const printablesQuery = groq`*[_type == "printable" && defined(slug.current)]|order(publishedAt desc)[0...10]{${printableFields}}`;
-export const printableBySlugQuery = groq`*[_type == "printable" && slug.current == $slug][0]{${printableFields}}`;
-export const featuredPrintablesQuery = groq`*[_type == "printable" && featured == true && defined(slug.current)]|order(publishedAt desc)[0...10]{${printableFields}}`;
+export const printablesQuery = groq`*[_type == "printable" && defined(slug.current) && !(_id in path("drafts.**"))]|order(publishedAt desc){${printableFields}}`;
+export const printableBySlugQuery = groq`*[_type == "printable" && slug.current == $slug && !(_id in path("drafts.**"))][0]{${printableFields}}`;
+export const featuredPrintablesQuery = groq`*[_type == "printable" && featured == true && defined(slug.current) && defined(coverImage) && !(_id in path("drafts.**"))]|order(publishedAt desc)[0...10]{${printableFields}}`;
 
 // QA Item queries
 export const qaItemsQuery = groq`*[_type == "qaItem" && defined(publishedAt)]|order(publishedAt desc)[0...10]{${QAItemFields}}`;
@@ -141,13 +142,11 @@ export const curatedCollectionFields = `
     summary,
     excerpt
   },
-  "ageGroup": ageGroup-> { _id, title, "slug": slug.current },
-  "category": category-> { _id, title, "slug": slug.current },
   publishedAt
 `;
 
 export const curatedCollectionsQuery = groq`*[_type == "curatedCollection" && defined(placement)]|order(order asc, publishedAt desc){${curatedCollectionFields}}`;
-export const curatedCollectionByPlacementQuery = groq`*[_type == "curatedCollection" && placement == $placement]|order(order asc, publishedAt desc)[0]{${curatedCollectionFields}}`;
+export const curatedCollectionByPlacementQuery = groq`*[_type == "curatedCollection" && placement == $placement && !(_id in path("drafts.**"))]|order(order asc, publishedAt desc)[0]{${curatedCollectionFields}}`;
 export const curatedCollectionsByPlacementQuery = groq`*[_type == "curatedCollection" && placement == $placement]|order(order asc, publishedAt desc){${curatedCollectionFields}}`;
 
 // Page Settings query (singleton)
@@ -174,6 +173,37 @@ export const pageSettingsFields = `
         ctaLink,
         alignment
       }
+    },
+    featuredBanner {
+      enabled,
+      type,
+      title,
+      subtitle,
+      description,
+      primaryCta {
+        text,
+        link
+      },
+      secondaryCta {
+        text,
+        link
+      },
+      "contentRef": contentRef-> {
+        _type,
+        _id,
+        title,
+        "slug": slug.current,
+        coverImage,
+        excerpt,
+        summary
+      },
+      youtubeVideo {
+        videoId,
+        thumbnail
+      },
+      customImage,
+      backgroundColor,
+      customBackgroundColor
     },
     seasonalBanner {
       enabled,
@@ -239,7 +269,7 @@ export const categoryFields = `
   order
 `;
 
-export const categoriesQuery = groq`*[_type == "category" && defined(slug.current)]|order(order asc, title asc){${categoryFields}}`;
+export const categoriesQuery = groq`*[_type == "category" && defined(slug.current) && slug.current != "elliniko-exoteriko"]|order(order asc, title asc){${categoryFields}}`;
 
 // Age Group queries
 export const ageGroupFields = `

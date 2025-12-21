@@ -13,15 +13,15 @@ NEXT_PUBLIC_SUPABASE_URL=your_url  ❌ This is a placeholder!
 Replace `your_url` with your actual Supabase project URL:
 
 ```bash
-NEXT_PUBLIC_SUPABASE_URL=https://abqefajosdwcakypnbhd.supabase.co
-SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFicWVmYWpvc2R3Y2FreXBuYmhkIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2NjIwMzgwNywiZXhwIjoyMDgxNzc5ODA3fQ.ZoZ891mJVTCEQtQqX1k15y1QD48hWGDDaV_0WdBL3DY
+NEXT_PUBLIC_SUPABASE_URL=https://your-project-ref.supabase.co
+SUPABASE_SERVICE_ROLE_KEY=your_service_role_key_here
 ```
 
 ## Steps
 
 1. Open `.env.local` file
 2. Find the line: `NEXT_PUBLIC_SUPABASE_URL=your_url`
-3. Replace `your_url` with: `https://abqefajosdwcakypnbhd.supabase.co`
+3. Replace `your_url` with your actual Supabase project URL (found in your Supabase dashboard)
 4. Save the file
 5. **Restart your dev server** (important!)
 
@@ -34,8 +34,8 @@ After fixing, restart the server and check:
 ## Your Correct .env.local Should Look Like:
 
 ```bash
-NEXT_PUBLIC_SUPABASE_URL=https://abqefajosdwcakypnbhd.supabase.co
-SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFicWVmYWpvc2R3Y2FreXBuYmhkIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2NjIwMzgwNywiZXhwIjoyMDgxNzc5ODA3fQ.ZoZ891mJVTCEQtQqX1k15y1QD48hWGDDaV_0WdBL3DY
+NEXT_PUBLIC_SUPABASE_URL=https://your-project-ref.supabase.co
+SUPABASE_SERVICE_ROLE_KEY=your_service_role_key_here
 ```
 
 **No quotes, no spaces, no "service=" prefix!**

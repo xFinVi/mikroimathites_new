@@ -15,27 +15,51 @@ interface ContentFiltersProps {
   ageGroups?: Array<{ _id: string; title: string; slug: string }>;
   categories?: Array<{ _id: string; title: string; slug: string }>;
   showTypeFilter?: boolean; // For activities page (activity vs printable)
+  showCategoryFilter?: boolean; // Whether to show category filter (default: true)
 }
 
 export function ContentFilters({
   ageGroups = [],
   categories = [],
   showTypeFilter = false,
+  showCategoryFilter = true,
 }: ContentFiltersProps) {
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
 
-  const ageFilter = searchParams.get("age") || "";
-  const categoryFilter = searchParams.get("category") || "";
-  const typeFilter = searchParams.get("type") || "";
+  const ageFilter = searchParams.get("age") || undefined;
+  const categoryFilter = searchParams.get("category") || undefined;
+  const typeFilter = searchParams.get("type") || undefined;
+
+  // Map categories - show all but with merged display names
+  // Note: "Ελληνικό Εξωτερικό" is filtered out at the query level
+  const displayCategories = categories.map((cat) => {
+    // Rename merged categories for display
+    if (cat.slug === 'diatrofi-epiloges') {
+      return { ...cat, title: 'Διατροφή & Συνταγές' };
+    }
+    if (cat.slug === 'fysikes-syntages') {
+      // Hide this one since it's merged into "Διατροφή & Επιλογές"
+      return null;
+    }
+    if (cat.slug === 'texnes-xirotexnies') {
+      return { ...cat, title: 'Δραστηριότητες & Παιχνίδια' };
+    }
+    if (cat.slug === 'idees-paixnidiou') {
+      // Hide this one since it's merged into "Τέχνες & Χειροτεχνίες"
+      return null;
+    }
+    return cat;
+  }).filter((cat): cat is NonNullable<typeof cat> => cat !== null);
 
   const updateFilter = (key: string, value: string) => {
     const params = new URLSearchParams(searchParams.toString());
-    if (value) {
-      params.set(key, value);
-    } else {
+    // Handle "all" value to clear filter
+    if (value === "all" || !value) {
       params.delete(key);
+    } else {
+      params.set(key, value);
     }
     // Reset to page 1 when filtering
     params.delete("page");
@@ -46,7 +70,7 @@ export function ContentFilters({
     router.push(pathname);
   };
 
-  const hasActiveFilters = ageFilter || categoryFilter || typeFilter;
+  const hasActiveFilters = ageFilter || (showCategoryFilter && categoryFilter) || typeFilter;
 
   return (
     <div className="bg-background-white rounded-card p-6 shadow-subtle border border-border/50 space-y-4">
@@ -56,12 +80,12 @@ export function ContentFilters({
         {/* Age Group Filter */}
         {ageGroups.length > 0 && (
           <div className="space-y-2">
-            <Select value={ageFilter} onValueChange={(value) => updateFilter("age", value)}>
+            <Select value={ageFilter || "all"} onValueChange={(value) => updateFilter("age", value)}>
               <SelectTrigger className="w-[180px]">
                 <SelectValue placeholder="Όλες οι ηλικίες" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Όλες οι ηλικίες</SelectItem>
+                <SelectItem value="all">Όλες οι ηλικίες</SelectItem>
                 {ageGroups.map((ageGroup) => (
                   <SelectItem key={ageGroup._id} value={ageGroup.slug}>
                     {ageGroup.title}
@@ -73,18 +97,18 @@ export function ContentFilters({
         )}
 
         {/* Category Filter */}
-        {categories.length > 0 && (
+        {showCategoryFilter && displayCategories.length > 0 && (
           <div className="space-y-2">
             <Select
-              value={categoryFilter}
+              value={categoryFilter || "all"}
               onValueChange={(value) => updateFilter("category", value)}
             >
               <SelectTrigger className="w-[180px]">
                 <SelectValue placeholder="Όλες οι κατηγορίες" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Όλες οι κατηγορίες</SelectItem>
-                {categories.map((category) => (
+                <SelectItem value="all">Όλες οι κατηγορίες</SelectItem>
+                {displayCategories.map((category) => (
                   <SelectItem key={category._id} value={category.slug}>
                     {category.title}
                   </SelectItem>
@@ -97,12 +121,12 @@ export function ContentFilters({
         {/* Type Filter (for activities page) */}
         {showTypeFilter && (
           <div className="space-y-2">
-            <Select value={typeFilter} onValueChange={(value) => updateFilter("type", value)}>
+            <Select value={typeFilter || "all"} onValueChange={(value) => updateFilter("type", value)}>
               <SelectTrigger className="w-[180px]">
                 <SelectValue placeholder="Όλοι οι τύποι" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Όλοι οι τύποι</SelectItem>
+                <SelectItem value="all">Όλοι οι τύποι</SelectItem>
                 <SelectItem value="activity">Δραστηριότητες</SelectItem>
                 <SelectItem value="printable">Εκτυπώσιμα</SelectItem>
               </SelectContent>
@@ -133,9 +157,9 @@ export function ContentFilters({
               Ηλικία: {ageGroups.find((ag) => ag.slug === ageFilter)?.title || ageFilter}
             </span>
           )}
-          {categoryFilter && (
+          {showCategoryFilter && categoryFilter && (
             <span className="px-3 py-1 rounded-full bg-secondary-blue/10 text-secondary-blue text-xs font-medium">
-              Κατηγορία: {categories.find((c) => c.slug === categoryFilter)?.title || categoryFilter}
+              Κατηγορία: {displayCategories.find((c) => c.slug === categoryFilter)?.title || categories.find((c) => c.slug === categoryFilter)?.title || categoryFilter}
             </span>
           )}
           {typeFilter && (
