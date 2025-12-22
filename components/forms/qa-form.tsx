@@ -151,7 +151,6 @@ export function QAForm() {
             <SelectItem value="emotions">Συναισθήματα & Συμπεριφορά</SelectItem>
             <SelectItem value="screens">Οθόνες & Ψηφιακή Ασφάλεια</SelectItem>
             <SelectItem value="routines">Καθημερινές Ρουτίνες</SelectItem>
-            <SelectItem value="greek-abroad">Ελληνικό Εξωτερικό</SelectItem>
             <SelectItem value="other">Άλλο</SelectItem>
           </SelectContent>
         </Select>

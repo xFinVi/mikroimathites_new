@@ -33,7 +33,6 @@ export function ContentFilters({
   const typeFilter = searchParams.get("type") || undefined;
 
   // Map categories - show all but with merged display names
-  // Note: "Ελληνικό Εξωτερικό" is filtered out at the query level
   const displayCategories = categories.map((cat) => {
     // Rename merged categories for display
     if (cat.slug === 'diatrofi-epiloges') {
@@ -63,11 +62,12 @@ export function ContentFilters({
     }
     // Reset to page 1 when filtering
     params.delete("page");
-    router.push(`${pathname}?${params.toString()}`);
+    // Use replace to avoid cluttering browser history
+    router.replace(`${pathname}?${params.toString()}`);
   };
 
   const clearFilters = () => {
-    router.push(pathname);
+    router.replace(pathname);
   };
 
   const hasActiveFilters = ageFilter || (showCategoryFilter && categoryFilter) || typeFilter;

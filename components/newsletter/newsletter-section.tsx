@@ -5,7 +5,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
-export function NewsletterSection() {
+interface NewsletterSectionProps {
+  source?: string; // Optional: track where subscription came from (e.g., 'homepage', 'footer')
+}
+
+export function NewsletterSection({ source = "homepage" }: NewsletterSectionProps) {
   const [email, setEmail] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
@@ -16,22 +20,22 @@ export function NewsletterSection() {
     setIsSubmitting(true);
     setError(null);
 
-    // TODO: Connect to email service (e.g., Mailchimp, SendGrid, Resend)
-    // For now, this is a placeholder
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      
-      // In production, replace with actual API call:
-      // const res = await fetch('/api/newsletter', {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify({ email }),
-      // });
-      
+      const res = await fetch("/api/newsletter", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, source }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || "Κάτι πήγε στραβά");
+      }
+
       setIsSubmitted(true);
       setEmail("");
-      
+
       // Reset after 3 seconds
       setTimeout(() => {
         setIsSubmitted(false);
@@ -97,9 +101,6 @@ export function NewsletterSection() {
               {isSubmitting ? "Εγγραφή..." : "Εγγραφή"}
             </Button>
           </div>
-          <p className="text-xs text-text-light">
-            ⚠️ Newsletter integration pending - Connect to email service (Mailchimp, SendGrid, etc.)
-          </p>
         </form>
       </div>
     </div>

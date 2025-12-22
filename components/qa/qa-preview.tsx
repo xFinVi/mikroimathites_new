@@ -29,7 +29,7 @@ export function QAPreview({ items }: QAPreviewProps) {
             question={item.question}
             answer={
               item.answer ? (
-                <PortableText value={item.answer as PortableTextBlock[]} />
+                      <PortableText value={item.answer as PortableTextBlock[]} />
               ) : null
             }
             category={item.category?.title}

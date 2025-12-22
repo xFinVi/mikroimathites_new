@@ -294,6 +294,7 @@ export const authorFields = `
     twitter,
     instagram,
     youtube,
+    facebook,
     website
   }
 `;
@@ -320,5 +321,170 @@ export const relatedContentQuery = groq`
     summary,
     excerpt
   }
+`;
+
+// Parents Hub Content Query (server-side search + pagination)
+// Note: All params ($search, $age, $categories) must be provided (can be null)
+// IMPORTANT: Count query below must use EXACT same filter logic
+export const parentsHubContentQuery = groq`
+  *[
+    _type in ["article","recipe","activity"] &&
+    defined(slug.current) &&
+    !(_id in path("drafts.**")) &&
+    (
+      $search == null ||
+      $search == "" ||
+      lower(title) match $search ||
+      (defined(excerpt) && lower(excerpt) match $search) ||
+      (defined(summary) && lower(summary) match $search) ||
+      (defined(body) && lower(pt::text(body)) match $search) ||
+      (defined(instructions) && lower(pt::text(instructions)) match $search) ||
+      (defined(steps) && lower(pt::text(steps)) match $search)
+    ) &&
+    (
+      $age == null ||
+      $age == "" ||
+      count(ageGroups[]->slug.current[slug.current == $age]) > 0
+    ) &&
+    (
+      $categories == null ||
+      count($categories) == 0 ||
+      (defined(category) && category->slug.current in $categories)
+    )
+  ]
+  | order(publishedAt desc)
+  [$start...$end]
+  {
+    _id,
+    _type,
+    title,
+    "slug": slug.current,
+    excerpt,
+    summary,
+    body,
+    coverImage,
+    secondaryImage,
+    publishedAt,
+    "category": category->{_id, title, "slug": slug.current},
+    "ageGroups": ageGroups[]->{_id, title, "slug": slug.current},
+    "tags": tags[]->{_id, title, "slug": slug.current},
+    featured
+  }
+`;
+
+// Parents Hub Content Count Query
+// CRITICAL: Must use EXACT same filter as parentsHubContentQuery above
+// Any difference will cause pagination to break (wrong total count)
+export const parentsHubContentCountQuery = groq`
+  count(*[
+    _type in ["article","recipe","activity"] &&
+    defined(slug.current) &&
+    !(_id in path("drafts.**")) &&
+    (
+      $search == null ||
+      $search == "" ||
+      lower(title) match $search ||
+      (defined(excerpt) && lower(excerpt) match $search) ||
+      (defined(summary) && lower(summary) match $search) ||
+      (defined(body) && lower(pt::text(body)) match $search) ||
+      (defined(instructions) && lower(pt::text(instructions)) match $search) ||
+      (defined(steps) && lower(pt::text(steps)) match $search)
+    ) &&
+    (
+      $age == null ||
+      $age == "" ||
+      count(ageGroups[]->slug.current[slug.current == $age]) > 0
+    ) &&
+    (
+      $categories == null ||
+      count($categories) == 0 ||
+      (defined(category) && category->slug.current in $categories)
+    )
+  ])
+`;
+
+// Activities Hub Content Query (server-side search + pagination for activities/printables)
+// Note: All params ($search, $age, $type) must be provided (can be null)
+// IMPORTANT: Count query below must use EXACT same filter logic
+export const activitiesHubContentQuery = groq`
+  *[
+    _type in ["activity","printable"] &&
+    defined(slug.current) &&
+    !(_id in path("drafts.**")) &&
+    (
+      $search == null ||
+      $search == "" ||
+      lower(title) match $search ||
+      (defined(summary) && lower(summary) match $search) ||
+      (defined(goals) && count(goals[lower(@) match $search]) > 0) ||
+      (defined(materials) && count(materials[lower(@) match $search]) > 0) ||
+      (defined(steps) && lower(pt::text(steps)) match $search) ||
+      (defined(safetyNotes) && lower(safetyNotes) match $search)
+    ) &&
+    (
+      $age == null ||
+      $age == "" ||
+      count(ageGroups[]->slug.current[slug.current == $age]) > 0
+    ) &&
+    (
+      $type == null ||
+      $type == "" ||
+      _type == $type
+    )
+  ]
+  | order(publishedAt desc)
+  [$start...$end]
+  {
+    _id,
+    _type,
+    title,
+    "slug": slug.current,
+    summary,
+    coverImage,
+    secondaryImage,
+    publishedAt,
+    duration,
+    goals,
+    materials,
+    steps,
+    safetyNotes,
+    file,
+    previewImages,
+    "category": category->{_id, title, "slug": slug.current},
+    "ageGroups": ageGroups[]->{_id, title, "slug": slug.current},
+    "tags": tags[]->{_id, title, "slug": slug.current},
+    featured
+  }
+`;
+
+// Activities Hub Content Count Query
+// CRITICAL: Must use EXACT same filter as activitiesHubContentQuery above
+// Any difference will cause pagination to break (wrong total count)
+export const activitiesHubContentCountQuery = groq`
+  count(*[
+    _type in ["activity","printable"] &&
+    defined(slug.current) &&
+    !(_id in path("drafts.**")) &&
+    (
+      $search == null ||
+      $search == "" ||
+      lower(title) match $search ||
+      (defined(summary) && lower(summary) match $search) ||
+      (defined(goals) && count(goals[lower(@) match $search]) > 0) ||
+      (defined(materials) && count(materials[lower(@) match $search]) > 0) ||
+      (defined(steps) && lower(pt::text(steps)) match $search) ||
+      (defined(safetyNotes) && lower(safetyNotes) match $search)
+    ) &&
+    (
+      $age == null ||
+      $age == "" ||
+      count(ageGroups[]->slug.current[slug.current == $age]) > 0
+    ) &&
+    (
+      $type == null ||
+      $type == "" ||
+      _type == $type
+    )
+  ])
 `;
 

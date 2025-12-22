@@ -16,8 +16,8 @@ interface SubmissionPayload {
   email?: string;
   message: string;
   rating?: number;
-  child_age_group?: "0-2" | "2-4" | "4-6" | "greek-abroad" | "other";
-  topic?: "sleep" | "speech" | "food" | "emotions" | "screens" | "routines" | "greek-abroad" | "other";
+  child_age_group?: "0-2" | "2-4" | "4-6" | "other";
+  topic?: "sleep" | "speech" | "food" | "emotions" | "screens" | "routines" | "other";
   source_page?: string;
   content_slug?: string;
   publish_consent?: boolean; // For Q&A form
@@ -31,20 +31,20 @@ function normalizeType(type: IncomingType): "video_idea" | "feedback" | "questio
   return "feedback";
 }
 
-function normalizeAgeGroup(age?: string): "0_2" | "2_4" | "4_6" | "greek_abroad" | "other" | null {
+function normalizeAgeGroup(age?: string): "0_2" | "2_4" | "4_6" | "other" | null {
   if (!age) return null;
   const normalized = age.replace("-", "_");
-  if (["0_2", "2_4", "4_6", "greek_abroad", "other"].includes(normalized)) {
-    return normalized as "0_2" | "2_4" | "4_6" | "greek_abroad" | "other";
+  if (["0_2", "2_4", "4_6", "other"].includes(normalized)) {
+    return normalized as "0_2" | "2_4" | "4_6" | "other";
   }
   return null;
 }
 
-function normalizeTopic(topic?: string): "sleep" | "speech" | "food" | "emotions" | "screens" | "routines" | "greek_abroad" | "other" | null {
+function normalizeTopic(topic?: string): "sleep" | "speech" | "food" | "emotions" | "screens" | "routines" | "other" | null {
   if (!topic) return null;
   const normalized = topic.replace("-", "_");
-  if (["sleep", "speech", "food", "emotions", "screens", "routines", "greek_abroad", "other"].includes(normalized)) {
-    return normalized as "sleep" | "speech" | "food" | "emotions" | "screens" | "routines" | "greek_abroad" | "other";
+  if (["sleep", "speech", "food", "emotions", "screens", "routines", "other"].includes(normalized)) {
+    return normalized as "sleep" | "speech" | "food" | "emotions" | "screens" | "routines" | "other";
   }
   return null;
 }

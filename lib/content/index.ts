@@ -21,6 +21,10 @@ import {
   categoriesQuery,
   ageGroupsQuery,
   authorsQuery,
+  parentsHubContentQuery,
+  parentsHubContentCountQuery,
+  activitiesHubContentQuery,
+  activitiesHubContentCountQuery,
 } from "@/lib/sanity/queries";
 
 // Common types
@@ -415,6 +419,7 @@ export interface Author {
     twitter?: string;
     instagram?: string;
     youtube?: string;
+    facebook?: string;
     website?: string;
   };
 }
@@ -454,10 +459,128 @@ export async function getRelatedContent(
   }
 
   // Otherwise, auto-generate based on category, age groups, and tags
-  const categoryId = content.category?._id;
+  const categoryId = "category" in content ? content.category?._id : undefined;
   const ageGroupIds = content.ageGroups?.map((ag) => ag._id) || [];
   const tagIds = content.tags?.map((tag) => tag._id) || [];
 
   return getAutoRelatedContent(content.slug, categoryId, ageGroupIds, tagIds);
+}
+
+// Parents Hub Content (server-side search + pagination)
+export interface ParentsHubContentOptions {
+  search?: string;
+  age?: string;
+  categories?: string[];
+  page: number;
+  pageSize: number;
+}
+
+export interface ParentsHubContentResult {
+  items: (Article | Recipe | Activity)[];
+  total: number;
+}
+
+export async function getParentsHubContent(
+  opts: ParentsHubContentOptions
+): Promise<ParentsHubContentResult> {
+  if (!safeClient) return { items: [], total: 0 };
+
+  const page = Math.max(1, opts.page || 1);
+  const pageSize = Math.max(1, Math.min(50, opts.pageSize || 18));
+  const start = (page - 1) * pageSize;
+  const end = start + pageSize;
+
+  // Normalize search - GROQ requires all referenced params to be provided
+  // Use null for undefined values so GROQ can check !defined()
+  // GROQ's match operator supports wildcards: "*term*" for substring matching
+  // Sanitize: remove wildcards from user input, cap length, use Greek locale for lowercase
+  const raw = opts.search?.trim() ?? "";
+  const cleaned = raw.replace(/\*/g, "").slice(0, 80); // Remove wildcards, cap at 80 chars
+  const search = cleaned ? `*${cleaned.toLocaleLowerCase("el-GR")}*` : null;
+  const age = opts.age?.trim() ? opts.age.trim() : null;
+  const categories = opts.categories && opts.categories.length > 0 ? opts.categories : null;
+
+  try {
+    const [items, total] = await Promise.all([
+      safeClient.fetch<(Article | Recipe | Activity)[]>(parentsHubContentQuery, {
+        start,
+        end,
+        search,
+        age,
+        categories,
+      }),
+      safeClient.fetch<number>(parentsHubContentCountQuery, {
+        search,
+        age,
+        categories,
+      }),
+    ]);
+
+    return {
+      items: items ?? [],
+      total: total ?? 0,
+    };
+  } catch (error) {
+    console.error("Error fetching parents hub content:", error);
+    return { items: [], total: 0 };
+  }
+}
+
+// Activities Hub Content (for drastiriotites page)
+export interface ActivitiesHubContentOptions {
+  search?: string;
+  age?: string;
+  type?: string; // "activity" | "printable" | null
+  page: number;
+  pageSize: number;
+}
+
+export interface ActivitiesHubContentResult {
+  items: (Activity | Printable)[];
+  total: number;
+}
+
+export async function getActivitiesHubContent(
+  opts: ActivitiesHubContentOptions
+): Promise<ActivitiesHubContentResult> {
+  if (!safeClient) return { items: [], total: 0 };
+
+  const page = Math.max(1, opts.page || 1);
+  const pageSize = Math.max(1, Math.min(50, opts.pageSize || 18));
+  const start = (page - 1) * pageSize;
+  const end = start + pageSize;
+
+  // Normalize search - GROQ requires all referenced params to be provided
+  // Sanitize: remove wildcards from user input, cap length, use Greek locale for lowercase
+  const raw = opts.search?.trim() ?? "";
+  const cleaned = raw.replace(/\*/g, "").slice(0, 80); // Remove wildcards, cap at 80 chars
+  const search = cleaned ? `*${cleaned.toLocaleLowerCase("el-GR")}*` : null;
+  const age = opts.age?.trim() ? opts.age.trim() : null;
+  const type = opts.type?.trim() ? opts.type.trim() : null;
+
+  try {
+    const [items, total] = await Promise.all([
+      safeClient.fetch<(Activity | Printable)[]>(activitiesHubContentQuery, {
+        start,
+        end,
+        search,
+        age,
+        type,
+      }),
+      safeClient.fetch<number>(activitiesHubContentCountQuery, {
+        search,
+        age,
+        type,
+      }),
+    ]);
+
+    return {
+      items: items ?? [],
+      total: total ?? 0,
+    };
+  } catch (error) {
+    console.error("Error fetching activities hub content:", error);
+    return { items: [], total: 0 };
+  }
 }
 

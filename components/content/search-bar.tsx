@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import { Search, X } from "lucide-react";
@@ -10,29 +10,64 @@ export function SearchBar() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
-  const [isPending, startTransition] = useTransition();
   const [searchQuery, setSearchQuery] = useState(searchParams.get("search") || "");
+  const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Update local state when URL search param changes (e.g., from browser back/forward)
+  useEffect(() => {
+    const urlSearch = searchParams.get("search") || "";
+    if (urlSearch !== searchQuery) {
+      setSearchQuery(urlSearch);
+    }
+  }, [searchParams]);
+
+  // Cleanup debounce timer on unmount
+  useEffect(() => {
+    return () => {
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+      }
+    };
+  }, []);
+
+  const updateURL = (value: string) => {
+    const params = new URLSearchParams(searchParams.toString());
+    if (value.trim()) {
+      params.set("search", value.trim());
+    } else {
+      params.delete("search");
+    }
+    // Reset to page 1 when searching
+    params.delete("page");
+    router.replace(`${pathname}?${params.toString()}`);
+  };
 
   const handleSearch = (value: string) => {
+    // Update local state immediately (so input shows typed value)
     setSearchQuery(value);
-    startTransition(() => {
-      const params = new URLSearchParams(searchParams.toString());
-      if (value.trim()) {
-        params.set("search", value.trim());
-      } else {
-        params.delete("search");
-      }
-      // Reset to page 1 when searching
-      params.delete("page");
-      router.push(`${pathname}?${params.toString()}`);
-    });
+
+    // Clear existing timer
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+    }
+
+    // Debounce URL update (wait 500ms after user stops typing)
+    debounceTimerRef.current = setTimeout(() => {
+      updateURL(value);
+    }, 500);
   };
 
   const clearSearch = () => {
     setSearchQuery("");
+    // Clear any pending debounce
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+    }
+    // Update URL immediately when clearing
     const params = new URLSearchParams(searchParams.toString());
     params.delete("search");
-    router.push(`${pathname}?${params.toString()}`);
+    params.delete("page");
+    router.replace(`${pathname}?${params.toString()}`);
   };
 
   return (
@@ -44,7 +79,6 @@ export function SearchBar() {
         value={searchQuery}
         onChange={(e) => handleSearch(e.target.value)}
         className="pl-10 pr-10 h-12 text-base"
-        disabled={isPending}
       />
       {searchQuery && (
         <Button
@@ -55,11 +89,6 @@ export function SearchBar() {
         >
           <X className="w-4 h-4" />
         </Button>
-      )}
-      {isPending && (
-        <div className="absolute right-12 top-1/2 transform -translate-y-1/2">
-          <div className="w-4 h-4 border-2 border-primary-pink border-t-transparent rounded-full animate-spin" />
-        </div>
       )}
     </div>
   );

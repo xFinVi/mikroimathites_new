@@ -23,11 +23,6 @@ const getAgeGroupStyles = (slug: string) => {
       text: "text-text-dark",
       accent: "bg-accent-yellow/20",
     },
-    "greek-abroad": {
-      bg: "bg-accent-green",
-      text: "text-white",
-      accent: "bg-accent-green/20",
-    },
   };
 
   // Try to match slug (could be "0-2", "0_2", etc.)

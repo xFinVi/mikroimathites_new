@@ -28,6 +28,8 @@ export const author = defineType({
       title: "Profile Picture",
       type: "image",
       options: { hotspot: true },
+      validation: (Rule) => Rule.required().error("Profile picture is required for team members"),
+      description: "Required profile picture for team members displayed on the About page",
     }),
     defineField({
       name: "role",

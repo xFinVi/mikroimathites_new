@@ -143,10 +143,9 @@ export function VideoIdeaForm() {
             <SelectValue placeholder="Επιλέξτε ηλικία (προαιρετικό)" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="0-2">0-2 χρόνια</SelectItem>
-            <SelectItem value="2-4">2-4 χρόνια</SelectItem>
-            <SelectItem value="4-6">4-6 χρόνια</SelectItem>
-            <SelectItem value="greek-abroad">Ελληνικό εξωτερικό</SelectItem>
+            <SelectItem value="0-2">0-2 χρόνων</SelectItem>
+            <SelectItem value="2-4">2-4 χρόνων</SelectItem>
+            <SelectItem value="4-6">4-6 χρόνων</SelectItem>
             <SelectItem value="other">Άλλο</SelectItem>
           </SelectContent>
         </Select>
@@ -171,7 +170,6 @@ export function VideoIdeaForm() {
             <SelectItem value="emotions">Συναισθήματα & Συμπεριφορά</SelectItem>
             <SelectItem value="screens">Οθόνες & Ψηφιακή Ασφάλεια</SelectItem>
             <SelectItem value="routines">Καθημερινές Ρουτίνες</SelectItem>
-            <SelectItem value="greek-abroad">Ελληνικό Εξωτερικό</SelectItem>
             <SelectItem value="other">Άλλο</SelectItem>
           </SelectContent>
         </Select>

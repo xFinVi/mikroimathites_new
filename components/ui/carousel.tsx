@@ -116,72 +116,72 @@ export function Carousel({ slides, autoPlay = true, autoPlayInterval = 5000 }: C
                   <div className="absolute bottom-0 left-0 w-32 h-32 bg-secondary-blue/20 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2 pointer-events-none animate-pulse" style={{ animationDelay: '1s' }} />
                   <div className="absolute top-1/2 left-1/4 w-24 h-24 bg-accent-yellow/20 rounded-full blur-2xl pointer-events-none animate-pulse" style={{ animationDelay: '2s' }} />
                   <div className="absolute bottom-1/4 right-1/4 w-20 h-20 bg-accent-green/20 rounded-full blur-xl pointer-events-none animate-pulse" style={{ animationDelay: '0.5s' }} />
-                  
-                  {/* Content */}
+                
+                {/* Content */}
                   <div className="relative z-10 text-center space-y-6 md:space-y-8 w-full flex-1 flex flex-col justify-center">
-                    {slide.badge && (
+                  {slide.badge && (
                       <div className="inline-block px-5 py-2.5 bg-gradient-to-r from-primary-pink/30 to-secondary-blue/30 backdrop-blur-sm text-primary-pink rounded-full text-sm font-bold shadow-lg border border-white/50">
-                        {slide.badge}
-                      </div>
-                    )}
-                    <div className="space-y-4 w-full">
-                      <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-text-dark leading-tight break-words drop-shadow-sm">
-                        {slide.title}
-                      </h2>
-                      {slide.subtitle && (
-                        <p className="text-lg sm:text-xl md:text-2xl text-text-medium font-semibold break-words">
-                          {slide.subtitle}
-                        </p>
-                      )}
+                      {slide.badge}
                     </div>
-                    {slide.description && (
-                      <p className="text-base sm:text-lg md:text-xl text-text-medium max-w-2xl mx-auto break-words px-4 leading-relaxed">
-                        {slide.description}
+                  )}
+                  <div className="space-y-4 w-full">
+                      <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-text-dark leading-tight break-words drop-shadow-sm">
+                      {slide.title}
+                    </h2>
+                    {slide.subtitle && (
+                        <p className="text-lg sm:text-xl md:text-2xl text-text-medium font-semibold break-words">
+                        {slide.subtitle}
                       </p>
                     )}
-                    {(slide.ctaText || slide.secondaryCtaText) && (
-                      <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4 px-4">
-                        {slide.ctaText && (
-                          <Button 
-                            size="lg" 
+                  </div>
+                  {slide.description && (
+                      <p className="text-base sm:text-lg md:text-xl text-text-medium max-w-2xl mx-auto break-words px-4 leading-relaxed">
+                      {slide.description}
+                    </p>
+                  )}
+                  {(slide.ctaText || slide.secondaryCtaText) && (
+                    <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4 px-4">
+                      {slide.ctaText && (
+                        <Button 
+                          size="lg" 
                             className="bg-gradient-to-r from-primary-pink to-primary-pink/90 hover:from-primary-pink/90 hover:to-primary-pink text-white text-base sm:text-lg px-8 sm:px-10 py-6 sm:py-7 rounded-button shadow-2xl hover:shadow-primary-pink/50 transition-all transform hover:scale-105 font-semibold"
-                            asChild={!!slide.ctaLink}
-                          >
-                            {slide.ctaLink ? (
-                              slide.ctaLink.startsWith("http") ? (
-                                <a href={slide.ctaLink} target="_blank" rel="noopener noreferrer">
-                                  {slide.ctaText}
-                                </a>
-                              ) : (
-                                <Link href={slide.ctaLink}>{slide.ctaText}</Link>
-                              )
+                          asChild={!!slide.ctaLink}
+                        >
+                          {slide.ctaLink ? (
+                            slide.ctaLink.startsWith("http") ? (
+                              <a href={slide.ctaLink} target="_blank" rel="noopener noreferrer">
+                                {slide.ctaText}
+                              </a>
                             ) : (
-                              slide.ctaText
-                            )}
-                          </Button>
-                        )}
-                        {slide.secondaryCtaText && (
-                          <Button 
-                            size="lg" 
-                            variant="outline"
+                              <Link href={slide.ctaLink}>{slide.ctaText}</Link>
+                            )
+                          ) : (
+                            slide.ctaText
+                          )}
+                        </Button>
+                      )}
+                      {slide.secondaryCtaText && (
+                        <Button 
+                          size="lg" 
+                          variant="outline"
                             className="border-2 border-secondary-blue bg-white/80 backdrop-blur-sm text-secondary-blue hover:bg-secondary-blue/10 hover:border-secondary-blue/80 text-base sm:text-lg px-8 sm:px-10 py-6 sm:py-7 rounded-button shadow-xl hover:shadow-2xl transition-all transform hover:scale-105 font-semibold"
-                            asChild={!!slide.secondaryCtaLink}
-                          >
-                            {slide.secondaryCtaLink ? (
-                              slide.secondaryCtaLink.startsWith("http") ? (
-                                <a href={slide.secondaryCtaLink} target="_blank" rel="noopener noreferrer">
-                                  {slide.secondaryCtaText}
-                                </a>
-                              ) : (
-                                <Link href={slide.secondaryCtaLink}>{slide.secondaryCtaText}</Link>
-                              )
+                          asChild={!!slide.secondaryCtaLink}
+                        >
+                          {slide.secondaryCtaLink ? (
+                            slide.secondaryCtaLink.startsWith("http") ? (
+                              <a href={slide.secondaryCtaLink} target="_blank" rel="noopener noreferrer">
+                                {slide.secondaryCtaText}
+                              </a>
                             ) : (
-                              slide.secondaryCtaText
-                            )}
-                          </Button>
-                        )}
-                      </div>
-                    )}
+                              <Link href={slide.secondaryCtaLink}>{slide.secondaryCtaText}</Link>
+                            )
+                          ) : (
+                            slide.secondaryCtaText
+                          )}
+                        </Button>
+                      )}
+                    </div>
+                  )}
                   </div>
                 </div>
               </div>

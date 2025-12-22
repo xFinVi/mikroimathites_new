@@ -1,8 +1,8 @@
 -- Enum types
 create type submission_type as enum ('video_idea','feedback','question','review');
 create type submission_status as enum ('new','read','archived','approved','rejected','published');
-create type age_group_slug as enum ('0_2','2_4','4_6','greek_abroad','other');
-create type submission_topic as enum ('sleep','speech','food','emotions','screens','routines','greek_abroad','other');
+create type age_group_slug as enum ('0_2','2_4','4_6','other');
+create type submission_topic as enum ('sleep','speech','food','emotions','screens','routines','other');
 
 -- Submissions table (user-generated content)
 create table if not exists submissions (

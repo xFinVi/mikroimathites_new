@@ -2,7 +2,7 @@ import { Container } from "@/components/ui/container";
 import { PageWrapper } from "@/components/pages/page-wrapper";
 import { PageHeader } from "@/components/pages/page-header";
 import { generateMetadataFor } from "@/lib/seo/generate-metadata";
-import { getAuthors } from "@/lib/content";
+import { getAuthors, type Author } from "@/lib/content";
 import Image from "next/image";
 import Link from "next/link";
 import { urlFor } from "@/lib/sanity/image-url";
@@ -11,6 +11,14 @@ export const metadata = generateMetadataFor("sxetika");
 
 export default async function SxetikaPage() {
   const authors = await getAuthors();
+  
+  // Pre-generate image URLs on server to avoid hydration mismatches
+  const authorsWithImageUrls = authors.map(author => ({
+    ...author,
+    imageUrl: author.profilePicture 
+      ? urlFor(author.profilePicture).width(200).height(200).url() 
+      : null,
+  }));
 
   return (
     <PageWrapper>
@@ -36,47 +44,146 @@ export default async function SxetikaPage() {
         </Container>
       </div>
 
-      <Container className="py-10 sm:py-14 md:py-16 space-y-12">
-        {/* Mission Section */}
-        <section className="space-y-6">
-          <h2 className="text-2xl sm:text-3xl font-bold text-text-dark">Η αποστολή μας</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="bg-background-white rounded-card p-6 shadow-subtle border border-border/50 space-y-3">
-              <div className="text-4xl mb-2">🎯</div>
-              <h3 className="text-lg font-semibold text-text-dark">Η αποστολή μας</h3>
-              <p className="text-text-medium text-sm">
-                Να υποστηρίξουμε τους γονείς με απλές, πρακτικές ιδέες που βοηθούν στην καθημερινή
-                ζωή με τα παιδιά. Χωρίς πίεση, χωρίς σύγκριση, μόνο υποστήριξη.
-              </p>
+      <Container className="py-10 sm:py-14 md:py-16 space-y-16">
+        {/* Mission Section - Redesigned with Playful Design */}
+        <section className="space-y-10">
+          <div className="text-center space-y-4">
+            <h2 className="text-4xl sm:text-5xl md:text-6xl font-bold text-text-dark">
+              Η αποστολή μας
+            </h2>
+            <p className="text-lg sm:text-xl text-text-medium max-w-3xl mx-auto">
+              Χτίζουμε μια κοινότητα που στηρίζει τους γονείς με πρακτικό, φιλικό περιεχόμενο
+            </p>
+          </div>
+          
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-10">
+            {/* Card 1: Mission */}
+            <div className="group relative bg-gradient-to-br from-primary-pink/10 via-primary-pink/5 to-white rounded-3xl p-8 sm:p-10 shadow-lg hover:shadow-2xl border-2 border-primary-pink/20 hover:border-primary-pink/40 transition-all duration-300 transform hover:-translate-y-2">
+              {/* Decorative Elements */}
+              <div className="absolute top-4 right-4 w-20 h-20 bg-primary-pink/10 rounded-full blur-2xl opacity-50 group-hover:opacity-75 transition-opacity" />
+              <div className="absolute bottom-4 left-4 w-16 h-16 bg-primary-pink/5 rounded-full blur-xl opacity-30" />
+              
+              <div className="relative z-10 space-y-6">
+                <div className="flex items-center gap-4">
+                  <div className="w-16 h-16 bg-gradient-to-br from-primary-pink to-primary-pink/70 rounded-2xl flex items-center justify-center text-4xl shadow-lg transform group-hover:scale-110 transition-transform duration-300">
+                    🎯
+                  </div>
+                  <h3 className="text-2xl sm:text-3xl font-bold text-text-dark">Η αποστολή μας</h3>
+                </div>
+                
+                <div className="space-y-4">
+                  <p className="text-base sm:text-lg text-text-dark leading-relaxed font-medium">
+                    Να υποστηρίξουμε τους γονείς με <span className="text-primary-pink font-semibold">απλές, πρακτικές ιδέες</span> που βοηθούν στην καθημερινή ζωή με τα παιδιά.
+                  </p>
+                  <p className="text-sm sm:text-base text-text-medium leading-relaxed">
+                    Χωρίς πίεση, χωρίς σύγκριση, μόνο υποστήριξη. Πιστεύουμε ότι κάθε γονέας κάνει το καλύτερο που μπορεί, και θέλουμε να είμαστε εκεί για να βοηθήσουμε.
+                  </p>
+                  <ul className="space-y-2 text-sm text-text-medium">
+                    <li className="flex items-start gap-2">
+                      <span className="text-primary-pink mt-1">✓</span>
+                      <span>Πρακτικές συμβουλές που λειτουργούν</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-primary-pink mt-1">✓</span>
+                      <span>Χωρίς κρίση, μόνο κατανόηση</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-primary-pink mt-1">✓</span>
+                      <span>Κοινότητα που στηρίζει</span>
+                    </li>
+                  </ul>
+                </div>
+              </div>
             </div>
-            <div className="bg-background-white rounded-card p-6 shadow-subtle border border-border/50 space-y-3">
-              <div className="text-4xl mb-2">💡</div>
-              <h3 className="text-lg font-semibold text-text-dark">Γιατί ξεκινήσαμε</h3>
-              <p className="text-text-medium text-sm">
-                Είδαμε ότι λείπει περιεχόμενο στα ελληνικά για γονείς με παιδιά 0-6 ετών. Θέλαμε να
-                φέρουμε περιεχόμενο φιλικό, σύντομο, και πρακτικό που μπορεί να εφαρμοστεί αμέσως.
-              </p>
+
+            {/* Card 2: Why We Started */}
+            <div className="group relative bg-gradient-to-br from-secondary-blue/10 via-secondary-blue/5 to-white rounded-3xl p-8 sm:p-10 shadow-lg hover:shadow-2xl border-2 border-secondary-blue/20 hover:border-secondary-blue/40 transition-all duration-300 transform hover:-translate-y-2">
+              {/* Decorative Elements */}
+              <div className="absolute top-4 right-4 w-20 h-20 bg-secondary-blue/10 rounded-full blur-2xl opacity-50 group-hover:opacity-75 transition-opacity" />
+              <div className="absolute bottom-4 left-4 w-16 h-16 bg-secondary-blue/5 rounded-full blur-xl opacity-30" />
+              
+              <div className="relative z-10 space-y-6">
+                <div className="flex items-center gap-4">
+                  <div className="w-16 h-16 bg-gradient-to-br from-secondary-blue to-secondary-blue/70 rounded-2xl flex items-center justify-center text-4xl shadow-lg transform group-hover:scale-110 transition-transform duration-300">
+                    💡
+                  </div>
+                  <h3 className="text-2xl sm:text-3xl font-bold text-text-dark">Γιατί ξεκινήσαμε</h3>
+                </div>
+                
+                <div className="space-y-4">
+                  <p className="text-base sm:text-lg text-text-dark leading-relaxed font-medium">
+                    Είδαμε ότι λείπει <span className="text-secondary-blue font-semibold">περιεχόμενο στα ελληνικά</span> για γονείς με παιδιά 0-6 ετών.
+                  </p>
+                  <p className="text-sm sm:text-base text-text-medium leading-relaxed">
+                    Θέλαμε να φέρουμε περιεχόμενο φιλικό, σύντομο, και πρακτικό που μπορεί να εφαρμοστεί αμέσως. Κάθε γονέας αξίζει πρόσβαση σε πληροφορίες που βοηθούν.
+                  </p>
+                  <ul className="space-y-2 text-sm text-text-medium">
+                    <li className="flex items-start gap-2">
+                      <span className="text-secondary-blue mt-1">✓</span>
+                      <span>Ελληνικό περιεχόμενο προσαρμοσμένο</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-secondary-blue mt-1">✓</span>
+                      <span>Σύντομο και εύκολο να διαβαστεί</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-secondary-blue mt-1">✓</span>
+                      <span>Άμεση εφαρμογή στην καθημερινότητα</span>
+                    </li>
+                  </ul>
+                </div>
+              </div>
             </div>
-            <div className="bg-background-white rounded-card p-6 shadow-subtle border border-border/50 space-y-3">
-              <div className="text-4xl mb-2">📚</div>
-              <h3 className="text-lg font-semibold text-text-dark">Τι θα βρείτε εδώ</h3>
-              <p className="text-text-medium text-sm">
-                Parent Hub με συμβουλές, δραστηριότητες, εκτυπώσιμα, συνταγές, και Q&A. Όλα
-                σχεδιασμένα για να είναι εύκολα, πρακτικά, και χρήσιμα.
-              </p>
+
+            {/* Card 3: What You'll Find */}
+            <div className="group relative bg-gradient-to-br from-accent-yellow/10 via-accent-yellow/5 to-white rounded-3xl p-8 sm:p-10 shadow-lg hover:shadow-2xl border-2 border-accent-yellow/20 hover:border-accent-yellow/40 transition-all duration-300 transform hover:-translate-y-2">
+              {/* Decorative Elements */}
+              <div className="absolute top-4 right-4 w-20 h-20 bg-accent-yellow/10 rounded-full blur-2xl opacity-50 group-hover:opacity-75 transition-opacity" />
+              <div className="absolute bottom-4 left-4 w-16 h-16 bg-accent-yellow/5 rounded-full blur-xl opacity-30" />
+              
+              <div className="relative z-10 space-y-6">
+                <div className="flex items-center gap-4">
+                  <div className="w-16 h-16 bg-gradient-to-br from-accent-yellow to-accent-yellow/70 rounded-2xl flex items-center justify-center text-4xl shadow-lg transform group-hover:scale-110 transition-transform duration-300">
+                    📚
+                  </div>
+                  <h3 className="text-2xl sm:text-3xl font-bold text-text-dark">Τι θα βρείτε εδώ</h3>
+                </div>
+                
+                <div className="space-y-4">
+                  <p className="text-base sm:text-lg text-text-dark leading-relaxed font-medium">
+                    <span className="text-accent-yellow font-semibold">Parent Hub</span> με συμβουλές, δραστηριότητες, εκτυπώσιμα, συνταγές, και Q&A.
+                  </p>
+                  <p className="text-sm sm:text-base text-text-medium leading-relaxed">
+                    Όλα σχεδιασμένα για να είναι εύκολα, πρακτικά, και χρήσιμα. Από ιδέες παιχνιδιών μέχρι συμβουλές διατροφής.
+                  </p>
+                  <ul className="space-y-2 text-sm text-text-medium">
+                    <li className="flex items-start gap-2">
+                      <span className="text-accent-yellow mt-1">✓</span>
+                      <span>Συμβουλές για γονείς</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-accent-yellow mt-1">✓</span>
+                      <span>Δραστηριότητες & Εκτυπώσιμα</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-accent-yellow mt-1">✓</span>
+                      <span>Συνταγές & Q&A</span>
+                    </li>
+                  </ul>
+                </div>
+              </div>
             </div>
           </div>
         </section>
 
         {/* Team Section */}
-        {authors && authors.length > 0 && (
+        {authorsWithImageUrls && authorsWithImageUrls.length > 0 && (
           <section className="space-y-6">
             <h2 className="text-2xl sm:text-3xl font-bold text-text-dark">Η ομάδα</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {authors.map((author) => {
-                const imageUrl = author.profilePicture
-                  ? urlFor(author.profilePicture).width(200).height(200).url()
-                  : null;
+              {authorsWithImageUrls.map((author) => {
+                // Use pre-generated image URL from server (no client-side generation)
+                const imageUrl = (author as Author & { imageUrl?: string | null }).imageUrl || null;
                 return (
                   <div
                     key={author._id}
@@ -89,6 +196,7 @@ export default async function SxetikaPage() {
                           alt={author.name}
                           fill
                           className="object-cover"
+                          sizes="128px"
                         />
                       </div>
                     ) : (
@@ -99,10 +207,70 @@ export default async function SxetikaPage() {
                     <div>
                       <h3 className="text-lg font-semibold text-text-dark mb-1">{author.name}</h3>
                       {author.role && (
-                        <p className="text-sm text-primary-pink font-medium mb-2">{author.role}</p>
+                        <p className="text-sm text-primary-pink font-medium mb-2">
+                          {author.role === "editor" && "Συντάκτης"}
+                          {author.role === "expert" && "Ειδικός"}
+                          {author.role === "contributor" && "Συνεργάτης"}
+                        </p>
                       )}
                       {author.bio && (
                         <p className="text-text-medium text-sm">{author.bio}</p>
+                      )}
+                      {author.socialLinks && (
+                        <div className="flex justify-center gap-3 mt-3">
+                          {author.socialLinks.instagram && (
+                            <a
+                              href={author.socialLinks.instagram}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-primary-pink hover:text-primary-pink/80 transition-colors"
+                              aria-label={`${author.name} Instagram`}
+                            >
+                              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+                              </svg>
+                            </a>
+                          )}
+                          {author.socialLinks.youtube && (
+                            <a
+                              href={author.socialLinks.youtube}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-primary-pink hover:text-primary-pink/80 transition-colors"
+                              aria-label={`${author.name} YouTube`}
+                            >
+                              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+                              </svg>
+                            </a>
+                          )}
+                          {author.socialLinks.facebook && (
+                            <a
+                              href={author.socialLinks.facebook}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-primary-pink hover:text-primary-pink/80 transition-colors"
+                              aria-label={`${author.name} Facebook`}
+                            >
+                              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                              </svg>
+                            </a>
+                          )}
+                          {author.socialLinks.twitter && (
+                            <a
+                              href={author.socialLinks.twitter}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-primary-pink hover:text-primary-pink/80 transition-colors"
+                              aria-label={`${author.name} Twitter`}
+                            >
+                              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"/>
+                              </svg>
+                            </a>
+                          )}
+                        </div>
                       )}
                     </div>
                   </div>

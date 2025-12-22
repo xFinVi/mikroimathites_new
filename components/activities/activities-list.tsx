@@ -7,33 +7,17 @@ type ContentItem = (Activity | Printable) & { _contentType: "activity" | "printa
 
 interface ActivitiesListProps {
   items: ContentItem[];
+  title?: string;
 }
 
-export function ActivitiesList({ items }: ActivitiesListProps) {
-  if (items.length === 0) {
-    return (
-      <section className="space-y-6">
-        <h2 className="text-2xl sm:text-3xl font-bold text-text-dark">Δραστηριότητες & Εκτυπώσιμα</h2>
-        <div className="bg-background-white rounded-card p-12 text-center shadow-subtle border border-border/50">
-          <p className="text-text-medium mb-4">
-            Δεν βρέθηκαν δραστηριότητες ή εκτυπώσιμα με τα επιλεγμένα φίλτρα.
-          </p>
-          <p className="text-sm text-text-light">
-            Δοκιμάστε να αλλάξετε τα φίλτρα ή{" "}
-            <a href="/studio" className="text-secondary-blue hover:underline">
-              προσθέστε περιεχόμενο στο Studio
-            </a>
-          </p>
-        </div>
-      </section>
-    );
-  }
+export function ActivitiesList({ items, title }: ActivitiesListProps) {
+  const displayTitle = title || `Δραστηριότητες & Εκτυπώσιμα (${items.length})`;
 
   return (
     <section className="space-y-6">
       <div className="flex items-center justify-between gap-4">
         <h2 className="text-2xl sm:text-3xl font-bold text-text-dark">
-          Δραστηριότητες & Εκτυπώσιμα ({items.length})
+          {displayTitle}
         </h2>
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">

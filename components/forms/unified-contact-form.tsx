@@ -14,8 +14,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { cn } from "@/lib/utils";
 
-type SubmissionType = "video-idea" | "feedback" | "question";
+type SubmissionType = "video-idea" | "feedback" | "question" | "";
 
 interface FormData {
   // Common fields
@@ -42,7 +43,7 @@ export function UnifiedContactForm() {
     name: "",
     email: "",
     child_age_group: "",
-    submission_type: "" as SubmissionType,
+    submission_type: "feedback",
     topic: "",
     message: "",
     rating: 0,
@@ -68,11 +69,15 @@ export function UnifiedContactForm() {
     }
 
     try {
+      // Get source page for tracking
+      const sourcePage = typeof window !== 'undefined' ? window.location.pathname : undefined;
+      
       let payload: any = {
         type: formData.submission_type,
         name: formData.name || undefined,
         email: formData.email || undefined,
         child_age_group: formData.child_age_group || undefined,
+        source_page: sourcePage,
       };
 
       // Build payload based on submission type
@@ -160,7 +165,7 @@ export function UnifiedContactForm() {
         name: "",
         email: "",
         child_age_group: "",
-        submission_type: "" as SubmissionType,
+        submission_type: "feedback",
         topic: "",
         message: "",
         rating: 0,
@@ -172,7 +177,7 @@ export function UnifiedContactForm() {
   };
 
   if (isSubmitted) {
-    const successMessages: Record<SubmissionType, { icon: string; title: string; message: string }> = {
+    const successMessages: Record<Exclude<SubmissionType, "">, { icon: string; title: string; message: string }> = {
       "video-idea": {
         icon: "💡",
         title: "Ευχαριστούμε!",
@@ -190,7 +195,7 @@ export function UnifiedContactForm() {
       },
     };
 
-    const success = successMessages[formData.submission_type] || {
+    const success = formData.submission_type && successMessages[formData.submission_type as Exclude<SubmissionType, "">] || {
       icon: "✅",
       title: "Ευχαριστούμε!",
       message: "Η υποβολή σας έχει καταγραφεί!",
@@ -216,30 +221,188 @@ export function UnifiedContactForm() {
         </div>
       )}
 
-      {/* Submission Type - Always visible first */}
-      <div className="space-y-2">
-        <Label htmlFor="submission-type" className="text-base font-semibold text-text-dark">
+      {/* Submission Type - Chip/Button Selection */}
+      <div className="space-y-3">
+        <Label className="text-base font-semibold text-text-dark block">
           Τι θέλετε να κάνετε; <span className="text-primary-pink">*</span>
         </Label>
-        <Select
-          value={formData.submission_type}
-          onValueChange={(value) => setFormData({ ...formData, submission_type: value as SubmissionType })}
-          required
-        >
-          <SelectTrigger id="submission-type" className="h-12">
-            <SelectValue placeholder="Επιλέξτε τύπο υποβολής" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="video-idea">💡 Ιδέα για βίντεο</SelectItem>
-            <SelectItem value="feedback">💬 Feedback / Σχόλια</SelectItem>
-            <SelectItem value="question">❓ Ερώτηση (Q&A)</SelectItem>
-          </SelectContent>
-        </Select>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          {/* Feedback Chip - First and Default */}
+          <button
+            type="button"
+            onClick={() => setFormData({ ...formData, submission_type: "feedback" })}
+            className={cn(
+              "group relative p-5 rounded-xl border-2 transition-all duration-200 text-left",
+              "hover:shadow-lg hover:-translate-y-1",
+              formData.submission_type === "feedback"
+                ? "border-secondary-blue bg-secondary-blue/5 shadow-md"
+                : "border-border/50 bg-background-white hover:border-secondary-blue/50"
+            )}
+          >
+            <div className="flex flex-col items-start gap-3">
+              <div className="text-3xl">💬</div>
+              <div>
+                <div className="font-semibold text-text-dark text-base mb-1">
+                  Feedback / Σχόλια
+                </div>
+                <div className="text-sm text-text-medium">
+                  Μοιραστείτε τη γνώμη σας
+                </div>
+              </div>
+              {formData.submission_type === "feedback" && (
+                <div className="absolute top-3 right-3 w-5 h-5 rounded-full bg-secondary-blue flex items-center justify-center">
+                  <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                  </svg>
+                </div>
+              )}
+            </div>
+          </button>
+
+          {/* Video Idea Chip */}
+          <button
+            type="button"
+            onClick={() => setFormData({ ...formData, submission_type: "video-idea" })}
+            className={cn(
+              "group relative p-5 rounded-xl border-2 transition-all duration-200 text-left",
+              "hover:shadow-lg hover:-translate-y-1",
+              formData.submission_type === "video-idea"
+                ? "border-primary-pink bg-primary-pink/5 shadow-md"
+                : "border-border/50 bg-background-white hover:border-primary-pink/50"
+            )}
+          >
+            <div className="flex flex-col items-start gap-3">
+              <div className="text-3xl">💡</div>
+              <div>
+                <div className="font-semibold text-text-dark text-base mb-1">
+                  Ιδέα για βίντεο
+                </div>
+                <div className="text-sm text-text-medium">
+                  Προτείνετε θέμα για νέο βίντεο
+                </div>
+              </div>
+              {formData.submission_type === "video-idea" && (
+                <div className="absolute top-3 right-3 w-5 h-5 rounded-full bg-primary-pink flex items-center justify-center">
+                  <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                  </svg>
+                </div>
+              )}
+            </div>
+          </button>
+
+          {/* Question (Q&A) Chip */}
+          <button
+            type="button"
+            onClick={() => setFormData({ ...formData, submission_type: "question" })}
+            className={cn(
+              "group relative p-5 rounded-xl border-2 transition-all duration-200 text-left",
+              "hover:shadow-lg hover:-translate-y-1",
+              formData.submission_type === "question"
+                ? "border-accent-yellow bg-accent-yellow/5 shadow-md"
+                : "border-border/50 bg-background-white hover:border-accent-yellow/50"
+            )}
+          >
+            <div className="flex flex-col items-start gap-3">
+              <div className="text-3xl">❓</div>
+              <div>
+                <div className="font-semibold text-text-dark text-base mb-1">
+                  Ερώτηση (Q&A)
+                </div>
+                <div className="text-sm text-text-medium">
+                  Κάντε μια ερώτηση
+                </div>
+              </div>
+              {formData.submission_type === "question" && (
+                <div className="absolute top-3 right-3 w-5 h-5 rounded-full bg-accent-yellow flex items-center justify-center">
+                  <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                  </svg>
+                </div>
+              )}
+            </div>
+          </button>
+        </div>
+        {!formData.submission_type && error && (
+          <p className="text-sm text-destructive mt-1">Παρακαλώ επιλέξτε έναν τύπο υποβολής</p>
+        )}
       </div>
+
+      {/* Age Group and Topic/Category - Grouped together for better UX */}
+      {showTypeSpecificFields && formData.submission_type !== "feedback" && (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 transition-all duration-300 ease-in-out">
+          {/* Age Group */}
+          <div className="space-y-2">
+            <Label htmlFor="child-age" className="text-base font-semibold text-text-dark">
+              Ηλικία παιδιού
+            </Label>
+            <Select
+              value={formData.child_age_group}
+              onValueChange={(value) => setFormData({ ...formData, child_age_group: value })}
+            >
+              <SelectTrigger id="child-age" className="h-12 bg-background-white border-border/50 hover:border-primary-pink/50 transition-colors">
+                <SelectValue placeholder="Επιλέξτε ηλικία (προαιρετικό)" />
+              </SelectTrigger>
+              <SelectContent>
+              <SelectItem value="0-2">0-2 χρόνων</SelectItem>
+              <SelectItem value="2-4">2-4 χρόνων</SelectItem>
+              <SelectItem value="4-6">4-6 χρόνων</SelectItem>
+                <SelectItem value="other">Άλλο</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Topic/Category - Only show for video-idea and question */}
+          {(formData.submission_type === "video-idea" || formData.submission_type === "question") && (
+            <div className="space-y-2">
+              <Label htmlFor={formData.submission_type === "video-idea" ? "topic" : "category"} className="text-base font-semibold text-text-dark">
+                {formData.submission_type === "video-idea" ? "Θέμα" : "Κατηγορία"}
+              </Label>
+              {formData.submission_type === "video-idea" ? (
+                <Select
+                  value={formData.topic}
+                  onValueChange={(value) => setFormData({ ...formData, topic: value })}
+                >
+                  <SelectTrigger id="topic" className="h-12 bg-background-white border-border/50 hover:border-primary-pink/50 transition-colors">
+                    <SelectValue placeholder="Επιλέξτε θέμα (προαιρετικό)" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="sleep">Ύπνος & Ρουτίνες</SelectItem>
+                    <SelectItem value="speech">Ομιλία & Λεξιλόγιο</SelectItem>
+                    <SelectItem value="food">Διατροφή & Δυσκολίες</SelectItem>
+                    <SelectItem value="emotions">Συναισθήματα & Συμπεριφορά</SelectItem>
+                    <SelectItem value="screens">Οθόνες & Ψηφιακή Ασφάλεια</SelectItem>
+                    <SelectItem value="routines">Καθημερινές Ρουτίνες</SelectItem>
+                    <SelectItem value="other">Άλλο</SelectItem>
+                  </SelectContent>
+                </Select>
+              ) : (
+                <Select
+                  value={formData.category}
+                  onValueChange={(value) => setFormData({ ...formData, category: value })}
+                >
+                  <SelectTrigger id="category" className="h-12 bg-background-white border-border/50 hover:border-accent-yellow/50 transition-colors">
+                    <SelectValue placeholder="Επιλέξτε κατηγορία (προαιρετικό)" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="sleep">Ύπνος & Ρουτίνες</SelectItem>
+                    <SelectItem value="speech">Ομιλία & Λεξιλόγιο</SelectItem>
+                    <SelectItem value="food">Διατροφή & Δυσκολίες</SelectItem>
+                    <SelectItem value="emotions">Συναισθήματα & Συμπεριφορά</SelectItem>
+                    <SelectItem value="screens">Οθόνες & Ψηφιακή Ασφάλεια</SelectItem>
+                    <SelectItem value="routines">Καθημερινές Ρουτίνες</SelectItem>
+                    <SelectItem value="other">Άλλο</SelectItem>
+                  </SelectContent>
+                </Select>
+              )}
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Name and Email - Shown for all types EXCEPT feedback (feedback has its own name/email section) */}
       {showTypeSpecificFields && formData.submission_type !== "feedback" && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 transition-all duration-300 ease-in-out">
           <div className="space-y-2">
             <Label htmlFor="name" className="text-base font-semibold text-text-dark">
               Όνομα
@@ -250,6 +413,7 @@ export function UnifiedContactForm() {
               placeholder="Το όνομά σας (προαιρετικό)"
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              className="h-12 bg-background-white border-border/50 hover:border-primary-pink/50 transition-colors"
             />
           </div>
           <div className="space-y-2">
@@ -262,79 +426,31 @@ export function UnifiedContactForm() {
               placeholder="email@example.com (προαιρετικό)"
               value={formData.email}
               onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+              className="h-12 bg-background-white border-border/50 hover:border-primary-pink/50 transition-colors"
             />
           </div>
         </div>
       )}
 
-      {/* Age Group - Shown after type is selected (except for feedback) */}
-      {showAgeGroup && formData.submission_type !== "feedback" && (
-        <div className="space-y-2">
-          <Label htmlFor="child-age" className="text-base font-semibold text-text-dark">
-            Ηλικία παιδιού
-          </Label>
-          <Select
-            value={formData.child_age_group}
-            onValueChange={(value) => setFormData({ ...formData, child_age_group: value })}
-          >
-            <SelectTrigger id="child-age" className="h-12">
-              <SelectValue placeholder="Επιλέξτε ηλικία (προαιρετικό)" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="0-2">0-2 χρόνια</SelectItem>
-              <SelectItem value="2-4">2-4 χρόνια</SelectItem>
-              <SelectItem value="4-6">4-6 χρόνια</SelectItem>
-              <SelectItem value="greek-abroad">Ελληνικό εξωτερικό</SelectItem>
-              <SelectItem value="other">Άλλο</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-      )}
-
       {/* Type-specific fields */}
       {showTypeSpecificFields && (
-        <div className="space-y-6 pt-4 border-t border-border/50">
+        <div className="space-y-6 pt-4 border-t border-border/50 transition-all duration-300 ease-in-out">
           {/* Video Idea Fields */}
           {formData.submission_type === "video-idea" && (
-            <>
-              <div className="space-y-2">
-                <Label htmlFor="topic" className="text-base font-semibold text-text-dark">
-                  Θέμα
-                </Label>
-                <Select
-                  value={formData.topic}
-                  onValueChange={(value) => setFormData({ ...formData, topic: value })}
-                >
-                  <SelectTrigger id="topic" className="h-12">
-                    <SelectValue placeholder="Επιλέξτε θέμα (προαιρετικό)" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="sleep">Ύπνος & Ρουτίνες</SelectItem>
-                    <SelectItem value="speech">Ομιλία & Λεξιλόγιο</SelectItem>
-                    <SelectItem value="food">Διατροφή & Δυσκολίες</SelectItem>
-                    <SelectItem value="emotions">Συναισθήματα & Συμπεριφορά</SelectItem>
-                    <SelectItem value="screens">Οθόνες & Ψηφιακή Ασφάλεια</SelectItem>
-                    <SelectItem value="routines">Καθημερινές Ρουτίνες</SelectItem>
-                    <SelectItem value="greek-abroad">Ελληνικό Εξωτερικό</SelectItem>
-                    <SelectItem value="other">Άλλο</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="message" className="text-base font-semibold text-text-dark">
-                  Η ιδέα σας <span className="text-primary-pink">*</span>
-                </Label>
-                <Textarea
-                  id="message"
-                  placeholder="Περιγράψτε την ιδέα σας για βίντεο..."
-                  value={formData.message}
-                  onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-                  required
-                  rows={6}
-                  className="resize-none text-base"
-                />
-              </div>
-            </>
+            <div className="space-y-2">
+              <Label htmlFor="message" className="text-base font-semibold text-text-dark">
+                Η ιδέα σας <span className="text-primary-pink">*</span>
+              </Label>
+              <Textarea
+                id="message"
+                placeholder="Περιγράψτε την ιδέα σας για βίντεο..."
+                value={formData.message}
+                onChange={(e) => setFormData({ ...formData, message: e.target.value })}
+                required
+                rows={6}
+                className="resize-none text-base bg-background-white border-border/50 hover:border-primary-pink/50 focus:border-primary-pink transition-colors"
+              />
+            </div>
           )}
 
           {/* Feedback Fields - Simplified: Rating first, then message, then name/email */}
@@ -357,7 +473,7 @@ export function UnifiedContactForm() {
                   onChange={(e) => setFormData({ ...formData, feedback_message: e.target.value })}
                   required
                   rows={6}
-                  className="resize-none text-base"
+                  className="resize-none text-base bg-background-white border-border/50 hover:border-secondary-blue/50 focus:border-secondary-blue transition-colors"
                 />
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
@@ -371,6 +487,7 @@ export function UnifiedContactForm() {
                     placeholder="Το όνομά σας (προαιρετικό)"
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    className="h-12 bg-background-white border-border/50 hover:border-secondary-blue/50 transition-colors"
                   />
                 </div>
                 <div className="space-y-2">
@@ -383,6 +500,7 @@ export function UnifiedContactForm() {
                     placeholder="email@example.com (προαιρετικό)"
                     value={formData.email}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    className="h-12 bg-background-white border-border/50 hover:border-secondary-blue/50 transition-colors"
                   />
                 </div>
               </div>
@@ -392,29 +510,6 @@ export function UnifiedContactForm() {
           {/* Question (Q&A) Fields */}
           {formData.submission_type === "question" && (
             <>
-              <div className="space-y-2">
-                <Label htmlFor="category" className="text-base font-semibold text-text-dark">
-                  Κατηγορία
-                </Label>
-                <Select
-                  value={formData.category}
-                  onValueChange={(value) => setFormData({ ...formData, category: value })}
-                >
-                  <SelectTrigger id="category" className="h-12">
-                    <SelectValue placeholder="Επιλέξτε κατηγορία (προαιρετικό)" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="sleep">Ύπνος & Ρουτίνες</SelectItem>
-                    <SelectItem value="speech">Ομιλία & Λεξιλόγιο</SelectItem>
-                    <SelectItem value="food">Διατροφή & Δυσκολίες</SelectItem>
-                    <SelectItem value="emotions">Συναισθήματα & Συμπεριφορά</SelectItem>
-                    <SelectItem value="screens">Οθόνες & Ψηφιακή Ασφάλεια</SelectItem>
-                    <SelectItem value="routines">Καθημερινές Ρουτίνες</SelectItem>
-                    <SelectItem value="greek-abroad">Ελληνικό Εξωτερικό</SelectItem>
-                    <SelectItem value="other">Άλλο</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
               <div className="space-y-2">
                 <Label htmlFor="message" className="text-base font-semibold text-text-dark">
                   Η ερώτησή σας <span className="text-primary-pink">*</span>
@@ -426,7 +521,7 @@ export function UnifiedContactForm() {
                   onChange={(e) => setFormData({ ...formData, message: e.target.value })}
                   required
                   rows={6}
-                  className="resize-none text-base"
+                  className="resize-none text-base bg-background-white border-border/50 hover:border-accent-yellow/50 focus:border-accent-yellow transition-colors"
                 />
               </div>
               <div className="flex items-start gap-3 p-4 bg-background-light rounded-card border border-border/50">
