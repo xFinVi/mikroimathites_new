@@ -6,7 +6,7 @@ interface PageHeaderProps {
 
 export function PageHeader({ title, description, eyebrow }: PageHeaderProps) {
   return (
-    <div className="mb-8 space-y-3 sm:space-y-4">
+    <div className="mb-8 mt-12 space-y-3 sm:space-y-4">
       {eyebrow && (
         <p className="text-sm font-semibold text-secondary-blue tracking-wide uppercase">
           {eyebrow}

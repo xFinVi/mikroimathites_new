@@ -1,5 +1,6 @@
 import { defineField, defineType } from "sanity";
 import { seo } from "../objects/seo";
+import { countWordsInBody, countImagesInBody, getImageRecommendation, getRecommendationMessage } from "../utils/image-recommendations";
 
 export const article = defineType({
   name: "article",
@@ -87,9 +88,58 @@ export const article = defineType({
     // Article-specific fields
     defineField({
       name: "body",
-      title: "Body",
+      title: "Body Content",
       type: "array",
-      of: [{ type: "block" }, { type: "image", options: { hotspot: true } }],
+      of: [
+        { type: "block" },
+        { 
+          type: "image", 
+          options: { hotspot: true },
+          fields: [
+            {
+              name: "alt",
+              type: "string",
+              title: "Alt Text",
+              description: "Important for accessibility and SEO",
+              validation: (Rule) => Rule.required().error("Alt text is required for images"),
+            },
+            {
+              name: "caption",
+              type: "string",
+              title: "Caption",
+              description: "Optional caption that appears below the image",
+            },
+          ],
+        },
+      ],
+      description: `
+📝 Image Guidelines for Best Readability (Cover image always counts as 1):
+
+• 0-300 words: 1 image recommended (cover image)
+• 300-600 words: 2 images recommended (1 cover + 1 in content)
+• 600-1000 words: 3-4 images recommended (1 cover + 2-3 in content)
+• 1000-1500 words: 5-6 images recommended (1 cover + 4-5 in content)
+• 1500-2000 words: 7-8 images recommended (1 cover + 6-7 in content)
+• 2000+ words: ~1 image per 200-250 words
+
+💡 Tips:
+• You can always add MORE images than recommended for better visual appeal!
+• Add images using the "+" button in the editor
+• Images break up long text and improve readability
+• Remember: The cover image counts toward your total image count
+
+✅ These are recommendations, not requirements - you can publish with any number of images!
+      `,
+      validation: (Rule) => 
+        Rule.custom((body) => {
+          // Only validate structure, not blocking on image count
+          if (!body || !Array.isArray(body)) {
+            return "Body content is required";
+          }
+          
+          // Always allow publishing - recommendations are shown in description
+          return true;
+        }),
     }),
     defineField({
       name: "readingTime",

@@ -521,7 +521,7 @@ export async function getParentsHubContent(
       total: total ?? 0,
     };
   } catch (error) {
-    console.error("Error fetching parents hub content:", error);
+    // Silently fail - return empty results
     return { items: [], total: 0 };
   }
 }
@@ -579,7 +579,7 @@ export async function getActivitiesHubContent(
       total: total ?? 0,
     };
   } catch (error) {
-    console.error("Error fetching activities hub content:", error);
+    // Silently fail - return empty results
     return { items: [], total: 0 };
   }
 }

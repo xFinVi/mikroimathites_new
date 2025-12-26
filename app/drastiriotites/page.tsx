@@ -8,9 +8,11 @@ import { SearchBar } from "@/components/content/search-bar";
 import { ActivitiesList } from "@/components/activities/activities-list";
 import { ActiveFilters } from "@/components/content/active-filters";
 import { Pagination } from "@/components/content/pagination";
+import { ErrorFallback } from "@/components/ui/error-fallback";
 import Image from "next/image";
 import Link from "next/link";
 import { urlFor } from "@/lib/sanity/image-url";
+import { logger } from "@/lib/utils/logger";
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 
@@ -107,9 +109,18 @@ export default async function DrastiriotitesPage({ searchParams }: PageProps) {
     }),
   ]);
 
+  // Extract successful results, use empty arrays for failed ones
   const ageGroups = ageGroupsResult.status === "fulfilled" ? ageGroupsResult.value : [];
   const { items, total } =
     contentResult.status === "fulfilled" ? contentResult.value : { items: [], total: 0 };
+
+  // Log errors for debugging
+  if (ageGroupsResult.status === "rejected") {
+    logger.error("Failed to fetch age groups:", ageGroupsResult.reason);
+  }
+  if (contentResult.status === "rejected") {
+    logger.error("Failed to fetch activities content:", contentResult.reason);
+  }
 
   // Calculate pagination
   // If total is 0, totalPages should be 0 (not 1) so pagination doesn't show

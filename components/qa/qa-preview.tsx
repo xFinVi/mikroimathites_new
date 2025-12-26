@@ -19,7 +19,8 @@ export function QAPreview({ items }: QAPreviewProps) {
       <div>
         <h3 className="text-2xl font-bold text-text-dark mb-2">Συχνές Ερωτήσεις</h3>
         <p className="text-text-medium">
-          Απαντήσεις σε ερωτήσεις που έχουν υποβληθεί από άλλους γονείς
+          Απαντήσεις σε ερωτήσεις που έχουν υποβληθεί από άλλους γονείς. Αν έχετε και εσείς μια ερώτηση, 
+          μπορείτε να την υποβάλετε παρακάτω και θα την απαντήσουμε!
         </p>
       </div>
       <Accordion>

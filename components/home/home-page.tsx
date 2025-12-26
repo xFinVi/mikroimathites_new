@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useMemo } from "react";
 import { Container } from "@/components/ui/container";
 import { Carousel } from "@/components/ui/carousel";
 import { PageWrapper } from "@/components/pages/page-wrapper";
@@ -11,9 +11,32 @@ import { ArticleCard } from "@/components/articles/article-card";
 import { ActivityCard } from "@/components/activities/activity-card";
 import { NewsletterSection } from "@/components/newsletter/newsletter-section";
 import { FeaturedBanner as FeaturedBannerComponent } from "@/components/home/featured-banner";
+import { VideoSneakPeek } from "@/components/home/video-sneak-peek";
+import { BackgroundVideoSection } from "@/components/home/background-video-section";
+import { VideoHeroSection } from "@/components/home/video-hero-section";
 import { User } from "lucide-react";
 import { HOME_PAGE_LIMITS } from "@/lib/constants/home-page";
 import { getAgeGroupColor, filterAgeGroups } from "@/lib/utils/age-groups";
+
+// Deterministic randomness functions for consistent server/client rendering
+function hashStringToSeed(input: string): number {
+  let h = 2166136261;
+  for (let i = 0; i < input.length; i++) {
+    h ^= input.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  return h >>> 0;
+}
+
+function seededRand(seed: number) {
+  let t = seed >>> 0;
+  return function () {
+    t += 0x6D2B79F5;
+    let x = Math.imul(t ^ (t >>> 15), 1 | t);
+    x ^= x + Math.imul(x ^ (x >>> 7), 61 | x);
+    return ((x ^ (x >>> 14)) >>> 0) / 4294967296;
+  };
+}
 
 const heroSlides = [
   {
@@ -117,48 +140,68 @@ export function HomePage({
   ageGroups = [],
 }: HomePageProps) {
   const heroRef = useRef<HTMLDivElement>(null);
-  const backgroundRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    const handleScroll = () => {
-      if (!heroRef.current || !backgroundRef.current) return;
-
-      const scrolled = window.scrollY;
-      const heroHeight = heroRef.current.offsetHeight;
-      const parallaxSpeed = 0.5;
-
-      if (scrolled < heroHeight) {
-        const scale = 1 + scrolled * 0.0005;
-        backgroundRef.current.style.transform = `translateY(${scrolled * parallaxSpeed}px) scale(${scale})`;
-      } else {
-        const maxScale = 1 + heroHeight * 0.0005;
-        backgroundRef.current.style.transform = `translateY(${heroHeight * parallaxSpeed}px) scale(${maxScale})`;
-      }
-    };
-
-    let ticking = false;
-    const onScroll = () => {
-      if (!ticking) {
-        window.requestAnimationFrame(() => {
-          handleScroll();
-          ticking = false;
-        });
-        ticking = true;
-      }
-    };
-
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
+  // Generate deterministic star positions for carousel section
+  const carouselStars = useMemo(() => {
+    const seed = hashStringToSeed("carousel-stars");
+    const rnd = seededRand(seed);
+    return Array.from({ length: 20 }).map((_, i) => ({
+      key: `carousel-star-${i}`,
+      left: `${(rnd() * 100).toFixed(6)}%`,
+      top: `${(rnd() * 100).toFixed(6)}%`,
+      animationDelay: `${(rnd() * 3).toFixed(6)}s`,
+      animationDuration: `${(2 + rnd() * 2).toFixed(6)}s`,
+    }));
   }, []);
 
   return (
     <PageWrapper mainClassName="bg-[#0d1330]">
-      {/* Section 1: Hero Image with Parallax */}
-      <section
+      {/* Section 1: Video Sneak Peek (Landing Section) */}
+      {/* 
+        TODO: Configure your videos here!
+        
+        Option 1: YouTube Videos (Recommended)
+        - Get video IDs from your YouTube URLs (e.g., from "https://youtube.com/watch?v=VIDEO_ID", use "VIDEO_ID")
+        - Replace the placeholder IDs below with your actual video IDs
+        
+        Option 2: Local Videos
+        - Add 3 short videos (10-15 seconds) to public/videos/
+        - Uncomment the local video examples below
+        - Optimize videos: MP4 format, max 5MB each, 1080p or 720p
+      */}
+      <VideoSneakPeek
+        videos={[
+          {
+            type: "youtube",
+            url: "Irrr-yMZADw",
+            title: "Τα Ζωάκια της Φάρμας, Μαθαίνω με την Βικτωρία",
+            startTime: 121, // Starts at 2:01
+          },
+          {
+            type: "youtube",
+            url: "Wial0HtS1dE",
+            title: "Καλά Χριστούγεννα με την Κυρία Βικτωρία, την Ίριδα και Μπρούνο στο Λονδίνο",
+            startTime: 313, // Starts at 5:13
+          },
+          {
+            type: "youtube",
+            url: "g3RUY8tkkbY",
+            title: "Μαθαίνω με την Κυρία Βικτωρία επεισόδιο με την Bluey",
+            startTime: 425, // Starts at 7:05
+          },
+        ]}
+        title="Sneak Peek από το κανάλι μας"
+        subtitle="Δείτε τι μπορείτε να δείτε στο YouTube μας - 3 σύντομα βίντεο που δείχνουν το περιεχόμενο μας"
+        youtubeChannelUrl="https://www.youtube.com/@MikroiMathites"
+      />
+
+      {/* Section 2: Interactive Hero Section with Background Image */}
+      <section 
         ref={heroRef}
-        className="relative w-full overflow-hidden min-h-[70vh] md:min-h-[80vh] flex items-center justify-center pt-20 sm:pt-24"
+        className="relative w-full min-h-[90vh] flex items-center justify-center overflow-hidden"
       >
-        <div ref={backgroundRef} className="absolute inset-0 z-0 will-change-transform">
+        {/* Background Image */}
+        <div className="absolute inset-0 z-0">
           <Image
             src="/images/ΧΡΙστουγεννα.png"
             alt="Χριστουγεννιάτικο Banner"
@@ -167,26 +210,116 @@ export function HomePage({
             priority
             sizes="100vw"
           />
-          <div className="absolute inset-0 bg-gradient-to-b from-black/5 via-transparent to-black/20" />
+          {/* Overlay for better text readability */}
+          <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/10 to-black/30" />
         </div>
-        <div className="relative z-10 text-center">
-          {/* Future: Video player will go here */}
+
+        {/* Animated Background Elements (subtle, on top of image) */}
+        <div className="absolute inset-0 z-0">
+          <div className="absolute top-0 right-1/4 w-[600px] h-[600px] bg-primary-pink/5 rounded-full blur-3xl animate-pulse" />
+          <div 
+            className="absolute bottom-0 left-1/4 w-[600px] h-[600px] bg-secondary-blue/5 rounded-full blur-3xl animate-pulse" 
+            style={{ animationDelay: '1s' }} 
+          />
         </div>
+
+        <Container className="relative z-10 mb-auto mt-8">
+          <div className="flex flex-col items-center justify-start max-w-4xl mx-auto">
+            <div className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-primary-pink/30 via-secondary-blue/30 to-accent-yellow/30 backdrop-blur-md text-white rounded-full text-sm font-bold shadow-2xl border border-white/30">
+              <span className="text-2xl">✨</span>
+              <span>Καλώς ήρθατε</span>
+              <span className="text-2xl">✨</span>
+            </div>
+            
+            {/* <h1 className="text-5xl sm:text-6xl md:text-7xl font-bold text-white  drop-shadow-2xl">
+              Γονείς & Παιδιά
+            </h1>
+            
+            <p className="text-xl sm:text-2xl text-white/95  leading-relaxed drop-shadow-lg">
+              Πρακτικές συμβουλές, δραστηριότητες και εκτυπώσιμα για την ανατροφή των παιδιών σας
+            </p>
+
+            <div className="flex flex-wrap items-center justify-center gap-6">
+              <Link
+                href="/drastiriotites"
+                className="px-8 py-4 bg-gradient-to-r from-primary-pink to-secondary-blue hover:from-primary-pink/90 hover:to-secondary-blue/90 text-white rounded-lg font-semibold transition-all shadow-lg hover:shadow-xl hover:scale-105 text-lg backdrop-blur-sm"
+              >
+                Δραστηριότητες
+              </Link>
+              <Link
+                href="/gia-goneis"
+                className="px-8 py-4 bg-white/30 backdrop-blur-md hover:bg-white/40 text-white rounded-lg font-semibold transition-all border border-white/40 shadow-lg hover:shadow-xl hover:scale-105 text-lg"
+              >
+                Άρθρα για Γονείς
+              </Link>
+              <Link
+                href="#age-cards"
+                className="px-8 py-4 bg-white/20 backdrop-blur-md hover:bg-white/30 text-white rounded-lg font-semibold transition-all border border-white/30 shadow-lg hover:shadow-xl hover:scale-105 text-lg"
+              >
+                Επιλέξτε Ηλικία
+              </Link>
+            </div> */}
+          </div>
+        </Container>
       </section>
 
-      {/* Section 2: Featured Banner (Flexible - YouTube, Article, Custom) */}
+      {/* Section 3: Featured Banner (Flexible - YouTube, Article, Custom) */}
       {featuredBanner && (
         <FeaturedBannerComponent banner={featuredBanner} />
       )}
 
-      {/* Section 3: Carousel */}
-      <section className="relative bg-[#0d1330] py-16 md:py-20 overflow-hidden">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <Carousel slides={heroSlides} autoPlay={true} autoPlayInterval={3000} />
+      {/* Section 4: Carousel (Moved one place below with creative redesign) */}
+      <section className="relative bg-gradient-to-br from-[#0d1330] via-[#1a1f3a] to-[#0d1330] py-20 md:py-24 overflow-hidden">
+        {/* Animated Background Elements */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute top-0 right-1/4 w-[500px] h-[500px] bg-primary-pink/10 rounded-full blur-3xl animate-pulse" style={{ animationDuration: '4s' }} />
+          <div className="absolute bottom-0 left-1/4 w-[500px] h-[500px] bg-secondary-blue/10 rounded-full blur-3xl animate-pulse" style={{ animationDuration: '5s', animationDelay: '1s' }} />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-accent-yellow/5 rounded-full blur-3xl animate-pulse" style={{ animationDuration: '6s', animationDelay: '2s' }} />
+        </div>
+
+        {/* Floating Stars Decoration */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          {carouselStars.map((star) => (
+            <div
+              key={star.key}
+              className="absolute w-1 h-1 bg-white rounded-full animate-twinkle"
+              style={{
+                left: star.left,
+                top: star.top,
+                animationDelay: star.animationDelay,
+                animationDuration: star.animationDuration,
+              }}
+            />
+          ))}
+        </div>
+
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          {/* Enhanced Header */}
+          <div className="text-center mb-12">
+            <div className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-primary-pink/20 via-secondary-blue/20 to-accent-yellow/20 backdrop-blur-md text-white rounded-full text-sm font-bold shadow-2xl border border-white/20 mb-6 animate-pulse">
+              <span className="text-2xl">✨</span>
+              <span>Νέο περιεχόμενο</span>
+              <span className="text-2xl">✨</span>
+            </div>
+            <h2 className="text-4xl sm:text-5xl md:text-6xl font-bold text-white mb-4 bg-gradient-to-r from-white via-primary-pink/90 to-white bg-clip-text text-transparent">
+              Ενημερωθείτε
+            </h2>
+            <p className="text-xl text-white/80 max-w-3xl mx-auto leading-relaxed">
+              Νέο περιεχόμενο, συμβουλές και ενημερώσεις για γονείς - Όλα σε ένα μέρος
+            </p>
+          </div>
+
+          {/* Carousel with Enhanced Styling */}
+          <div className="relative">
+            <div className="absolute -inset-4 bg-gradient-to-r from-primary-pink/20 via-secondary-blue/20 to-accent-yellow/20 rounded-3xl blur-2xl opacity-50 animate-pulse" />
+            <div className="relative bg-white/5 backdrop-blur-sm rounded-3xl p-2 border border-white/10 shadow-2xl">
+              <Carousel slides={heroSlides} autoPlay={true} autoPlayInterval={4000} />
+            </div>
+          </div>
         </div>
       </section>
 
-      {/* Section 4: Featured Content Grid - Standalone Section */}
+      {/* Section 5: Featured Content Grid - Standalone Section */}
       {featuredContent.length > 0 && (
         <section className="relative bg-[#E8F4F8] pb-16 md:pb-20 overflow-hidden w-full">
           {/* Dark Blue Header Section */}
@@ -261,7 +394,7 @@ export function HomePage({
         </section>
       )}
 
-      {/* Section 5: Age Cards with Featured Content Preview */}
+      {/* Section 6: Age Cards with Featured Content Preview */}
       <section id="age-cards" className="relative bg-[#FFF4E6] py-16 md:py-20">
         <Container>
           <div className="text-center mb-12">
@@ -310,7 +443,7 @@ export function HomePage({
         </Container>
       </section>
 
-      {/* Section 6: Featured Articles / Parent Tips */}
+      {/* Section 7: Featured Articles / Parent Tips */}
       <section className="relative bg-[#E0F2FE] py-16 md:py-20 overflow-hidden">
         {/* Dark Header Section */}
         <div className="bg-[#1a1f3a] py-12 md:py-16 mb-12">
@@ -353,7 +486,7 @@ export function HomePage({
         </Container>
       </section>
 
-      {/* Section 7: Activities & Printables */}
+      {/* Section 8: Activities & Printables */}
       <section className="relative bg-[#FCE7F3] py-16 md:py-20 overflow-hidden">
         <Container className="relative z-10">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-10">
@@ -427,7 +560,7 @@ export function HomePage({
       {/* Section 8: Newsletter */}
       <section id="newsletter" className="relative bg-[#EDE9FE] py-16 md:py-20 overflow-hidden">
         <Container className="relative z-10">
-          <div className="max-w-2xl mx-auto">
+          <div className="max-w-5xl mx-auto">
             <NewsletterSection />
           </div>
         </Container>

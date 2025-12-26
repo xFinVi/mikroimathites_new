@@ -6,6 +6,7 @@ import { urlFor } from "@/lib/sanity/image-url";
 import Image from "next/image";
 import Link from "next/link";
 import { PortableText } from "@portabletext/react";
+import { ContentTracker } from "@/components/analytics/content-tracker";
 import type { Metadata } from "next";
 
 interface PageProps {
@@ -69,6 +70,10 @@ export default async function RecipePage({ params }: PageProps) {
 
   return (
     <PageWrapper>
+      <ContentTracker
+        content_type="recipe"
+        content_slug={slug}
+      />
       <article className="bg-background-light">
         {/* Hero Section */}
         {coverImageUrl && (

@@ -10,6 +10,7 @@ const navItems = [
   { href: "/drastiriotites", label: "Δραστηριότητες" },
   { href: "/epikoinonia", label: "Επικοινωνία" },
   { href: "/sxetika", label: "Σχετικά" },
+  { href: "/support", label: "Στήριξη" },
 ];
 
 export function Navigation() {

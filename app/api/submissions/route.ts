@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase/server";
+import { logger } from "@/lib/utils/logger";
 
 type IncomingType =
   | "video-idea"
@@ -95,7 +96,7 @@ export async function POST(req: Request) {
     });
 
   if (error) {
-    console.error("Supabase insert error", error);
+    logger.error("Supabase insert error", error);
     return NextResponse.json({ error: "Failed to submit" }, { status: 500 });
   }
 

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { revalidateTag, revalidatePath } from "next/cache";
+import { logger } from "@/lib/utils/logger";
 
 export async function POST(req: Request) {
   const secret = process.env.SANITY_REVALIDATE_SECRET;
@@ -22,6 +23,7 @@ export async function POST(req: Request) {
     revalidatePath("/drastiriotites", "page");
     revalidatePath("/epikoinonia", "page");
     revalidatePath("/sxetika", "page");
+    revalidatePath("/support", "page");
     
     // Revalidate dynamic routes (layout-level)
     revalidatePath("/gia-goneis", "layout");
@@ -31,10 +33,10 @@ export async function POST(req: Request) {
     return NextResponse.json({ 
       revalidated: true, 
       now: Date.now(),
-      paths: ["/", "/gia-goneis", "/drastiriotites", "/epikoinonia", "/sxetika", "/age"]
+      paths: ["/", "/gia-goneis", "/drastiriotites", "/epikoinonia", "/sxetika", "/support", "/age"]
     });
   } catch (err) {
-    console.error("Revalidation error:", err);
+    logger.error("Revalidation error:", err);
     return NextResponse.json({ 
       error: "Failed to revalidate", 
       details: err instanceof Error ? err.message : String(err) 

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase/server";
+import { logger } from "@/lib/utils/logger";
 
 interface NewsletterPayload {
   email: string;
@@ -50,19 +51,28 @@ export async function POST(req: Request) {
   const normalizedEmail = email.trim().toLowerCase();
 
   // Check if email already exists
-  const { data: existing } = await supabaseAdmin
+  const { data: existing, error: queryError } = await supabaseAdmin
     .from("newsletter_subscriptions")
     .select("id, status")
     .eq("email", normalizedEmail)
-    .single();
+    .maybeSingle();
+  
+  // Handle query errors (but not "not found" - that's expected)
+  if (queryError && queryError.code !== "PGRST116") {
+    logger.error("Supabase query error", queryError);
+    return NextResponse.json(
+      { error: "Failed to check subscription" },
+      { status: 500 }
+    );
+  }
 
   if (existing) {
-    // If already subscribed and active, return success (idempotent)
+    // If already subscribed and active, return error to prevent duplicate
     if (existing.status === "active") {
-      return NextResponse.json({
-        ok: true,
-        message: "Already subscribed",
-      });
+      return NextResponse.json(
+        { error: "Αυτό το email είναι ήδη εγγεγραμμένο στο newsletter μας!" },
+        { status: 400 }
+      );
     }
 
     // If unsubscribed, reactivate
@@ -76,7 +86,7 @@ export async function POST(req: Request) {
       .eq("id", existing.id);
 
     if (updateError) {
-      console.error("Supabase update error", updateError);
+      logger.error("Supabase update error", updateError);
       return NextResponse.json(
         { error: "Failed to update subscription" },
         { status: 500 }
@@ -99,14 +109,14 @@ export async function POST(req: Request) {
     });
 
   if (error) {
-    console.error("Supabase insert error", error);
+    logger.error("Supabase insert error", error);
     
-    // Handle unique constraint violation gracefully
+    // Handle unique constraint violation - email already exists
     if (error.code === "23505") {
-      return NextResponse.json({
-        ok: true,
-        message: "Already subscribed",
-      });
+      return NextResponse.json(
+        { error: "Αυτό το email είναι ήδη εγγεγραμμένο στο newsletter μας!" },
+        { status: 400 }
+      );
     }
 
     return NextResponse.json(

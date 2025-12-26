@@ -1,4 +1,5 @@
 import { createClient } from "@supabase/supabase-js";
+import { logger } from "@/lib/utils/logger";
 
 // Get and trim environment variables (remove any whitespace)
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim();
@@ -15,21 +16,21 @@ const isValidUrl = (url: string | undefined): boolean => {
   }
 };
 
-// Better error messages
+// Better error messages (always log config errors)
 if (!supabaseUrl) {
-  console.error(
+  logger.error(
     "❌ NEXT_PUBLIC_SUPABASE_URL is missing or empty in .env.local"
   );
 }
 
 if (!supabaseServiceKey) {
-  console.error(
+  logger.error(
     "❌ SUPABASE_SERVICE_ROLE_KEY is missing or empty in .env.local"
   );
 }
 
 if (supabaseUrl && !isValidUrl(supabaseUrl)) {
-  console.error(
+  logger.error(
     `❌ NEXT_PUBLIC_SUPABASE_URL is invalid: "${supabaseUrl}"\n` +
     `   Expected format: https://your-project.supabase.co`
   );

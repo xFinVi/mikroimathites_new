@@ -14,9 +14,11 @@ import { SearchBar } from "@/components/content/search-bar";
 import { ContentList } from "@/components/content/content-list";
 import { ActiveFilters } from "@/components/content/active-filters";
 import { Pagination } from "@/components/content/pagination";
+import { ErrorFallback } from "@/components/ui/error-fallback";
 import Image from "next/image";
 import Link from "next/link";
 import { urlFor } from "@/lib/sanity/image-url";
+import { logger } from "@/lib/utils/logger";
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 
@@ -132,6 +134,7 @@ export default async function GiaGoneisPage({ searchParams }: PageProps) {
     }),
   ]);
 
+  // Extract successful results, use empty arrays/null for failed ones
   const featuredArticlesData =
     featuredArticles.status === "fulfilled" ? featuredArticles.value : [];
   const categoriesData = categories.status === "fulfilled" ? categories.value : [];
@@ -142,6 +145,26 @@ export default async function GiaGoneisPage({ searchParams }: PageProps) {
     quickTipsFromParents.status === "fulfilled" ? quickTipsFromParents.value : null;
   const { items, total } =
     contentResult.status === "fulfilled" ? contentResult.value : { items: [], total: 0 };
+
+  // Log errors for debugging
+  if (featuredArticles.status === "rejected") {
+    logger.error("Failed to fetch featured articles:", featuredArticles.reason);
+  }
+  if (categories.status === "rejected") {
+    logger.error("Failed to fetch categories:", categories.reason);
+  }
+  if (ageGroups.status === "rejected") {
+    logger.error("Failed to fetch age groups:", ageGroups.reason);
+  }
+  if (quickTipsFromQuickTips.status === "rejected") {
+    logger.error("Failed to fetch quick tips collection:", quickTipsFromQuickTips.reason);
+  }
+  if (quickTipsFromParents.status === "rejected") {
+    logger.error("Failed to fetch parents quick tips:", quickTipsFromParents.reason);
+  }
+  if (contentResult.status === "rejected") {
+    logger.error("Failed to fetch content:", contentResult.reason);
+  }
 
   const quickTips = quickTipsFromQuickTipsData || quickTipsFromParentsData;
 

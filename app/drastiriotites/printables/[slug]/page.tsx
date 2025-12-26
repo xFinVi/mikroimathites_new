@@ -8,6 +8,7 @@ import Link from "next/link";
 import { PrintableContent } from "@/components/printables/printable-content";
 import { PrintableMeta } from "@/components/printables/printable-meta";
 import { ShareButtons } from "@/components/articles/share-buttons";
+import { ContentTracker } from "@/components/analytics/content-tracker";
 import type { Metadata } from "next";
 
 interface PageProps {
@@ -70,6 +71,10 @@ export default async function PrintablePage({ params }: PageProps) {
 
   return (
     <PageWrapper>
+      <ContentTracker
+        content_type="printable"
+        content_slug={slug}
+      />
       <article className="bg-background-light">
         {/* Hero Section */}
         {coverImageUrl && (
@@ -111,14 +116,7 @@ export default async function PrintablePage({ params }: PageProps) {
 
             {/* Printable Header */}
             <header className="mb-8 space-y-4">
-              {printable.category && (
-                <Link
-                  href={`/drastiriotites?category=${printable.category.slug}`}
-                  className="inline-block px-4 py-2 rounded-full bg-primary-pink/10 text-primary-pink text-sm font-semibold hover:bg-primary-pink/20 transition"
-                >
-                  {printable.category.title}
-                </Link>
-              )}
+              {/* Printables don't have categories, so skip category display */}
 
               <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-text-dark">
                 {printable.title}

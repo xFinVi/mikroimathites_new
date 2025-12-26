@@ -45,7 +45,7 @@ export function Header() {
               alt="Μικροί Μαθητές"
               width={200}
               height={70}
-              className="h-14 sm:h-18 md:h-20 w-auto object-contain"
+              className="h-14 sm:h-18 md:h-20 lg:h-24 xl:h-28 w-auto object-contain"
               priority
             />
           </Link>

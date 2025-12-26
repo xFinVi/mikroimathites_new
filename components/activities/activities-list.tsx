@@ -61,11 +61,7 @@ export function ActivitiesList({ items, title }: ActivitiesListProps) {
                         {printable.ageGroups.map((ag) => ag.title).join(", ")}
                       </span>
                     )}
-                    {printable.category && (
-                      <span className="px-2 py-1 bg-secondary-blue/20 text-secondary-blue rounded-full text-xs">
-                        {printable.category.title}
-                      </span>
-                    )}
+                    {/* Printables don't have categories */}
                   </div>
                 </div>
               </Link>

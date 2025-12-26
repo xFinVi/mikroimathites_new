@@ -9,6 +9,7 @@ import { ActivityContent } from "@/components/activities/activity-content";
 import { ActivityMeta } from "@/components/activities/activity-meta";
 import { ShareButtons } from "@/components/articles/share-buttons";
 import { RelatedArticles } from "@/components/articles/related-articles";
+import { ContentTracker } from "@/components/analytics/content-tracker";
 import type { Metadata } from "next";
 
 interface PageProps {
@@ -71,6 +72,10 @@ export default async function ActivityPage({ params }: PageProps) {
 
   return (
     <PageWrapper>
+      <ContentTracker
+        content_type="activity"
+        content_slug={slug}
+      />
       <article className="bg-background-light">
         {/* Hero Section */}
         {coverImageUrl && (

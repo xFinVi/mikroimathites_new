@@ -2,16 +2,24 @@
 
 Modern Parent Hub built with Next.js 16, TypeScript, Tailwind CSS, and shadcn/ui.
 
-## Tech Stack
+## 🚀 Tech Stack
 
 - **Framework:** Next.js 16 (App Router)
 - **Language:** TypeScript
 - **Styling:** Tailwind CSS
 - **UI Components:** shadcn/ui
 - **CMS:** Sanity
-- **Database:** Supabase
+- **Database:** Supabase (PostgreSQL)
+- **Deployment:** Vercel (recommended)
 
-## Getting Started
+## 📋 Getting Started
+
+### Prerequisites
+
+- Node.js 18+ 
+- npm or yarn
+- Sanity account
+- Supabase account
 
 ### Installation
 
@@ -29,57 +37,151 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ### Environment Variables
 
-Create a `.env.local` file with:
+Create a `.env.local` file (see `.env.example` for template):
 
-**Sanity:**
-- `SANITY_PROJECT_ID`
-- `SANITY_DATASET`
-- `SANITY_API_VERSION`
-- `SANITY_TOKEN` (optional)
-- `SANITY_REVALIDATE_SECRET`
+**Required:**
+- `SANITY_PROJECT_ID` - Your Sanity project ID
+- `SANITY_DATASET` - Dataset name (usually "production")
+- `SANITY_API_VERSION` - API version (default: "2024-03-01")
+- `SANITY_REVALIDATE_SECRET` - Secret for webhook revalidation
+- `NEXT_PUBLIC_SUPABASE_URL` - Your Supabase project URL
+- `SUPABASE_SERVICE_ROLE_KEY` - Supabase service role key
 
-**Supabase:**
-- `NEXT_PUBLIC_SUPABASE_URL`
-- `SUPABASE_SERVICE_ROLE_KEY`
+**Optional:**
+- `SANITY_TOKEN` - Read token for drafts
+- `NEXT_PUBLIC_GA_ID` - Google Analytics ID
+- `NEXT_PUBLIC_SITE_URL` - Production site URL
 
-**Analytics (optional):**
-- `NEXT_PUBLIC_GA_ID`
+## 🗄️ Database Setup
 
-## Project Status
+### Run Migrations
 
-### ✅ Completed Features
+Before deploying, run these migrations in Supabase Dashboard → SQL Editor:
 
-- **Foundation:** Next.js 16, TypeScript, Tailwind CSS, Design System
-- **Pages:** Home, For Parents, Activities, About, Contact
-- **CMS Integration:** Sanity Studio embedded, all content types configured
-- **Content Pages:** Articles, Activities, Recipes, Printables with detail pages
-- **Forms:** Unified contact form (Video Ideas, Feedback, Q&A) submitting to Supabase
-- **Search & Filters:** Age, category, and type filtering with URL params
-- **SEO:** Dynamic sitemap, robots.txt, metadata optimization
-- **UI Components:** Accordion FAQ, card layouts, responsive navigation
-- **Admin:** Basic admin view for submissions
+1. `supabase/migrations/create-newsletter-subscriptions.sql`
+2. `supabase/migrations/create-content-views.sql` (if using analytics)
 
-### 📁 Project Structure
+## 🏗️ Build & Deploy
 
-```
-├── app/                    # Next.js App Router pages
-├── components/            # React components
-│   ├── ui/               # shadcn/ui components
-│   └── layout/           # Layout components
-├── lib/                  # Utilities and content layer
-│   ├── content/         # Content provider (Sanity)
-│   └── sanity/          # Sanity client and queries
-├── sanity/               # Sanity Studio configuration
-└── scripts/              # Utility scripts
-```
-
-## Build
+### Production Build
 
 ```bash
 npm run build
-npm start
+npm run start
 ```
 
-## Access Sanity Studio
+### Deployment
+
+**Vercel (Recommended):**
+1. Connect your GitHub repository
+2. Set environment variables
+3. Deploy automatically
+
+**Other Platforms:**
+- Build command: `npm run build`
+- Start command: `npm run start`
+- Node version: 18+
+
+## 📁 Project Structure
+
+```
+├── app/                    # Next.js App Router pages
+│   ├── api/               # API routes
+│   ├── gia-goneis/        # For Parents section
+│   ├── drastiriotites/    # Activities section
+│   └── ...
+├── components/            # React components
+│   ├── ui/               # shadcn/ui components
+│   ├── layout/           # Layout components
+│   ├── forms/            # Form components
+│   └── ...
+├── lib/                  # Utilities and content layer
+│   ├── content/         # Content provider (Sanity)
+│   ├── sanity/          # Sanity client and queries
+│   ├── supabase/        # Supabase client
+│   ├── analytics/       # Analytics utilities
+│   └── utils/           # Utilities (logger, etc.)
+├── hooks/               # React hooks
+├── sanity/              # Sanity Studio configuration
+└── supabase/            # Database migrations
+```
+
+## ✅ Features
+
+### Content Management
+- ✅ Articles, Recipes, Activities, Printables
+- ✅ Age groups, Categories, Tags
+- ✅ Q&A system
+- ✅ Featured content system
+- ✅ Sanity Studio embedded at `/studio`
+
+### User Features
+- ✅ Contact forms (Video Ideas, Feedback, Q&A)
+- ✅ Newsletter subscription
+- ✅ Server-side search & filtering
+- ✅ Server-side pagination
+- ✅ Age group filtering
+- ✅ Category filtering
+
+### Technical
+- ✅ Error handling on all pages
+- ✅ Loading states with skeleton components
+- ✅ Cookie consent (GDPR compliant)
+- ✅ Content tracking system
+- ✅ Production-safe logging
+- ✅ SEO optimization
+- ✅ Responsive design
+
+## 📄 Pages
+
+- `/` - Homepage
+- `/gia-goneis` - For Parents hub
+- `/gia-goneis/[slug]` - Article detail
+- `/gia-goneis/recipes/[slug]` - Recipe detail
+- `/drastiriotites` - Activities hub
+- `/drastiriotites/[slug]` - Activity detail
+- `/drastiriotites/printables/[slug]` - Printable detail
+- `/age/[slug]` - Age group pages
+- `/sxetika` - About page
+- `/epikoinonia` - Contact page
+- `/privacy` - Privacy Policy
+- `/terms` - Terms & Conditions
+- `/studio` - Sanity Studio (content management)
+
+## 🔧 Development
+
+### Access Sanity Studio
 
 Visit `http://localhost:3000/studio` to manage content.
+
+### API Routes
+
+- `POST /api/newsletter` - Newsletter subscription
+- `POST /api/submissions` - Form submissions
+- `POST /api/analytics/view` - Content view tracking
+- `POST /api/revalidate` - Revalidate pages (webhook)
+
+## 📚 Documentation
+
+- `PROJECT_STATUS.md` - Current project status and next steps
+- `PRODUCTION_REVIEW.md` - Comprehensive production readiness review
+
+## 🚀 Production Checklist
+
+Before deploying to production:
+
+- [ ] Run database migrations in Supabase
+- [ ] Set all environment variables
+- [ ] Test production build (`npm run build`)
+- [ ] Verify all pages load correctly
+- [ ] Test form submissions
+- [ ] Test search/filtering
+- [ ] Review security settings
+
+## 📝 License
+
+All rights reserved.
+
+---
+
+**Built with ❤️ for parents and children**

@@ -16,7 +16,7 @@ export default async function SxetikaPage() {
   const authorsWithImageUrls = authors.map(author => ({
     ...author,
     imageUrl: author.profilePicture 
-      ? urlFor(author.profilePicture).width(200).height(200).url() 
+      ? urlFor(author.profilePicture).width(300).height(300).quality(90).url() 
       : null,
   }));
 
@@ -38,7 +38,7 @@ export default async function SxetikaPage() {
           <div className="max-w-4xl mx-auto">
             <PageHeader
               title="Σχετικά"
-              description="Γεια σας! Είμαστε οι Μικροί Μαθητές"
+              description="Γεια σας! Είμαστε οι Μικροί Μαθητές - μια κοινότητα που στηρίζει τους γονείς με πρακτικό, φιλικό περιεχόμενο"
             />
           </div>
         </Container>
@@ -51,8 +51,8 @@ export default async function SxetikaPage() {
             <h2 className="text-4xl sm:text-5xl md:text-6xl font-bold text-text-dark">
               Η αποστολή μας
             </h2>
-            <p className="text-lg sm:text-xl text-text-medium max-w-3xl mx-auto">
-              Χτίζουμε μια κοινότητα που στηρίζει τους γονείς με πρακτικό, φιλικό περιεχόμενο
+            <p className="text-lg sm:text-xl text-text-medium max-w-3xl mx-auto leading-relaxed">
+              Να στηρίζουμε τους γονείς με απλές, πρακτικές ιδέες που κάνουν την καθημερινότητα πιο εύκολη.
             </p>
           </div>
           
@@ -73,23 +73,23 @@ export default async function SxetikaPage() {
                 
                 <div className="space-y-4">
                   <p className="text-base sm:text-lg text-text-dark leading-relaxed font-medium">
-                    Να υποστηρίξουμε τους γονείς με <span className="text-primary-pink font-semibold">απλές, πρακτικές ιδέες</span> που βοηθούν στην καθημερινή ζωή με τα παιδιά.
+                    Να στηρίζουμε τους γονείς με απλές, πρακτικές ιδέες που κάνουν την καθημερινότητα πιο εύκολη.
                   </p>
                   <p className="text-sm sm:text-base text-text-medium leading-relaxed">
-                    Χωρίς πίεση, χωρίς σύγκριση, μόνο υποστήριξη. Πιστεύουμε ότι κάθε γονέας κάνει το καλύτερο που μπορεί, και θέλουμε να είμαστε εκεί για να βοηθήσουμε.
+                    Ξέρουμε από πρώτο χέρι πόσο πιεστική μπορεί να είναι μια μέρα για έναν γονέα και πόσο δύσκολο είναι να κρατήσεις ισορροπία με την τεχνολογία. Γι' αυτό δημιουργούμε κάτι διασκεδαστικό αλλά και εκπαιδευτικό για τα παιδιά μας.
                   </p>
                   <ul className="space-y-2 text-sm text-text-medium">
                     <li className="flex items-start gap-2">
                       <span className="text-primary-pink mt-1">✓</span>
-                      <span>Πρακτικές συμβουλές που λειτουργούν</span>
+                      <span>Πρακτικές τεχνικές που χρησιμοποιούνται σε σχολεία και νηπιαγωγεία</span>
                     </li>
                     <li className="flex items-start gap-2">
                       <span className="text-primary-pink mt-1">✓</span>
-                      <span>Χωρίς κρίση, μόνο κατανόηση</span>
+                      <span>Χωρίς κρίση μόνο κατανόηση</span>
                     </li>
                     <li className="flex items-start gap-2">
                       <span className="text-primary-pink mt-1">✓</span>
-                      <span>Κοινότητα που στηρίζει</span>
+                      <span>Χτίζουμε μια κοινότητα που στηρίζει</span>
                     </li>
                   </ul>
                 </div>
@@ -112,23 +112,26 @@ export default async function SxetikaPage() {
                 
                 <div className="space-y-4">
                   <p className="text-base sm:text-lg text-text-dark leading-relaxed font-medium">
-                    Είδαμε ότι λείπει <span className="text-secondary-blue font-semibold">περιεχόμενο στα ελληνικά</span> για γονείς με παιδιά 0-6 ετών.
+                    Με τον ερχομό της κόρης μας, ως Έλληνες στο εξωτερικό ξέραμε ότι τα Αγγλικά θα της βγουν φυσικά. Αυτό που θέλαμε όμως ήταν να κρατήσει και τα Ελληνικά όχι μόνο σαν λέξεις, αλλά και με σωστή προφορά,όσο πιο κοντά γίνεται στη φυσική προφορά ενός Έλληνα.
                   </p>
                   <p className="text-sm sm:text-base text-text-medium leading-relaxed">
-                    Θέλαμε να φέρουμε περιεχόμενο φιλικό, σύντομο, και πρακτικό που μπορεί να εφαρμοστεί αμέσως. Κάθε γονέας αξίζει πρόσβαση σε πληροφορίες που βοηθούν.
+                    Ψάξαμε για κάτι αντίστοιχο και δεν το βρήκαμε: ελληνικό περιεχόμενο με έναν επαγγελματία μπροστά στην κάμερα, χωρίς υπερβολικά cartoons και animations. Έτσι αποφασίσαμε να κάνουμε το πρώτο βήμα για τη δική μας οικογένεια.
+                  </p>
+                  <p className="text-sm sm:text-base text-text-medium leading-relaxed">
+                    Στην πορεία είδαμε τη στήριξη κι από άλλους γονείς και αυτό μας έδωσε δύναμη να συνεχίσουμε. Ακούσαμε τις ανάγκες και τις δυσκολίες σας και προσαρμόζουμε τα βίντεο ώστε να βοηθούν παιδιά και γονείς σαν εμάς στο εξωτερικό, αλλά και οικογένειες στην Ελλάδα.
                   </p>
                   <ul className="space-y-2 text-sm text-text-medium">
                     <li className="flex items-start gap-2">
                       <span className="text-secondary-blue mt-1">✓</span>
-                      <span>Ελληνικό περιεχόμενο προσαρμοσμένο</span>
+                      <span>Ελληνικά για παιδιά 0–6, με έμφαση σε γλώσσα & προφορά</span>
                     </li>
                     <li className="flex items-start gap-2">
                       <span className="text-secondary-blue mt-1">✓</span>
-                      <span>Σύντομο και εύκολο να διαβαστεί</span>
+                      <span>Επαγγελματική παρουσία, καθαρό και απλό περιεχόμενο</span>
                     </li>
                     <li className="flex items-start gap-2">
                       <span className="text-secondary-blue mt-1">✓</span>
-                      <span>Άμεση εφαρμογή στην καθημερινότητα</span>
+                      <span>Περιεχόμενο που εξελίσσεται με βάση τις ανάγκες της κοινότητας</span>
                     </li>
                   </ul>
                 </div>
@@ -151,23 +154,23 @@ export default async function SxetikaPage() {
                 
                 <div className="space-y-4">
                   <p className="text-base sm:text-lg text-text-dark leading-relaxed font-medium">
-                    <span className="text-accent-yellow font-semibold">Parent Hub</span> με συμβουλές, δραστηριότητες, εκτυπώσιμα, συνταγές, και Q&A.
+                    Μια προσπάθεια να δημιουργήσουμε μια κοινότητα που συνδέει γονείς με επαγγελματίες και ακαδημαϊκή έρευνα, με στόχο την ουσιαστική στήριξη του κάθε γονέα.
                   </p>
                   <p className="text-sm sm:text-base text-text-medium leading-relaxed">
-                    Όλα σχεδιασμένα για να είναι εύκολα, πρακτικά, και χρήσιμα. Από ιδέες παιχνιδιών μέχρι συμβουλές διατροφής.
+                    Όλα είναι φτιαγμένα ώστε να είναι εύκολα στην ανάγνωση και άμεσα εφαρμόσιμα: απλοποιημένες ακαδημαϊκές έρευνες, υγιεινές συνταγές, πρακτικές συμβουλές και ιδέες για δραστηριότητες που φέρνουν γονείς και παιδιά ένα βήμα πιο κοντά.
                   </p>
                   <ul className="space-y-2 text-sm text-text-medium">
                     <li className="flex items-start gap-2">
                       <span className="text-accent-yellow mt-1">✓</span>
-                      <span>Συμβουλές για γονείς</span>
+                      <span>Απλοποιημένες ακαδημαϊκές έρευνες & πρακτική γνώση</span>
                     </li>
                     <li className="flex items-start gap-2">
                       <span className="text-accent-yellow mt-1">✓</span>
-                      <span>Δραστηριότητες & Εκτυπώσιμα</span>
+                      <span>Υγιεινές συνταγές και ιδέες για την καθημερινότητα</span>
                     </li>
                     <li className="flex items-start gap-2">
                       <span className="text-accent-yellow mt-1">✓</span>
-                      <span>Συνταγές & Q&A</span>
+                      <span>Δραστηριότητες που ενισχύουν τη σύνδεση γονέα παιδιού</span>
                     </li>
                   </ul>
                 </div>
@@ -179,28 +182,40 @@ export default async function SxetikaPage() {
         {/* Team Section */}
         {authorsWithImageUrls && authorsWithImageUrls.length > 0 && (
           <section className="space-y-6">
-            <h2 className="text-2xl sm:text-3xl font-bold text-text-dark">Η ομάδα</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <h2 className="text-2xl sm:text-3xl font-bold text-text-dark text-center">Η ομάδα</h2>
+            <div className="flex  justify-center gap-6">
               {authorsWithImageUrls.map((author) => {
                 // Use pre-generated image URL from server (no client-side generation)
                 const imageUrl = (author as Author & { imageUrl?: string | null }).imageUrl || null;
                 return (
                   <div
                     key={author._id}
-                    className="bg-background-white rounded-card p-6 shadow-subtle border border-border/50 space-y-4 text-center"
+                    className="bg-background-white rounded-card p-6 shadow-subtle border border-border/50 space-y-4 text-center w-full sm:max-w-sm"
                   >
                     {imageUrl ? (
-                      <div className="relative w-32 h-32 mx-auto rounded-full overflow-hidden">
+                      <div className="relative w-32 h-32 mx-auto rounded-full overflow-hidden ring-4 ring-primary-pink/20 shadow-lg">
                         <Image
                           src={imageUrl}
                           alt={author.name}
                           fill
                           className="object-cover"
                           sizes="128px"
+                          priority
+                        />
+                      </div>
+                    ) : author.profilePicture ? (
+                      <div className="relative w-32 h-32 mx-auto rounded-full overflow-hidden ring-4 ring-primary-pink/20 shadow-lg">
+                        <Image
+                          src={urlFor(author.profilePicture).width(300).height(300).quality(90).url()}
+                          alt={author.name}
+                          fill
+                          className="object-cover"
+                          sizes="128px"
+                          priority
                         />
                       </div>
                     ) : (
-                      <div className="w-32 h-32 mx-auto rounded-full bg-background-light flex items-center justify-center text-4xl">
+                      <div className="w-32 h-32 mx-auto rounded-full bg-background-light flex items-center justify-center text-4xl ring-4 ring-primary-pink/20 shadow-lg">
                         👤
                       </div>
                     )}

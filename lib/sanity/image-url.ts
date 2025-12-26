@@ -1,6 +1,7 @@
 import { createImageUrlBuilder } from "@sanity/image-url";
 import { sanityClient } from "./client";
 import { SanityImageSource } from "@sanity/image-url/lib/types/types";
+import { logger } from "@/lib/utils/logger";
 
 /**
  * Builds a URL for a Sanity image
@@ -9,7 +10,7 @@ import { SanityImageSource } from "@sanity/image-url/lib/types/types";
  */
 export function urlFor(source: SanityImageSource) {
   if (!sanityClient) {
-    console.warn("Sanity client not configured, image URL builder may not work");
+    logger.warn("Sanity client not configured, image URL builder may not work");
     // Return a dummy builder that will fail gracefully
     const dummyBuilder = createImageUrlBuilder({
       projectId: "",

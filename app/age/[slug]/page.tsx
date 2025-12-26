@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { Container } from "@/components/ui/container";
 import { PageWrapper } from "@/components/pages/page-wrapper";
+import { logger } from "@/lib/utils/logger";
 import { getAgeGroups, getArticles, getActivities, getPrintables, getRecipes, getCuratedCollectionByPlacement, getCategories } from "@/lib/content";
 import { ArticleCard } from "@/components/articles/article-card";
 import { ActivityCard } from "@/components/activities/activity-card";
@@ -10,6 +11,7 @@ import Link from "next/link";
 import { AgeGroupHero } from "@/components/age-group/age-group-hero";
 import { AgeGroupContentGrid } from "@/components/age-group/age-group-content-grid";
 import { AgeGroupCategories } from "@/components/age-group/age-group-categories";
+import { ErrorFallback } from "@/components/ui/error-fallback";
 import type { Metadata } from "next";
 
 interface PageProps {
@@ -18,38 +20,61 @@ interface PageProps {
 }
 
 export async function generateStaticParams() {
-  const ageGroups = await getAgeGroups();
-  return ageGroups.map((ageGroup) => ({
-    slug: ageGroup.slug,
-  }));
+  try {
+    const ageGroups = await getAgeGroups();
+    return ageGroups.map((ageGroup) => ({
+      slug: ageGroup.slug,
+    }));
+  } catch (error) {
+    logger.error("Failed to generate static params for age groups:", error);
+    // Return empty array to prevent build failure
+    return [];
+  }
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
-  const { slug } = await params;
-  const ageGroups = await getAgeGroups();
-  const ageGroup = ageGroups.find((ag) => ag.slug === slug);
+  try {
+    const { slug } = await params;
+    const ageGroups = await getAgeGroups();
+    const ageGroup = ageGroups.find((ag) => ag.slug === slug);
 
-  if (!ageGroup) {
+    if (!ageGroup) {
+      return {
+        title: "Ηλικιακή ομάδα δεν βρέθηκε",
+      };
+    }
+
     return {
-      title: "Ηλικιακή ομάδα δεν βρέθηκε",
-    };
-  }
-
-  return {
-    title: `${ageGroup.title} | Μικροί Μαθητές`,
-    description: `Περιεχόμενο, δραστηριότητες και συμβουλές για παιδιά ${ageGroup.title.toLowerCase()}`,
-    openGraph: {
       title: `${ageGroup.title} | Μικροί Μαθητές`,
       description: `Περιεχόμενο, δραστηριότητες και συμβουλές για παιδιά ${ageGroup.title.toLowerCase()}`,
-    },
-  };
+      openGraph: {
+        title: `${ageGroup.title} | Μικροί Μαθητές`,
+        description: `Περιεχόμενο, δραστηριότητες και συμβουλές για παιδιά ${ageGroup.title.toLowerCase()}`,
+      },
+    };
+  } catch (error) {
+    logger.error("Failed to generate metadata for age group page:", error);
+    return {
+      title: "Μικροί Μαθητές",
+      description: "Περιεχόμενο, δραστηριότητες και συμβουλές για παιδιά",
+    };
+  }
 }
 
 export default async function AgeGroupPage({ params, searchParams }: PageProps) {
   const { slug } = await params;
   const searchParamsResolved = await searchParams;
   
-  const [ageGroups, allArticles, allActivities, allPrintables, allRecipes, featuredCollection, allCategories] = await Promise.all([
+  // Fetch all data with error handling
+  const [
+    ageGroupsResult,
+    allArticlesResult,
+    allActivitiesResult,
+    allPrintablesResult,
+    allRecipesResult,
+    featuredCollectionResult,
+    allCategoriesResult,
+  ] = await Promise.allSettled([
     getAgeGroups(),
     getArticles(),
     getActivities(),
@@ -58,6 +83,50 @@ export default async function AgeGroupPage({ params, searchParams }: PageProps) 
     getCuratedCollectionByPlacement(`age-${slug}`),
     getCategories(),
   ]);
+
+  // Handle errors - if critical data fails, show error page
+  if (ageGroupsResult.status === "rejected") {
+    logger.error("Failed to fetch age groups:", ageGroupsResult.reason);
+    return (
+      <PageWrapper>
+        <ErrorFallback
+          title="Δεν μπορέσαμε να φορτώσουμε τα δεδομένα"
+          message="Παρακαλώ δοκιμάστε ξανά σε λίγο."
+          backUrl="/"
+          backLabel="Επιστροφή στην αρχική"
+        />
+      </PageWrapper>
+    );
+  }
+
+  // Extract successful results, use empty arrays/null for failed ones
+  const ageGroups = ageGroupsResult.status === "fulfilled" ? ageGroupsResult.value : [];
+  const allArticles = allArticlesResult.status === "fulfilled" ? allArticlesResult.value : [];
+  const allActivities = allActivitiesResult.status === "fulfilled" ? allActivitiesResult.value : [];
+  const allPrintables = allPrintablesResult.status === "fulfilled" ? allPrintablesResult.value : [];
+  const allRecipes = allRecipesResult.status === "fulfilled" ? allRecipesResult.value : [];
+  const featuredCollection = featuredCollectionResult.status === "fulfilled" ? featuredCollectionResult.value : null;
+  const allCategories = allCategoriesResult.status === "fulfilled" ? allCategoriesResult.value : [];
+
+  // Log any failures for debugging (non-critical data)
+  if (allArticlesResult.status === "rejected") {
+    logger.error("Failed to fetch articles:", allArticlesResult.reason);
+  }
+  if (allActivitiesResult.status === "rejected") {
+    logger.error("Failed to fetch activities:", allActivitiesResult.reason);
+  }
+  if (allPrintablesResult.status === "rejected") {
+    logger.error("Failed to fetch printables:", allPrintablesResult.reason);
+  }
+  if (allRecipesResult.status === "rejected") {
+    logger.error("Failed to fetch recipes:", allRecipesResult.reason);
+  }
+  if (featuredCollectionResult.status === "rejected") {
+    logger.error("Failed to fetch featured collection:", featuredCollectionResult.reason);
+  }
+  if (allCategoriesResult.status === "rejected") {
+    logger.error("Failed to fetch categories:", allCategoriesResult.reason);
+  }
 
   // Normalize slug (handle both "0-2" and "0_2" formats)
   const normalizeSlug = (s: string) => s.replace(/_/g, "-");
@@ -101,7 +170,7 @@ export default async function AgeGroupPage({ params, searchParams }: PageProps) 
   // Get categories that have content for this age group
   const categoriesWithContent = new Set<string>();
   [...articles, ...activities, ...printables, ...recipes].forEach((item) => {
-    if (item.category) {
+    if ('category' in item && item.category) {
       categoriesWithContent.add(item.category.slug);
     }
   });
@@ -119,9 +188,8 @@ export default async function AgeGroupPage({ params, searchParams }: PageProps) 
     filteredActivities = filteredActivities.filter(
       (item) => item.category?.slug === searchParamsResolved.category
     );
-    filteredPrintables = filteredPrintables.filter(
-      (item) => item.category?.slug === searchParamsResolved.category
-    );
+    // Printables don't have categories, so skip category filtering for them
+    filteredPrintables = filteredPrintables;
     filteredRecipes = filteredRecipes.filter(
       (item) => item.category?.slug === searchParamsResolved.category
     );

@@ -1,11 +1,28 @@
+"use client";
+
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Youtube, Instagram, Facebook, Music } from "lucide-react";
 import { Container } from "@/components/ui/container";
 import { Button } from "@/components/ui/button";
+import { CookieSettingsModal } from "@/components/cookies/cookie-settings-modal";
 import Image from "next/image";
 
 export function Footer() {
   const currentYear = new Date().getFullYear();
+  const [isCookieSettingsOpen, setIsCookieSettingsOpen] = useState(false);
+
+  // Listen for custom event to open cookie settings
+  useEffect(() => {
+    const handleOpenSettings = () => {
+      setIsCookieSettingsOpen(true);
+    };
+
+    window.addEventListener("openCookieSettings", handleOpenSettings);
+    return () => {
+      window.removeEventListener("openCookieSettings", handleOpenSettings);
+    };
+  }, []);
 
   const navItems = [
     { href: "/", label: "Αρχική" },
@@ -13,6 +30,7 @@ export function Footer() {
     { href: "/drastiriotites", label: "Δραστηριότητες" },
     { href: "/epikoinonia", label: "Επικοινωνία" },
     { href: "/gia-goneis", label: "Για Γονείς" },
+    { href: "/support", label: "Στήριξη" },
   ];
 
   const socialLinks = [
@@ -59,6 +77,15 @@ export function Footer() {
           <div className="text-center mb-12">
             <p className="text-sm text-white mb-4">Νέα από τη γωνία...</p>
             <Button
+              onClick={() => {
+                // Scroll to newsletter section on homepage
+                if (window.location.pathname === '/') {
+                  document.getElementById('newsletter')?.scrollIntoView({ behavior: 'smooth' });
+                } else {
+                  // Navigate to homepage and scroll to newsletter
+                  window.location.href = '/#newsletter';
+                }
+              }}
               className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-bold px-8 py-3 rounded-lg"
               size="lg"
             >
@@ -116,12 +143,21 @@ export function Footer() {
 
           {/* Cookie Settings */}
           <div className="text-left">
-            <button className="text-sm font-bold text-white uppercase hover:text-accent-yellow transition-colors">
+            <button
+              onClick={() => setIsCookieSettingsOpen(true)}
+              className="text-sm font-bold text-white uppercase hover:text-accent-yellow transition-colors"
+            >
               ΡΥΘΜΙΣΕΙΣ COOKIES
             </button>
           </div>
         </div>
       </Container>
+
+      {/* Cookie Settings Modal */}
+      <CookieSettingsModal
+        isOpen={isCookieSettingsOpen}
+        onClose={() => setIsCookieSettingsOpen(false)}
+      />
     </footer>
   );
 }

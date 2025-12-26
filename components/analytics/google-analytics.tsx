@@ -1,13 +1,25 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Script from "next/script";
+import { useCookieConsent } from "@/hooks/use-cookie-consent";
 
 interface GoogleAnalyticsProps {
   gaId?: string;
 }
 
 export function GoogleAnalytics({ gaId }: GoogleAnalyticsProps) {
-  if (!gaId) {
+  const { isCategoryAllowed, isLoading } = useCookieConsent();
+  const [shouldLoad, setShouldLoad] = useState(false);
+
+  useEffect(() => {
+    // Only load GA if analytics cookies are allowed and not loading
+    if (!isLoading && isCategoryAllowed("analytics")) {
+      setShouldLoad(true);
+    }
+  }, [isLoading, isCategoryAllowed]);
+
+  if (!gaId || !shouldLoad) {
     return null;
   }
 

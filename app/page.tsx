@@ -12,6 +12,7 @@ import {
 } from "@/lib/content";
 import { urlFor } from "@/lib/sanity/image-url";
 import { HOME_PAGE_LIMITS, HOME_PAGE_IMAGE_SIZES } from "@/lib/constants/home-page";
+import { logger } from "@/lib/utils/logger";
 
 export const metadata = generateMetadataFor("home");
 
@@ -51,7 +52,7 @@ export default async function Home() {
     ]);
   } catch (error) {
     // Log error but don't crash the page - use empty arrays as fallback
-    console.error('Failed to fetch content for home page:', error);
+    logger.error('Failed to fetch content for home page:', error);
     // All variables already initialized to empty arrays/null
   }
 

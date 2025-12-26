@@ -37,6 +37,22 @@ export default async function EpikoinoniaPage() {
       </div>
 
       <Container className="py-10 sm:py-14 md:py-16 space-y-10">
+        {/* Introduction Section */}
+        <section className="max-w-4xl mx-auto bg-background-white rounded-card p-6 sm:p-8 shadow-subtle border border-border/50">
+          <div className="space-y-4 text-text-medium">
+            <p className="text-lg leading-relaxed">
+              Η γνώμη σας είναι πολύτιμη για εμάς! Είμαστε εδώ για να ακούσουμε τις ιδέες σας, 
+              να απαντήσουμε στις ερωτήσεις σας, και να βελτιώσουμε συνεχώς το περιεχόμενο μας.
+            </p>
+            <p>
+              Μπορείτε να μας στείλετε <strong>ιδέες για βίντεο</strong>, <strong> feedback</strong> 
+              
+              , ή <strong>ερωτήσεις</strong> που θα θέλατε να δημοσιεύσουμε 
+              στο Q&A μας.
+            </p>
+          </div>
+        </section>
+
         {/* Unified Contact Form */}
         <section className="max-w-4xl mx-auto">
           <div className="bg-background-white rounded-card p-6 sm:p-8 shadow-subtle border border-border/50">
@@ -45,45 +61,88 @@ export default async function EpikoinoniaPage() {
         </section>
 
         {/* Q&A Preview Section */}
-        {qaItems.length > 0 && <QAPreview items={qaItems} />}
+        {qaItems.length > 0 && (
+          <section className="max-w-4xl mx-auto">
+            <QAPreview items={qaItems} />
+          </section>
+        )}
 
-        {/* Safety Rules Section */}
-        <section className="max-w-4xl mx-auto bg-background-white rounded-card p-6 shadow-subtle border border-border/50">
-          <h3 className="text-xl font-bold text-text-dark mb-4">Κανόνες & Ασφάλεια</h3>
-          <ul className="space-y-3 text-text-medium">
-            <li className="flex items-start gap-3">
-              <span className="text-primary-pink mt-1">•</span>
-              <span>Δεν δημοσιεύουμε προσωπικές πληροφορίες για παιδιά</span>
-            </li>
-            <li className="flex items-start gap-3">
-              <span className="text-primary-pink mt-1">•</span>
-              <span>Οι Q&A δημοσιεύονται μόνο μετά από έγκριση</span>
-            </li>
-            <li className="flex items-start gap-3">
-              <span className="text-primary-pink mt-1">•</span>
-              <span>Δεν παρέχουμε ιατρικές διαγνώσεις - για σοβαρές ανησυχίες, συμβουλευτείτε επαγγελματία</span>
-            </li>
-            <li className="flex items-start gap-3">
-              <span className="text-primary-pink mt-1">•</span>
-              <span>Όλες οι υποβολές αποθηκεύονται ασφαλώς και χρησιμοποιούνται μόνο για βελτίωση της υπηρεσίας</span>
-            </li>
-          </ul>
+        {/* Information Section */}
+        <section className="max-w-4xl mx-auto bg-background-white rounded-card p-6 sm:p-8 shadow-subtle border border-border/50">
+          <h3 className="text-2xl font-bold text-text-dark mb-6">Σημαντικές πληροφορίες</h3>
+          
+          <div className="space-y-6">
+            <div>
+              <h4 className="text-lg font-semibold text-text-dark mb-3 flex items-center gap-2">
+                <span>📝</span>
+                <span>Πώς λειτουργεί</span>
+              </h4>
+              <ul className="space-y-2 text-text-medium ml-7">
+                <li className="flex items-start gap-2">
+                  <span className="text-primary-pink mt-1">•</span>
+                  <span><strong>Ιδέες για βίντεο:</strong> Προτείνετε θέματα που θα θέλατε να δούμε σε βίντεο</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-primary-pink mt-1">•</span>
+                  <span><strong>Feedback:</strong> Πείτε μας τι σας αρέσει, τι όχι, και πώς μπορούμε να βελτιωθούμε</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-primary-pink mt-1">•</span>
+                  <span><strong>Q&A:</strong> Κάντε ερώτηση και επιλέξτε αν θέλετε να δημοσιευτεί (μετά από έγκριση)</span>
+                </li>
+              </ul>
+            </div>
+
+            <div>
+              <h4 className="text-lg font-semibold text-text-dark mb-3 flex items-center gap-2">
+                <span>🔒</span>
+                <span>Ασφάλεια & Απόρρητο</span>
+              </h4>
+              <ul className="space-y-2 text-text-medium ml-7">
+                <li className="flex items-start gap-2">
+                  <span className="text-primary-pink mt-1">•</span>
+                  <span>Δεν δημοσιεύουμε προσωπικές πληροφορίες για παιδιά</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-primary-pink mt-1">•</span>
+                  <span>Οι Q&A δημοσιεύονται μόνο μετά από έγκριση και αφαίρεση προσωπικών στοιχείων</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-primary-pink mt-1">•</span>
+                  <span>Όλες οι υποβολές αποθηκεύονται ασφαλώς και χρησιμοποιούνται μόνο για βελτίωση της υπηρεσίας</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-primary-pink mt-1">•</span>
+                  <span>Μπορείτε να διαβάσετε την <Link href="/privacy" className="text-primary-pink hover:underline font-semibold">Πολιτική Απορρήτου</Link> μας</span>
+                </li>
+              </ul>
+            </div>
+
+          </div>
         </section>
 
         {/* Alternative Contact */}
-        <section className="max-w-4xl mx-auto bg-background-white rounded-card p-6 shadow-subtle border border-border/50 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-          <div>
-            <h3 className="text-xl font-bold text-text-dark mb-2">Εναλλακτικοί τρόποι επικοινωνίας</h3>
-            <p className="text-text-medium">
-              Προτιμάτε email; Μπορείτε να μας στείλετε email απευθείας.
-            </p>
+        <section className="max-w-4xl mx-auto bg-background-white rounded-card p-6 sm:p-8 shadow-subtle border border-border/50">
+          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+            <div className="space-y-2">
+              <h3 className="text-2xl font-bold text-text-dark">Εναλλακτικός τρόπος επικοινωνίας</h3>
+              <p className="text-text-medium">
+                Προτιμάτε email; Μπορείτε να μας στείλετε email απευθείας στο 
+                <a href="mailto:info@mikroimathites.gr" className="text-primary-pink hover:underline font-semibold ml-1">
+                  info@mikroimathites.gr
+                </a>
+              </p>
+            </div>
+            <Link
+              href="mailto:info@mikroimathites.gr"
+              className="inline-flex items-center gap-2 rounded-button bg-secondary-blue px-6 py-4 text-white hover:bg-secondary-blue/90 transition font-semibold whitespace-nowrap"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+              </svg>
+              Στείλτε Email
+            </Link>
           </div>
-          <Link
-            href="mailto:info@mikroimathites.gr"
-            className="inline-flex items-center gap-2 rounded-button bg-secondary-blue px-5 py-3 text-white hover:bg-secondary-blue/90 transition"
-          >
-            Στείλτε Email
-          </Link>
         </section>
       </Container>
     </PageWrapper>

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Container } from "@/components/ui/container";
 import { PageWrapper } from "@/components/pages/page-wrapper";
 import { Button } from "@/components/ui/button";
+import { logger } from "@/lib/utils/logger";
 
 export default function Error({
   error,
@@ -15,7 +16,7 @@ export default function Error({
 }) {
   useEffect(() => {
     // Log error to error reporting service
-    console.error("Application error:", error);
+    logger.error("Application error:", error);
   }, [error]);
 
   return (

@@ -8,8 +8,10 @@ import Link from "next/link";
 import { PortableText } from "@portabletext/react";
 import { ArticleContent } from "@/components/articles/article-content";
 import { ArticleMeta } from "@/components/articles/article-meta";
+import { ArticleStats } from "@/components/articles/article-stats";
 import { ShareButtons } from "@/components/articles/share-buttons";
 import { RelatedArticles } from "@/components/articles/related-articles";
+import { ContentTracker } from "@/components/analytics/content-tracker";
 import type { Metadata } from "next";
 
 interface PageProps {
@@ -73,6 +75,10 @@ export default async function ArticlePage({ params }: PageProps) {
 
   return (
     <PageWrapper>
+      <ContentTracker
+        content_type="article"
+        content_slug={slug}
+      />
       <article className="bg-background-light">
         {/* Hero Section */}
         {coverImageUrl && (
@@ -135,6 +141,9 @@ export default async function ArticlePage({ params }: PageProps) {
 
               <ArticleMeta article={article} />
             </header>
+
+            {/* Article Stats */}
+            <ArticleStats article={article} />
 
             {/* Article Content */}
             {article.body && (
