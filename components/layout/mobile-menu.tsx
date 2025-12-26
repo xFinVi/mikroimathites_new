@@ -3,8 +3,9 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useSession } from "next-auth/react";
 import { cn } from "@/lib/utils";
-import { Home, Users, Activity, Mail, Info, Heart } from "lucide-react";
+import { Home, Users, Activity, Mail, Info, Heart, LayoutDashboard } from "lucide-react";
 
 const navItems = [
   { href: "/", label: "Αρχική", icon: Home },
@@ -20,6 +21,8 @@ export function MobileMenu() {
   const [isAnimating, setIsAnimating] = useState(false);
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
   const pathname = usePathname();
+  const { data: session } = useSession();
+  const isAdmin = session?.user?.role === "admin";
 
   // Check for reduced motion preference
   useEffect(() => {
@@ -214,6 +217,55 @@ export function MobileMenu() {
                     </Link>
                   );
                 })}
+
+                {/* Admin Dashboard Link */}
+                {isAdmin && (
+                  <Link
+                    href="/admin/submissions?status=not_answered"
+                    onClick={closeMenu}
+                    className={cn(
+                      "group flex items-center gap-4 px-4 py-4 rounded-xl mt-4",
+                      "text-base font-medium transition-all duration-200",
+                      "relative overflow-hidden",
+                      pathname.startsWith("/admin")
+                        ? "bg-primary-pink/20 text-primary-pink border-2 border-primary-pink/50 shadow-lg shadow-primary-pink/20"
+                        : "text-white/90 hover:text-white hover:bg-white/10 border-2 border-transparent"
+                    )}
+                    style={{
+                      animationDelay: isAnimating && !prefersReducedMotion ? `${navItems.length * 50}ms` : "0ms",
+                      animation: isAnimating && !prefersReducedMotion ? "menu-item-slide 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards" : "none",
+                    }}
+                  >
+                    {/* Icon */}
+                    <div
+                      className={cn(
+                        "flex items-center justify-center w-10 h-10 rounded-lg transition-all duration-200",
+                        pathname.startsWith("/admin")
+                          ? "bg-primary-pink/20 text-primary-pink"
+                          : "bg-white/5 text-white/70 group-hover:bg-white/10 group-hover:text-white group-hover:scale-110"
+                      )}
+                    >
+                      <LayoutDashboard className="w-5 h-5" />
+                    </div>
+
+                    {/* Label */}
+                    <span className="flex-1">Αιτήματα</span>
+
+                    {/* Active indicator */}
+                    {pathname.startsWith("/admin") && (
+                      <div className="absolute right-4 top-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-primary-pink animate-pulse" />
+                    )}
+
+                    {/* Hover effect gradient */}
+                    <div
+                      className={cn(
+                        "absolute inset-0 bg-gradient-to-r from-primary-pink/0 via-primary-pink/5 to-primary-pink/0",
+                        "opacity-0 group-hover:opacity-100 transition-opacity duration-300",
+                        "-translate-x-full group-hover:translate-x-0 transition-transform duration-500"
+                      )}
+                    />
+                  </Link>
+                )}
               </div>
 
               {/* Decorative bottom section */}

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useSearchParams, usePathname } from "next/navigation";
 import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { getCategoryDisplayName } from "@/lib/utils/category-mapping";
 
 interface ActiveFiltersProps {
   ageGroups?: Array<{ _id: string; title: string; slug: string }>;
@@ -31,10 +32,9 @@ export function ActiveFilters({ ageGroups = [], categories = [] }: ActiveFilters
     return `${pathname}${queryString ? `?${queryString}` : ""}`;
   };
 
-  const clearAllUrl = pathname;
-
   const ageGroupTitle = ageGroups.find((ag) => ag.slug === age)?.title || age;
-  const categoryTitle = categories.find((cat) => cat.slug === category)?.title || category;
+  const categoryObj = categories.find((cat) => cat.slug === category);
+  const categoryTitle = categoryObj ? getCategoryDisplayName(categoryObj.slug, categoryObj.title) : category;
   const typeTitle = type === "activity" ? "Δραστηριότητες" : type === "printable" ? "Εκτυπώσιμα" : type;
 
   return (
@@ -103,7 +103,7 @@ export function ActiveFilters({ ageGroups = [], categories = [] }: ActiveFilters
         )}
         
         {(age || category || type || search) && (
-          <Link href={clearAllUrl} className="ml-auto">
+          <Link href={pathname} className="ml-auto">
             <Button variant="outline" size="sm" className="gap-2">
               <X className="w-4 h-4" />
               Καθαρισμός όλων

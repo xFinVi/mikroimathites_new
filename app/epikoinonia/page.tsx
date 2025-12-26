@@ -4,29 +4,44 @@ import { PageHeader } from "@/components/pages/page-header";
 import { generateMetadataFor } from "@/lib/seo/generate-metadata";
 import { UnifiedContactForm } from "@/components/forms/unified-contact-form";
 import { QAPreview } from "@/components/qa/qa-preview";
-import { getQAItems } from "@/lib/content";
+import { getQAItems, type QAItem } from "@/lib/content";
+import { CONTACT_CONSTANTS } from "@/lib/constants/contact";
+import { logger } from "@/lib/utils/logger";
 import Image from "next/image";
 import Link from "next/link";
 
 export const metadata = generateMetadataFor("epikoinonia");
 
+// ISR revalidation - page doesn't use dynamic APIs, so ISR is safe
+export const revalidate = 600; // 10 minutes, same as other content pages
+
 export default async function EpikoinoniaPage() {
-  const qaItems = await getQAItems();
+  // Error handling for QA items (non-critical data)
+  let qaItems: QAItem[] = [];
+  try {
+    qaItems = await getQAItems();
+  } catch (error) {
+    // Log error for debugging (logger is safe in server components)
+    logger.error("Failed to fetch QA items:", error);
+    // Page continues to render - QA section just won't show (graceful degradation)
+  }
   return (
-    <PageWrapper>
-      {/* Hero */}
-      <div className="relative overflow-hidden bg-background-light">
-        <div className="absolute inset-0">
-          <Image
-            src="/images/background.png"
-            alt="Επικοινωνία background"
-            fill
-            className="object-cover"
-            priority
-          />
-          <div className="absolute inset-0 bg-gradient-to-b from-[#0d1330]/45 via-background-light/80 to-background-light" />
-        </div>
-        <Container className="relative py-12 sm:py-16 md:py-20">
+    <PageWrapper mainClassName="relative">
+      {/* Background Image - Absolute positioned, doesn't affect layout */}
+      <div className="absolute top-0 left-0 right-0 h-[60vh] overflow-hidden pointer-events-none z-0">
+        <Image
+          src={CONTACT_CONSTANTS.BACKGROUND_IMAGE_PATH}
+          alt="Επικοινωνία background"
+          fill
+          className="object-cover"
+          priority
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-[#0d1330]/45 via-background-light/80 to-background-light" />
+      </div>
+
+      {/* Hero Content - Positioned over background */}
+      <div className="relative z-10 pt-12 sm:pt-16 md:pt-20 pb-10">
+        <Container>
           <div className="max-w-4xl mx-auto">
             <PageHeader
               title="Επικοινωνία"
@@ -36,9 +51,9 @@ export default async function EpikoinoniaPage() {
         </Container>
       </div>
 
-      <Container className="py-10 sm:py-14 md:py-16 space-y-10">
+      <Container className="py-10 sm:py-14 md:py-16 space-y-10 relative z-10">
         {/* Introduction Section */}
-        <section className="max-w-4xl mx-auto bg-background-white rounded-card p-6 sm:p-8 shadow-subtle border border-border/50">
+        <section className={CONTACT_CONSTANTS.SECTION_CLASSES}>
           <div className="space-y-4 text-text-medium">
             <p className="text-lg leading-relaxed">
               Η γνώμη σας είναι πολύτιμη για εμάς! Είμαστε εδώ για να ακούσουμε τις ιδέες σας, 
@@ -55,7 +70,7 @@ export default async function EpikoinoniaPage() {
 
         {/* Unified Contact Form */}
         <section className="max-w-4xl mx-auto">
-          <div className="bg-background-white rounded-card p-6 sm:p-8 shadow-subtle border border-border/50">
+          <div className={CONTACT_CONSTANTS.SECTION_CLASSES}>
             <UnifiedContactForm />
           </div>
         </section>
@@ -68,7 +83,7 @@ export default async function EpikoinoniaPage() {
         )}
 
         {/* Information Section */}
-        <section className="max-w-4xl mx-auto bg-background-white rounded-card p-6 sm:p-8 shadow-subtle border border-border/50">
+        <section className={CONTACT_CONSTANTS.SECTION_CLASSES}>
           <h3 className="text-2xl font-bold text-text-dark mb-6">Σημαντικές πληροφορίες</h3>
           
           <div className="space-y-6">
@@ -122,19 +137,19 @@ export default async function EpikoinoniaPage() {
         </section>
 
         {/* Alternative Contact */}
-        <section className="max-w-4xl mx-auto bg-background-white rounded-card p-6 sm:p-8 shadow-subtle border border-border/50">
+        <section className={CONTACT_CONSTANTS.SECTION_CLASSES}>
           <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
             <div className="space-y-2">
               <h3 className="text-2xl font-bold text-text-dark">Εναλλακτικός τρόπος επικοινωνίας</h3>
               <p className="text-text-medium">
                 Προτιμάτε email; Μπορείτε να μας στείλετε email απευθείας στο 
-                <a href="mailto:info@mikroimathites.gr" className="text-primary-pink hover:underline font-semibold ml-1">
-                  info@mikroimathites.gr
+                <a href={`mailto:${CONTACT_CONSTANTS.EMAIL}`} className="text-primary-pink hover:underline font-semibold ml-1">
+                  {CONTACT_CONSTANTS.EMAIL}
                 </a>
               </p>
             </div>
             <Link
-              href="mailto:info@mikroimathites.gr"
+              href={`mailto:${CONTACT_CONSTANTS.EMAIL}`}
               className="inline-flex items-center gap-2 rounded-button bg-secondary-blue px-6 py-4 text-white hover:bg-secondary-blue/90 transition font-semibold whitespace-nowrap"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

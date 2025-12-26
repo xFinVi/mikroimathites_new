@@ -2,7 +2,8 @@ import { notFound } from "next/navigation";
 import { Container } from "@/components/ui/container";
 import { PageWrapper } from "@/components/pages/page-wrapper";
 import { getRecipeBySlug, getRecipes } from "@/lib/content";
-import { urlFor } from "@/lib/sanity/image-url";
+import { generateImageUrl } from "@/lib/sanity/image-url";
+import { GIA_GONEIS_CONSTANTS } from "@/lib/constants/gia-goneis";
 import Image from "next/image";
 import Link from "next/link";
 import { PortableText } from "@portabletext/react";
@@ -31,9 +32,11 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   }
 
   const seo = recipe.seo;
-  const ogImage = recipe.coverImage
-    ? urlFor(recipe.coverImage).width(1200).height(630).url()
-    : undefined;
+  const ogImage = generateImageUrl(
+    recipe.coverImage,
+    GIA_GONEIS_CONSTANTS.IMAGE_SIZES.OG_IMAGE.width,
+    GIA_GONEIS_CONSTANTS.IMAGE_SIZES.OG_IMAGE.height
+  ) || undefined;
 
   return {
     title: seo?.title || recipe.title,
@@ -64,9 +67,11 @@ export default async function RecipePage({ params }: PageProps) {
     notFound();
   }
 
-  const coverImageUrl = recipe.coverImage
-    ? urlFor(recipe.coverImage).width(1200).height(600).url()
-    : null;
+  const coverImageUrl = generateImageUrl(
+    recipe.coverImage,
+    GIA_GONEIS_CONSTANTS.IMAGE_SIZES.HERO.width,
+    GIA_GONEIS_CONSTANTS.IMAGE_SIZES.HERO.height
+  );
 
   return (
     <PageWrapper>
@@ -168,7 +173,7 @@ export default async function RecipePage({ params }: PageProps) {
               <div className="mb-8 bg-white rounded-lg p-6 shadow-sm">
                 <h2 className="text-2xl font-bold text-text-dark mb-4">Υλικά</h2>
                 <ul className="space-y-2">
-                  {recipe.ingredients.map((ingredient: any, idx: number) => (
+                  {recipe.ingredients.map((ingredient, idx: number) => (
                     <li key={idx} className="flex items-start gap-2">
                       <span className="text-primary-pink mt-1">•</span>
                       <span className="text-text-dark">

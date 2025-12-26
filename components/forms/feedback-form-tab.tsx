@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { SuccessMessage } from "./success-message";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -84,15 +85,10 @@ export function FeedbackFormTab() {
 
   if (isSubmitted) {
     return (
-      <div className="bg-accent-green/10 border-2 border-accent-green rounded-card p-8 text-center">
-        <div className="text-5xl mb-4">💬</div>
-        <h3 className="text-2xl font-bold text-text-dark mb-2">
-          Ευχαριστούμε!
-        </h3>
-        <p className="text-text-medium">
-          Το feedback σας είναι πολύτιμο. Θα το εξετάσουμε προσεκτικά!
-        </p>
-      </div>
+      <SuccessMessage
+        title="Ευχαριστούμε!"
+        message="Το feedback σας είναι πολύτιμο. Θα το εξετάσουμε προσεκτικά!"
+      />
     );
   }
 

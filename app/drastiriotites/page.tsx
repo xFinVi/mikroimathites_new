@@ -8,25 +8,24 @@ import { SearchBar } from "@/components/content/search-bar";
 import { ActivitiesList } from "@/components/activities/activities-list";
 import { ActiveFilters } from "@/components/content/active-filters";
 import { Pagination } from "@/components/content/pagination";
-import { ErrorFallback } from "@/components/ui/error-fallback";
 import Image from "next/image";
 import Link from "next/link";
-import { urlFor } from "@/lib/sanity/image-url";
+import { generateImageUrl } from "@/lib/sanity/image-url";
+import { getContentUrl, type ContentType } from "@/lib/utils/content-url";
+import { EmptyState } from "@/components/ui/empty-state";
+import { DRASTIRIOTITES_CONSTANTS } from "@/lib/constants/drastiriotites";
 import { logger } from "@/lib/utils/logger";
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
-
-const PAGE_SIZE = 18;
 
 // Dynamic metadata with canonical URLs
 export async function generateMetadata({
   searchParams,
 }: {
-  searchParams?: Promise<{ age?: string; type?: string; search?: string; page?: string }> | { age?: string; type?: string; search?: string; page?: string };
+  searchParams?: Promise<{ age?: string; type?: string; search?: string; page?: string }>;
 }): Promise<Metadata> {
-  // Handle both Promise and object types for Next.js 16 compatibility
-  const resolvedSearchParams = searchParams instanceof Promise ? await searchParams : (searchParams ?? {});
-  const params = resolvedSearchParams as {
+  const resolvedSearchParams = await searchParams;
+  const params = (resolvedSearchParams ?? {}) as {
     age?: string;
     type?: string;
     search?: string;
@@ -42,11 +41,15 @@ export async function generateMetadata({
   if (params.search) parts.push(`Αναζήτηση: ${params.search}`);
   const suffix = parts.length ? ` — ${parts.join(" • ")}` : "";
 
-  // Handle title - can be string or object
-  const baseTitle =
-    typeof base.title === "string"
-      ? base.title
-      : (base.title as any)?.default ?? "Δραστηριότητες & Εκτυπώσιμα";
+  // Handle title - extract string from metadata object
+  const getTitleString = (title: string | { default?: string } | undefined): string => {
+    if (typeof title === "string") return title;
+    if (title && typeof title === "object" && "default" in title) {
+      return title.default ?? "Δραστηριότητες & Εκτυπώσιμα";
+    }
+    return "Δραστηριότητες & Εκτυπώσιμα";
+  };
+  const baseTitle = getTitleString(base.title);
 
   // Canonical: don't include page param, and use base URL for search pages (noindex)
   const hasSearch = !!params.search;
@@ -67,26 +70,24 @@ export async function generateMetadata({
         }
       : undefined,
     alternates: {
-      ...(base as any)?.alternates,
+      ...(typeof base === "object" && base && "alternates" in base
+        ? (base.alternates as { canonical?: string })
+        : {}),
       canonical,
     },
   } as Metadata;
 }
 
-// Dynamic rendering for search/filter pages
-export const dynamic = 'force-dynamic';
-
 // Incremental static regeneration
 export const revalidate = 600;
 
 interface PageProps {
-  searchParams?: Promise<{ age?: string; type?: string; search?: string; page?: string }> | { age?: string; type?: string; search?: string; page?: string };
+  searchParams?: Promise<{ age?: string; type?: string; search?: string; page?: string }>;
 }
 
 export default async function DrastiriotitesPage({ searchParams }: PageProps) {
-  // Handle both Promise and object types for Next.js 16 compatibility
-  const resolvedSearchParams = searchParams instanceof Promise ? await searchParams : (searchParams ?? {});
-  const params = resolvedSearchParams as {
+  const resolvedSearchParams = await searchParams;
+  const params = (resolvedSearchParams ?? {}) as {
     age?: string;
     type?: string;
     search?: string;
@@ -105,7 +106,7 @@ export default async function DrastiriotitesPage({ searchParams }: PageProps) {
       age: params.age,
       type: params.type,
       page: currentPage,
-      pageSize: PAGE_SIZE,
+      pageSize: DRASTIRIOTITES_CONSTANTS.PAGE_SIZE,
     }),
   ]);
 
@@ -124,7 +125,7 @@ export default async function DrastiriotitesPage({ searchParams }: PageProps) {
 
   // Calculate pagination
   // If total is 0, totalPages should be 0 (not 1) so pagination doesn't show
-  const totalPages = total === 0 ? 0 : Math.ceil(total / PAGE_SIZE);
+  const totalPages = total === 0 ? 0 : Math.ceil(total / DRASTIRIOTITES_CONSTANTS.PAGE_SIZE);
 
   // Validate current page is within bounds
   const validatedCurrentPage = totalPages > 0 ? Math.min(currentPage, totalPages) : 1;
@@ -142,14 +143,26 @@ export default async function DrastiriotitesPage({ searchParams }: PageProps) {
   // Determine if we should show filtered content or all content
   const hasFilters = !!(params.age || params.type || params.search);
 
+  // Helper to determine content type
+  const getContentType = (item: { _type: string }): ContentType => {
+    if (item._type === "activity") return "activity";
+    if (item._type === "printable") return "printable";
+    return "activity";
+  };
+
   // Pre-generate image URLs for all items
-  const itemsWithImageUrls = items.map((item: any) => ({
-    ...item,
-    _contentType: item._type === "activity" ? ("activity" as const) : ("printable" as const),
-    imageUrl: item.coverImage
-      ? urlFor(item.coverImage as any).width(400).height(250).url()
-      : null,
-  }));
+  const itemsWithImageUrls = items.map((item) => {
+    const contentType = getContentType(item);
+    return {
+      ...item,
+      _contentType: contentType,
+      imageUrl: generateImageUrl(
+        item.coverImage,
+        DRASTIRIOTITES_CONSTANTS.IMAGE_SIZES.CARD.width,
+        DRASTIRIOTITES_CONSTANTS.IMAGE_SIZES.CARD.height
+      ),
+    };
+  });
 
   // Determine title
   const title = hasFilters
@@ -196,18 +209,14 @@ export default async function DrastiriotitesPage({ searchParams }: PageProps) {
 
         {/* Content grid or empty state */}
         {itemsWithImageUrls.length === 0 ? (
-          <div className="rounded-2xl border border-border/50 bg-white p-8 text-center">
-            <h2 className="text-xl font-bold text-text-dark">Δεν βρέθηκαν αποτελέσματα</h2>
-            <p className="mt-2 text-text-medium">
-              Δοκιμάστε άλλη λέξη ή αλλάξτε φίλτρα.
-            </p>
-            <Link
-              href="/drastiriotites"
-              className="mt-5 inline-flex rounded-button bg-secondary-blue px-5 py-3 text-white hover:bg-secondary-blue/90 transition"
-            >
-              Επιστροφή σε όλα
-            </Link>
-          </div>
+          <EmptyState
+            title="Δεν βρέθηκαν αποτελέσματα"
+            description="Δοκιμάστε άλλη λέξη ή αλλάξτε φίλτρα."
+            action={{
+              label: "Επιστροφή σε όλα",
+              href: "/drastiriotites",
+            }}
+          />
         ) : (
           <>
             <ActivitiesList items={itemsWithImageUrls} title={title} />
@@ -247,17 +256,23 @@ export default async function DrastiriotitesPage({ searchParams }: PageProps) {
             name: title,
             description: "Διασκεδαστικές δραστηριότητες και εκτυπώσιμα για παιδιά 0-6 ετών",
             numberOfItems: total,
-            itemListElement: itemsWithImageUrls.slice(0, 10).map((item, index) => ({
-              "@type": "ListItem",
-              position: index + 1,
-              item: {
-                "@type": item._type === "activity" ? "CreativeWork" : "CreativeWork",
-                "@id": `${process.env.NEXT_PUBLIC_SITE_URL || "https://mikroimathites.gr"}/drastiriotites${item._type === "printable" ? `/printables` : ""}/${item.slug}`,
-                name: item.title,
-                description: item.summary || "",
-                image: item.imageUrl || undefined,
-              },
-            })),
+            itemListElement: itemsWithImageUrls.slice(0, 10).map((item, index) => {
+              const contentType = getContentType(item);
+              const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://mikroimathites.gr";
+              const itemUrl = getContentUrl(contentType, item.slug);
+              
+              return {
+                "@type": "ListItem",
+                position: index + 1,
+                item: {
+                  "@type": "CreativeWork",
+                  "@id": `${baseUrl}${itemUrl}`,
+                  name: item.title,
+                  description: item.summary || "",
+                  image: item.imageUrl || undefined,
+                },
+              };
+            }),
           }),
         }}
       />

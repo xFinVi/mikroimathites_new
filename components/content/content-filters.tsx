@@ -10,6 +10,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { X } from "lucide-react";
+import { shouldHideCategory, getCategoryDisplayName } from "@/lib/utils/category-mapping";
 
 interface ContentFiltersProps {
   ageGroups?: Array<{ _id: string; title: string; slug: string }>;
@@ -32,25 +33,14 @@ export function ContentFilters({
   const categoryFilter = searchParams.get("category") || undefined;
   const typeFilter = searchParams.get("type") || undefined;
 
-  // Map categories - show all but with merged display names
-  const displayCategories = categories.map((cat) => {
-    // Rename merged categories for display
-    if (cat.slug === 'diatrofi-epiloges') {
-      return { ...cat, title: 'Διατροφή & Συνταγές' };
-    }
-    if (cat.slug === 'fysikes-syntages') {
-      // Hide this one since it's merged into "Διατροφή & Επιλογές"
-      return null;
-    }
-    if (cat.slug === 'texnes-xirotexnies') {
-      return { ...cat, title: 'Δραστηριότητες & Παιχνίδια' };
-    }
-    if (cat.slug === 'idees-paixnidiou') {
-      // Hide this one since it's merged into "Τέχνες & Χειροτεχνίες"
-      return null;
-    }
-    return cat;
-  }).filter((cat): cat is NonNullable<typeof cat> => cat !== null);
+  // Map categories - use CMS titles with special display name overrides
+  // Hide categories that are merged into others
+  const displayCategories = categories
+    .filter((cat) => !shouldHideCategory(cat.slug))
+    .map((cat) => ({
+      ...cat,
+      title: getCategoryDisplayName(cat.slug, cat.title),
+    }));
 
   const updateFilter = (key: string, value: string) => {
     const params = new URLSearchParams(searchParams.toString());

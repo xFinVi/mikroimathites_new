@@ -1,40 +1,13 @@
 import { RelatedContentItem } from "@/lib/content";
-import { urlFor } from "@/lib/sanity/image-url";
+import { generateImageUrl } from "@/lib/sanity/image-url";
+import { getContentUrl, type ContentType } from "@/lib/utils/content-url";
+import { getContentTypeLabel } from "@/lib/utils/content-utils";
+import { GIA_GONEIS_CONSTANTS } from "@/lib/constants/gia-goneis";
 import Image from "next/image";
 import Link from "next/link";
 
 interface RelatedArticlesProps {
   relatedContent: RelatedContentItem[];
-}
-
-function getContentUrl(item: RelatedContentItem): string {
-  switch (item._type) {
-    case "article":
-      return `/gia-goneis/${item.slug}`;
-    case "activity":
-      return `/drastiriotites/${item.slug}`;
-    case "printable":
-      return `/drastiriotites/printables/${item.slug}`;
-    case "recipe":
-      return `/gia-goneis/recipes/${item.slug}`;
-    default:
-      return "#";
-  }
-}
-
-function getContentTypeLabel(type: string): string {
-  switch (type) {
-    case "article":
-      return "Άρθρο";
-    case "activity":
-      return "Δραστηριότητα";
-    case "printable":
-      return "Εκτυπώσιμο";
-    case "recipe":
-      return "Συνταγή";
-    default:
-      return "Περιεχόμενο";
-  }
 }
 
 export function RelatedArticles({ relatedContent }: RelatedArticlesProps) {
@@ -47,14 +20,25 @@ export function RelatedArticles({ relatedContent }: RelatedArticlesProps) {
       <h3 className="text-2xl font-bold text-text-dark mb-6">Σχετικό περιεχόμενο</h3>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {relatedContent.map((item) => {
-          const imageUrl = item.coverImage
-            ? urlFor(item.coverImage).width(400).height(250).url()
-            : null;
+          // Type guard to safely convert _type to ContentType
+          const getContentType = (type: string): ContentType => {
+            if (type === "article") return "article";
+            if (type === "recipe") return "recipe";
+            if (type === "activity") return "activity";
+            if (type === "printable") return "printable";
+            return "article"; // Default fallback
+          };
+          const contentType = getContentType(item._type);
+          const imageUrl = generateImageUrl(
+            item.coverImage,
+            GIA_GONEIS_CONSTANTS.IMAGE_SIZES.CARD.width,
+            GIA_GONEIS_CONSTANTS.IMAGE_SIZES.CARD.height
+          );
 
           return (
             <Link
               key={item._id}
-              href={getContentUrl(item)}
+              href={getContentUrl(contentType, item.slug)}
               className="group bg-background-white rounded-card overflow-hidden shadow-subtle border border-border/50 hover:shadow-md transition-all"
             >
               {imageUrl && (
@@ -69,7 +53,7 @@ export function RelatedArticles({ relatedContent }: RelatedArticlesProps) {
               )}
               <div className="p-5">
                 <div className="text-xs font-semibold text-primary-pink mb-2">
-                  {getContentTypeLabel(item._type)}
+                  {getContentTypeLabel(contentType)}
                 </div>
                 <h4 className="text-lg font-semibold text-text-dark group-hover:text-primary-pink transition mb-2">
                   {item.title}

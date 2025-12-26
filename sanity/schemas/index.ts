@@ -9,10 +9,15 @@ import { tag } from "./documents/tag";
 import { author } from "./documents/author";
 import { curatedCollection } from "./documents/curatedCollection";
 import { pageSettings } from "./documents/pageSettings";
+import { homeHero } from "./documents/homeHero";
+import { featuredContentSection } from "./documents/featuredContentSection";
+import { forParentsSection } from "./documents/forParentsSection";
+import { activitiesPrintablesSection } from "./documents/activitiesPrintablesSection";
 import { seo } from "./objects/seo";
 import { hero } from "./objects/hero";
 import { ingredient } from "./objects/ingredient";
 import { featuredBanner } from "./objects/featuredBanner";
+import { activityStep } from "./objects/activity-step";
 
 // Register all schema types here
 const schemas = [
@@ -28,11 +33,16 @@ const schemas = [
   curatedCollection,
   pageSettings,
   qaItem,
+  homeHero,
+  featuredContentSection,
+  forParentsSection,
+  activitiesPrintablesSection,
   // Objects
   seo,
   hero,
   ingredient,
   featuredBanner,
+  activityStep,
 ];
 
 export default schemas;

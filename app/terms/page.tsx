@@ -2,6 +2,7 @@ import { Container } from "@/components/ui/container";
 import { PageWrapper } from "@/components/pages/page-wrapper";
 import { PageHeader } from "@/components/pages/page-header";
 import { generateMetadataFor } from "@/lib/seo/generate-metadata";
+import { CONTACT_CONSTANTS } from "@/lib/constants/contact";
 import Image from "next/image";
 
 export const metadata = generateMetadataFor("terms");
@@ -273,10 +274,10 @@ export default function TermsPage() {
               <p>
                 <strong>Email:</strong>{" "}
                 <a
-                  href="mailto:info@mikroimathites.gr"
+                  href={`mailto:${CONTACT_CONSTANTS.EMAIL}`}
                   className="text-primary-pink hover:underline"
                 >
-                  info@mikroimathites.gr
+                  {CONTACT_CONSTANTS.EMAIL}
                 </a>
               </p>
               <p>

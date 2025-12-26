@@ -18,13 +18,13 @@ const portableTextComponents = {
       return (
         <figure className="my-12 md:my-16">
           <div className="relative w-full aspect-video md:aspect-[16/10] rounded-xl overflow-hidden shadow-xl bg-gradient-to-br from-gray-100 to-gray-200">
-            <Image
-              src={imageUrl}
-              alt={value.alt || "Article image"}
+          <Image
+            src={imageUrl}
+            alt={value.alt || "Article image"}
               fill
               className="object-cover"
               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 90vw, 1200px"
-            />
+          />
           </div>
           {value.caption && (
             <figcaption className="text-sm text-text-medium text-center mt-4 italic max-w-2xl mx-auto">

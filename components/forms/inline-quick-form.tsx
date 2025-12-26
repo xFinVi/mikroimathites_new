@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { SuccessMessage } from "./success-message";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -96,17 +97,14 @@ export function InlineQuickForm({ defaultType = "question", sourcePage }: Inline
 
   if (isSubmitted) {
     return (
-      <div className="bg-accent-green/10 border-2 border-accent-green rounded-card p-6 text-center">
-        <div className="text-4xl mb-3">✅</div>
-        <h3 className="text-lg font-bold text-text-dark mb-2">
-          Επιτυχία!
-        </h3>
-        <p className="text-text-medium text-sm">
-          {formData.type === "question"
-            ? "Ευχαριστούμε για την ερώτηση! Θα λάβετε απάντηση σύντομα."
-            : "Ευχαριστούμε για την ιδέα! Θα την εξετάσουμε σύντομα."}
-        </p>
-      </div>
+      <SuccessMessage
+        title="Ευχαριστούμε!"
+        message={
+          formData.type === "question"
+            ? "Η ερώτησή σας έχει καταγραφεί. Θα την εξετάσουμε και θα σας απαντήσουμε σύντομα!"
+            : "Η ιδέα σας έχει καταγραφεί. Θα την εξετάσουμε σύντομα!"
+        }
+      />
     );
   }
 

@@ -13,16 +13,19 @@ import { ContentFilters } from "@/components/content/content-filters";
 import { SearchBar } from "@/components/content/search-bar";
 import { ContentList } from "@/components/content/content-list";
 import { ActiveFilters } from "@/components/content/active-filters";
-import { Pagination } from "@/components/content/pagination";
-import { ErrorFallback } from "@/components/ui/error-fallback";
 import Image from "next/image";
 import Link from "next/link";
-import { urlFor } from "@/lib/sanity/image-url";
+import { generateImageUrl } from "@/lib/sanity/image-url";
 import { logger } from "@/lib/utils/logger";
 import type { Metadata } from "next";
-import { redirect } from "next/navigation";
+import { getMappedCategories } from "@/lib/utils/category-mapping";
+import { getContentUrl, type ContentType } from "@/lib/utils/content-url";
+import { GIA_GONEIS_CONSTANTS } from "@/lib/constants/gia-goneis";
+import { EmptyState } from "@/components/ui/empty-state";
+import { QuickTipsSection } from "@/components/gia-goneis/quick-tips-section";
+import { LoadMoreContent } from "@/components/gia-goneis/load-more-content";
 
-const PAGE_SIZE = 18;
+const INITIAL_PAGE_SIZE = GIA_GONEIS_CONSTANTS.INITIAL_PAGE_SIZE;
 
 // Dynamic metadata with canonical URLs
 export async function generateMetadata({
@@ -45,11 +48,15 @@ export async function generateMetadata({
   if (params.search) parts.push(`Αναζήτηση: ${params.search}`);
   const suffix = parts.length ? ` — ${parts.join(" • ")}` : "";
 
-  // Handle title - can be string or object
-  const baseTitle =
-    typeof base.title === "string"
-      ? base.title
-      : (base.title as any)?.default ?? "Για Γονείς";
+  // Handle title - extract string from metadata object
+  const getTitleString = (title: string | { default?: string } | undefined): string => {
+    if (typeof title === "string") return title;
+    if (title && typeof title === "object" && "default" in title) {
+      return title.default ?? "Για Γονείς";
+    }
+    return "Για Γονείς";
+  };
+  const baseTitle = getTitleString(base.title);
 
   // Canonical: don't include page param, and use base URL for search pages (noindex)
   const hasSearch = !!params.search;
@@ -70,7 +77,9 @@ export async function generateMetadata({
         }
       : undefined,
     alternates: {
-      ...(base as any)?.alternates,
+      ...(typeof base === "object" && base && "alternates" in base
+        ? (base.alternates as { canonical?: string })
+        : {}),
       canonical,
     },
   } as Metadata;
@@ -83,17 +92,6 @@ interface PageProps {
   searchParams?: Promise<{ age?: string; category?: string; search?: string; page?: string }>;
 }
 
-// Category mapping - merge categories
-const getMappedCategories = (categorySlug: string): string[] => {
-  const normalized = categorySlug.replace(/-and-/g, "-");
-  const mapping: Record<string, string[]> = {
-    // "Διατροφή & Επιλογές" includes recipes
-    "diatrofi-epiloges": ["diatrofi-epiloges", "fysikes-syntages"],
-    // "Τέχνες & Χειροτεχνίες" includes play ideas
-    "texnes-xirotexnies": ["texnes-xirotexnies", "idees-paixnidiou"],
-  };
-  return mapping[normalized] ?? [normalized];
-};
 
 export default async function GiaGoneisPage({ searchParams }: PageProps) {
   const resolvedSearchParams = await searchParams;
@@ -104,10 +102,7 @@ export default async function GiaGoneisPage({ searchParams }: PageProps) {
     page?: string;
   };
   
-  // Get current page (default to 1, validate it's a number)
-  const pageNum = parseInt(params.page || "1", 10);
-  const currentPage = isNaN(pageNum) || pageNum < 1 ? 1 : pageNum;
-  
+  // Always start with page 1 for initial load (load more handles subsequent pages)
   // Get mapped categories if category filter is active
   const mappedCategories = params.category ? getMappedCategories(params.category) : undefined;
 
@@ -129,8 +124,8 @@ export default async function GiaGoneisPage({ searchParams }: PageProps) {
       search: params.search,
       age: params.age,
       categories: mappedCategories,
-      page: currentPage,
-      pageSize: PAGE_SIZE,
+      page: 1, // Always start with page 1
+      pageSize: INITIAL_PAGE_SIZE, // Show only 9 items initially
     }),
   ]);
 
@@ -172,36 +167,27 @@ export default async function GiaGoneisPage({ searchParams }: PageProps) {
   const hasFilters = !!(params.age || params.category || params.search);
 
   // Pre-generate image URLs for all items
-  // Type assertion needed because GROQ returns _type but our interfaces don't include it
-  const itemsWithImageUrls = items.map((item: any) => ({
-    ...item,
-    _contentType:
-      item._type === "article"
-        ? ("article" as const)
-        : item._type === "recipe"
-          ? ("recipe" as const)
-          : ("activity" as const),
-    imageUrl: item.coverImage
-      ? urlFor(item.coverImage as any).width(400).height(250).url()
-      : null,
-  }));
+  // Type guard to determine content type safely
+  const getContentType = (item: { _type: string }): ContentType => {
+    if (item._type === "article") return "article";
+    if (item._type === "recipe") return "recipe";
+    if (item._type === "activity") return "activity";
+    if (item._type === "printable") return "printable";
+    return "article"; // Default fallback
+  };
 
-  // Calculate pagination
-  // If total is 0, totalPages should be 0 (not 1) so pagination doesn't show
-  const totalPages = total === 0 ? 0 : Math.ceil(total / PAGE_SIZE);
-  
-  // Validate current page is within bounds
-  const validatedCurrentPage = totalPages > 0 ? Math.min(currentPage, totalPages) : 1;
-
-  // If user requested an out-of-range page, redirect to the last valid page
-  if (totalPages > 0 && currentPage !== validatedCurrentPage) {
-    const qs = new URLSearchParams();
-    if (params.category) qs.set("category", params.category);
-    if (params.age) qs.set("age", params.age);
-    if (params.search) qs.set("search", params.search);
-    qs.set("page", String(validatedCurrentPage));
-    redirect(`/gia-goneis?${qs.toString()}`);
-  }
+  const itemsWithImageUrls = items.map((item) => {
+    const contentType = getContentType(item);
+    return {
+      ...item,
+      _contentType: contentType,
+      imageUrl: generateImageUrl(
+        item.coverImage,
+        GIA_GONEIS_CONSTANTS.IMAGE_SIZES.CARD.width,
+        GIA_GONEIS_CONSTANTS.IMAGE_SIZES.CARD.height
+      ),
+    };
+  });
 
   // Determine title
   const title = hasFilters
@@ -247,197 +233,24 @@ export default async function GiaGoneisPage({ searchParams }: PageProps) {
 
         {/* Content grid or empty state */}
         {itemsWithImageUrls.length === 0 ? (
-          <div className="rounded-2xl border border-border/50 bg-white p-8 text-center">
-            <h2 className="text-xl font-bold text-text-dark">Δεν βρέθηκαν αποτελέσματα</h2>
-            <p className="mt-2 text-text-medium">
-              Δοκιμάστε άλλη λέξη ή αλλάξτε κατηγορία/ηλικία.
-            </p>
-                <Link
-              href="/gia-goneis"
-              className="mt-5 inline-flex rounded-button bg-primary-pink px-5 py-3 text-white hover:bg-primary-pink/90 transition"
-                >
-              Επιστροφή σε όλα
-            </Link>
-                  </div>
+          <EmptyState
+            title="Δεν βρέθηκαν αποτελέσματα"
+            description="Δοκιμάστε άλλη λέξη ή αλλάξτε κατηγορία/ηλικία."
+            action={{
+              label: "Επιστροφή σε όλα",
+              href: "/gia-goneis",
+            }}
+          />
         ) : (
-          <>
-            <ContentList items={itemsWithImageUrls} title={title} />
-            {/* Pagination */}
-            {totalPages > 1 && (
-              <Pagination currentPage={validatedCurrentPage} totalPages={totalPages} />
-            )}
-          </>
+          <LoadMoreContent
+            initialItems={itemsWithImageUrls}
+            initialTotal={total}
+            initialTitle={title}
+          />
         )}
 
         {/* Quick Tips list */}
-        {quickTips ? (
-          (() => {
-            const validItems =
-              quickTips.items?.filter((item: any) => item && item.slug && item.title) || [];
-            return validItems.length > 0 ? (
-          <section className="space-y-6">
-            <div className="flex items-center justify-between gap-4">
-              <h2 className="text-2xl sm:text-3xl font-bold text-text-dark">
-                {quickTips.title || "Γρήγορες λύσεις (5')"}
-              </h2>
-            </div>
-            {quickTips.description && (
-              <p className="text-text-medium">{quickTips.description}</p>
-            )}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                  {validItems.map((item: any, idx: number) => {
-                    // Build the correct URL based on content type
-                    let href = "#";
-                    if (item.slug) {
-                      if (item._type === "article") {
-                        href = `/gia-goneis/${item.slug}`;
-                      } else if (item._type === "activity") {
-                        href = `/drastiriotites/${item.slug}`;
-                      } else if (item._type === "printable") {
-                        href = `/drastiriotites/printables/${item.slug}`;
-                      } else if (item._type === "recipe") {
-                        href = `/gia-goneis/recipes/${item.slug}`;
-                      }
-                    }
-
-                    // Get image URL
-                    const imageUrl = item.coverImage
-                      ? urlFor(item.coverImage).width(400).height(300).url()
-                      : null;
-
-                    // Playful color variations for cards
-                    const colorVariants = [
-                      "from-pink-100 to-pink-50 border-pink-200",
-                      "from-blue-100 to-blue-50 border-blue-200",
-                      "from-yellow-100 to-yellow-50 border-yellow-200",
-                      "from-green-100 to-green-50 border-green-200",
-                    ];
-                    const colorClass = colorVariants[idx % colorVariants.length];
-
-                    return (
-                <Link
-                        key={item._id || `item-${idx}`}
-                        href={href}
-                        className="group relative bg-white rounded-2xl overflow-hidden border-2 border-transparent hover:border-primary-pink/50 hover:shadow-xl transition-all duration-300 cursor-pointer flex flex-col h-full transform hover:-translate-y-2"
-                      >
-                        {/* Number Badge */}
-                        <div className="absolute top-3 left-3 z-10 bg-primary-pink text-white rounded-full w-10 h-10 flex items-center justify-center font-bold text-lg shadow-lg">
-                          {idx + 1}
-                        </div>
-
-                        {/* Image Section */}
-                        <div
-                          className={`relative w-full h-48 bg-gradient-to-br ${colorClass} overflow-hidden`}
-                        >
-                          {imageUrl ? (
-                            <Image
-                              src={imageUrl}
-                              alt={item.title}
-                              fill
-                              className="object-cover group-hover:scale-110 transition-transform duration-500"
-                              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-                            />
-                          ) : (
-                            <div className="absolute inset-0 flex items-center justify-center">
-                              <div className="text-center">
-                                <div className="text-5xl mb-2">
-                                  {item._type === "recipe"
-                                    ? "🍳"
-                      : item._type === "activity"
-                                      ? "🎨"
-                                      : "📄"}
-                                </div>
-                              </div>
-                            </div>
-                          )}
-                          {/* Gradient overlay for better text readability */}
-                          <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                        </div>
-
-                        {/* Content Section */}
-                        <div className="p-5 flex-1 flex flex-col bg-white">
-                          <h3 className="text-base font-bold text-text-dark line-clamp-2 mb-2 group-hover:text-primary-pink transition-colors">
-                            {item.title}
-                          </h3>
-
-                          {/* Content Type Badge */}
-                          <div className="mt-auto pt-3 border-t border-border/30">
-                            <span className="inline-flex items-center gap-1.5 text-xs font-medium text-text-medium">
-                              {item._type === "recipe" && "🍳 Συνταγή"}
-                              {item._type === "activity" && "🎨 Δραστηριότητα"}
-                              {item._type === "article" && "📄 Άρθρο"}
-                              {item._type === "printable" && "🖨️ Εκτυπώσιμο"}
-                            </span>
-                          </div>
-                        </div>
-                </Link>
-                    );
-                  })}
-                </div>
-              </section>
-            ) : (
-              <section className="space-y-6">
-                <div className="flex items-center justify-between gap-4">
-                  <h2 className="text-2xl sm:text-3xl font-bold text-text-dark">
-                    {quickTips.title || "Γρήγορες λύσεις (5')"}
-                  </h2>
-                </div>
-                <div className="bg-yellow-50 border border-yellow-200 rounded-card p-4">
-                  <p className="text-sm text-yellow-800">
-                    ⚠️ Collection found but no valid items to display. Make sure all items are
-                    published and have slugs.
-                  </p>
-            </div>
-          </section>
-            );
-          })()
-        ) : (
-          <section className="space-y-6">
-            <div className="flex items-center justify-between gap-4">
-              <h2 className="text-2xl sm:text-3xl font-bold text-text-dark">
-                Γρήγορες λύσεις (5')
-              </h2>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {[
-                "3 φράσεις για ήρεμες μεταβάσεις",
-                "Μικρά παιχνίδια λεξιλογίου",
-                "Απαλά όρια χωρίς θυμούς",
-                "Ρουτίνα ύπνου σε 4 βήματα",
-              ].map((tip, idx) => (
-                <div
-                  key={idx}
-                  className="bg-background-white rounded-card p-4 shadow-subtle border border-border/50 flex items-center gap-3 opacity-60"
-                >
-                  <span className="text-lg font-semibold text-primary-pink flex-shrink-0">
-                    {idx + 1}.
-                  </span>
-                  <p className="text-text-dark">{tip}</p>
-                </div>
-              ))}
-            </div>
-            <div className="bg-background-light rounded-card p-6 border border-border/50">
-              <p className="text-sm text-text-medium text-center">
-                <strong className="text-text-dark">
-                  Δημιουργήστε μια Curated Collection στο Sanity Studio:
-                </strong>
-                <br />
-                <span className="text-text-light mt-2 block">
-                  • Placement:{" "}
-                  <code className="bg-background-white px-2 py-1 rounded text-xs">
-                    "quick-tips"
-                  </code>{" "}
-                  ή{" "}
-                  <code className="bg-background-white px-2 py-1 rounded text-xs">
-                    "parentsPageQuickTips"
-                  </code>
-                  <br />
-                  • Προσθέστε 4+ άρθρα/δραστηριότητες/συνταγές για να εμφανίζονται εδώ
-                </span>
-              </p>
-            </div>
-          </section>
-        )}
+        <QuickTipsSection quickTips={quickTips} />
 
         {/* Support / CTA */}
         <section className="space-y-4 bg-background-white rounded-card p-6 shadow-subtle border border-border/50">
@@ -468,17 +281,28 @@ export default async function GiaGoneisPage({ searchParams }: PageProps) {
             name: title,
             description: "Σύντομες συμβουλές & πρακτικές ιδέες για την καθημερινότητα με το παιδί",
             numberOfItems: total,
-            itemListElement: itemsWithImageUrls.slice(0, 10).map((item, index) => ({
-              "@type": "ListItem",
-              position: index + 1,
-              item: {
-                "@type": item._type === "article" ? "Article" : item._type === "recipe" ? "Recipe" : "CreativeWork",
-                "@id": `${process.env.NEXT_PUBLIC_SITE_URL || "https://mikroimathites.gr"}/gia-goneis${item._type === "recipe" ? `/recipes` : ""}/${item.slug}`,
-                name: item.title,
-                description: item.excerpt || item.summary || "",
-                image: item.imageUrl || undefined,
-              },
-            })),
+            itemListElement: itemsWithImageUrls.slice(0, 9).map((item, index) => {
+              const contentType = getContentType(item);
+              const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://mikroimathites.gr";
+              const itemUrl = getContentUrl(contentType, item.slug);
+              
+              // Map content type to Schema.org type
+              const schemaType = contentType === "article" ? "Article" 
+                : contentType === "recipe" ? "Recipe" 
+                : "CreativeWork";
+              
+              return {
+                "@type": "ListItem",
+                position: index + 1,
+                item: {
+                  "@type": schemaType,
+                  "@id": `${baseUrl}${itemUrl}`,
+                  name: item.title,
+                  description: item.excerpt || item.summary || "",
+                  image: item.imageUrl || undefined,
+                },
+              };
+            }),
           }),
         }}
       />

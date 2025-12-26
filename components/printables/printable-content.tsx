@@ -72,11 +72,26 @@ const portableTextComponents = {
 };
 
 export function PrintableContent({ printable }: PrintableContentProps) {
-  const handleDownload = () => {
-    if (printable.file?.asset?._ref) {
-      // Get the file URL from Sanity
-      const fileUrl = urlFor(printable.file).url();
-      window.open(fileUrl, "_blank");
+  const handleDownload = async () => {
+    if (printable.file) {
+      try {
+        // Fetch file URL from API
+        const response = await fetch(`/api/printables/${printable.slug}/download`);
+        if (response.ok) {
+          const data = await response.json();
+          if (data.url) {
+            // Create a temporary link and trigger download
+            const link = document.createElement('a');
+            link.href = data.url;
+            link.download = `${printable.slug}.pdf`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+          }
+        }
+      } catch (error) {
+        console.error("Error downloading file:", error);
+      }
     }
   };
 

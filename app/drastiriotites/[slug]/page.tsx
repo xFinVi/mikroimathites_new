@@ -2,7 +2,8 @@ import { notFound } from "next/navigation";
 import { Container } from "@/components/ui/container";
 import { PageWrapper } from "@/components/pages/page-wrapper";
 import { getActivityBySlug, getActivities } from "@/lib/content";
-import { urlFor } from "@/lib/sanity/image-url";
+import { generateImageUrl } from "@/lib/sanity/image-url";
+import { DRASTIRIOTITES_CONSTANTS } from "@/lib/constants/drastiriotites";
 import Image from "next/image";
 import Link from "next/link";
 import { ActivityContent } from "@/components/activities/activity-content";
@@ -34,9 +35,11 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   }
 
   const seo = activity.seo;
-  const ogImage = activity.coverImage
-    ? urlFor(activity.coverImage).width(1200).height(630).url()
-    : undefined;
+  const ogImage = generateImageUrl(
+    activity.coverImage,
+    DRASTIRIOTITES_CONSTANTS.IMAGE_SIZES.OG_IMAGE.width,
+    DRASTIRIOTITES_CONSTANTS.IMAGE_SIZES.OG_IMAGE.height
+  );
 
   return {
     title: seo?.title || activity.title,
@@ -66,9 +69,17 @@ export default async function ActivityPage({ params }: PageProps) {
     notFound();
   }
 
-  const coverImageUrl = activity.coverImage
-    ? urlFor(activity.coverImage).width(1200).height(600).url()
-    : null;
+  const coverImageUrl = generateImageUrl(
+    activity.coverImage,
+    DRASTIRIOTITES_CONSTANTS.IMAGE_SIZES.HERO.width,
+    DRASTIRIOTITES_CONSTANTS.IMAGE_SIZES.HERO.height
+  );
+
+  const secondaryImageUrl = generateImageUrl(
+    activity.secondaryImage,
+    DRASTIRIOTITES_CONSTANTS.IMAGE_SIZES.CARD.width,
+    DRASTIRIOTITES_CONSTANTS.IMAGE_SIZES.CARD.height
+  );
 
   return (
     <PageWrapper>
@@ -93,7 +104,7 @@ export default async function ActivityPage({ params }: PageProps) {
         )}
 
         <Container className={`py-8 sm:py-12 md:py-16 ${!coverImageUrl ? 'pt-16 sm:pt-20 md:pt-24' : ''}`}>
-          <div className="max-w-4xl mx-auto">
+          <div className="max-w-6xl mx-auto">
             {/* Back Link */}
             <Link
               href="/drastiriotites"
@@ -140,7 +151,7 @@ export default async function ActivityPage({ params }: PageProps) {
             </header>
 
             {/* Activity Content */}
-            <ActivityContent activity={activity} />
+            <ActivityContent activity={activity} secondaryImageUrl={secondaryImageUrl} />
 
             {/* Share Buttons */}
             <ShareButtons

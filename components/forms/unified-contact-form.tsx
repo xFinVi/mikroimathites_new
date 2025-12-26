@@ -15,6 +15,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
+import { SuccessMessage } from "./success-message";
 
 type SubmissionType = "video-idea" | "feedback" | "question" | "";
 
@@ -202,11 +203,7 @@ export function UnifiedContactForm() {
     };
 
     return (
-      <div className="bg-accent-green/10 border-2 border-accent-green rounded-card p-8 text-center">
-        <div className="text-5xl mb-4">{success.icon}</div>
-        <h3 className="text-2xl font-bold text-text-dark mb-2">{success.title}</h3>
-        <p className="text-text-medium">{success.message}</p>
-      </div>
+      <SuccessMessage title={success.title} message={success.message} />
     );
   }
 

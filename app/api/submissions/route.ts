@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase/server";
 import { logger } from "@/lib/utils/logger";
+import { sendSubmissionNotificationToAdmin } from "@/lib/email/resend";
 
 type IncomingType =
   | "video-idea"
@@ -79,7 +80,7 @@ export async function POST(req: Request) {
   const referer = req.headers.get("referer");
   const finalSourcePage = source_page || referer || null;
 
-  const { error } = await supabaseAdmin
+  const { data: submission, error } = await supabaseAdmin
     .from("submissions")
     .insert({
       type: dbType,
@@ -93,14 +94,31 @@ export async function POST(req: Request) {
       content_slug: content_slug || null,
       is_approved: publish_consent || false,
       status: "new",
-    });
+    })
+    .select()
+    .single();
 
   if (error) {
     logger.error("Supabase insert error", error);
     return NextResponse.json({ error: "Failed to submit" }, { status: 500 });
   }
 
-  return NextResponse.json({ ok: true });
+  // Send email notification to admin (non-blocking)
+  if (submission) {
+    sendSubmissionNotificationToAdmin({
+      type: dbType,
+      name: name || null,
+      email: email || null,
+      message,
+      topic: dbTopic || null,
+      submissionId: submission.id,
+    }).catch((err) => {
+      // Log but don't fail the request if email fails
+      logger.error("Failed to send notification email", err);
+    });
+  }
+
+  return NextResponse.json({ ok: true, id: submission?.id });
 }
 
 // Admin listing placeholder (not exposed publicly for security)

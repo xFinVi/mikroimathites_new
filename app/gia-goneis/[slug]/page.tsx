@@ -2,7 +2,8 @@ import { notFound } from "next/navigation";
 import { Container } from "@/components/ui/container";
 import { PageWrapper } from "@/components/pages/page-wrapper";
 import { getArticleBySlug, getArticles } from "@/lib/content";
-import { urlFor } from "@/lib/sanity/image-url";
+import { generateImageUrl } from "@/lib/sanity/image-url";
+import { GIA_GONEIS_CONSTANTS } from "@/lib/constants/gia-goneis";
 import Image from "next/image";
 import Link from "next/link";
 import { PortableText } from "@portabletext/react";
@@ -36,9 +37,11 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   }
 
   const seo = article.seo;
-  const ogImage = article.coverImage
-    ? urlFor(article.coverImage).width(1200).height(630).url()
-    : undefined;
+  const ogImage = generateImageUrl(
+    article.coverImage,
+    GIA_GONEIS_CONSTANTS.IMAGE_SIZES.OG_IMAGE.width,
+    GIA_GONEIS_CONSTANTS.IMAGE_SIZES.OG_IMAGE.height
+  ) || undefined;
 
   return {
     title: seo?.title || article.title,
@@ -69,9 +72,11 @@ export default async function ArticlePage({ params }: PageProps) {
     notFound();
   }
 
-  const coverImageUrl = article.coverImage
-    ? urlFor(article.coverImage).width(1200).height(600).url()
-    : null;
+  const coverImageUrl = generateImageUrl(
+    article.coverImage,
+    GIA_GONEIS_CONSTANTS.IMAGE_SIZES.HERO.width,
+    GIA_GONEIS_CONSTANTS.IMAGE_SIZES.HERO.height
+  );
 
   return (
     <PageWrapper>

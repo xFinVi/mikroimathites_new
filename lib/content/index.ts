@@ -121,6 +121,21 @@ export interface Recipe {
   relatedContent?: RelatedContentItem[];
 }
 
+/**
+ * Activity Step - New structured format
+ * Each step can have an optional title, content (PortableText), and image
+ */
+export interface ActivityStep {
+  _type: "activityStep";
+  _key?: string;
+  title?: string;
+  content?: unknown; // PortableText blocks
+  image?: unknown; // Sanity image
+}
+
+/**
+ * Activity - Supports both new structured steps and legacy PortableText format
+ */
 export interface Activity {
   _id: string;
   title: string;
@@ -129,10 +144,16 @@ export interface Activity {
   duration?: string;
   goals?: string[];
   materials?: string[];
-  steps?: unknown;
+  steps?: unknown; // Can be ActivityStep[] (new) or PortableText blocks (legacy)
   safetyNotes?: string;
   coverImage?: unknown;
   secondaryImage?: unknown;
+  enableCarousel?: boolean;
+  carouselImages?: Array<{
+    asset?: unknown;
+    alt?: string;
+    caption?: string;
+  }>;
   ageGroups?: AgeGroup[];
   tags?: Tag[];
   category?: Category;
@@ -244,6 +265,27 @@ export interface PageSettings {
       startDate?: string;
       endDate?: string;
     };
+    featuredContent?: Array<{
+      _type: "article" | "recipe" | "activity" | "printable";
+      _id: string;
+      title: string;
+      slug: string;
+      coverImage?: unknown;
+      secondaryImage?: unknown;
+      excerpt?: string;
+      summary?: string;
+      author?: {
+        _id: string;
+        name: string;
+        slug?: string;
+        profilePicture?: unknown;
+      };
+      category?: {
+        _id: string;
+        title: string;
+        slug: string;
+      };
+    }>;
   };
   forParents?: {
     hero?: {
@@ -393,6 +435,193 @@ export async function getCuratedCollectionsByPlacement(
 export async function getPageSettings(): Promise<PageSettings | null> {
   if (!safeClient) return null;
   return safeClient.fetch<PageSettings | null>(pageSettingsQuery);
+}
+
+// Home Hero
+export interface HomeHero {
+  image?: unknown;
+}
+
+export async function getHomeHero(): Promise<HomeHero | null> {
+  if (!safeClient) return null;
+  return safeClient.fetch<HomeHero | null>(
+    `*[_type == "homeHero" && !(_id in path("drafts.**"))][0]{image}`
+  );
+}
+
+// Featured Content Section
+export interface FeaturedContentSection {
+  title?: string;
+  subtitle?: string;
+  contentItems?: Array<{
+    contentType: "article" | "activity" | "printable" | "recipe";
+    article?: Article;
+    activity?: Activity;
+    printable?: Printable;
+    recipe?: Recipe;
+  }>;
+}
+
+export async function getFeaturedContentSection(): Promise<FeaturedContentSection | null> {
+  if (!safeClient) return null;
+  return safeClient.fetch<FeaturedContentSection | null>(
+    `*[_type == "featuredContentSection" && !(_id in path("drafts.**"))][0]{
+      title,
+      subtitle,
+      "contentItems": contentItems[]{
+        contentType,
+        "article": article-> {
+          _type,
+          _id,
+          title,
+          "slug": slug.current,
+          coverImage,
+          secondaryImage,
+          excerpt,
+          summary,
+          "author": author-> { _id, name, "slug": slug.current, profilePicture },
+          "category": category-> { _id, title, "slug": slug.current }
+        },
+        "activity": activity-> {
+          _type,
+          _id,
+          title,
+          "slug": slug.current,
+          coverImage,
+          secondaryImage,
+          excerpt,
+          summary,
+          "author": author-> { _id, name, "slug": slug.current, profilePicture },
+          "category": category-> { _id, title, "slug": slug.current }
+        },
+        "printable": printable-> {
+          _type,
+          _id,
+          title,
+          "slug": slug.current,
+          coverImage,
+          secondaryImage,
+          excerpt,
+          summary,
+          "author": author-> { _id, name, "slug": slug.current, profilePicture },
+          "category": category-> { _id, title, "slug": slug.current }
+        },
+        "recipe": recipe-> {
+          _type,
+          _id,
+          title,
+          "slug": slug.current,
+          coverImage,
+          secondaryImage,
+          excerpt,
+          summary,
+          "author": author-> { _id, name, "slug": slug.current, profilePicture },
+          "category": category-> { _id, title, "slug": slug.current }
+        }
+      }
+    }`
+  );
+}
+
+// For Parents Section
+export interface ForParentsSection {
+  title?: string;
+  subtitle?: string;
+  viewAllText?: string;
+  viewAllLink?: string;
+  articles?: Article[];
+}
+
+export async function getForParentsSection(): Promise<ForParentsSection | null> {
+  if (!safeClient) return null;
+  return safeClient.fetch<ForParentsSection | null>(
+    `*[_type == "forParentsSection" && !(_id in path("drafts.**"))][0]{
+      title,
+      subtitle,
+      viewAllText,
+      viewAllLink,
+      "articles": articles[]-> {
+        _type,
+        _id,
+        title,
+        "slug": slug.current,
+        coverImage,
+        secondaryImage,
+        excerpt,
+        summary,
+        "author": author-> { _id, name, "slug": slug.current, profilePicture },
+        "category": category-> { _id, title, "slug": slug.current }
+      }
+    }`
+  );
+}
+
+// Activities & Printables Section
+export interface ActivitiesPrintablesSection {
+  title?: string;
+  subtitle?: string;
+  viewAllText?: string;
+  viewAllLink?: string;
+  contentItems?: Array<{
+    contentType: "activity" | "printable";
+    activity?: Activity;
+    printable?: Printable;
+  }>;
+}
+
+export async function getActivitiesPrintablesSection(): Promise<ActivitiesPrintablesSection | null> {
+  if (!safeClient) return null;
+  const result = await safeClient.fetch<ActivitiesPrintablesSection | null>(
+    `*[_type == "activitiesPrintablesSection" && !(_id in path("drafts.**"))][0]{
+      title,
+      subtitle,
+      viewAllText,
+      viewAllLink,
+      "contentItems": contentItems[]{
+        contentType,
+        "activity": activity-> {
+          _type,
+          _id,
+          title,
+          "slug": slug.current,
+          coverImage,
+          secondaryImage,
+          excerpt,
+          summary,
+          "author": author-> { _id, name, "slug": slug.current, profilePicture },
+          "category": category-> { _id, title, "slug": slug.current }
+        },
+        "printable": printable-> {
+          _type,
+          _id,
+          title,
+          "slug": slug.current,
+          coverImage,
+          secondaryImage,
+          excerpt,
+          summary,
+          "author": author-> { _id, name, "slug": slug.current, profilePicture },
+          "category": category-> { _id, title, "slug": slug.current }
+        }
+      }[defined(activity) || defined(printable)]
+    }`
+  );
+  
+  // Filter out items where the referenced document doesn't exist, is a draft, or doesn't have a slug
+  // Note: We don't filter by coverImage - components handle missing images with placeholders
+  if (result?.contentItems) {
+    result.contentItems = result.contentItems.filter((item) => {
+      const content = item.activity || item.printable;
+      // Only include if content exists, has a slug (is published), and is not a draft
+      // If content is null, it means the reference is broken or points to a non-existent document
+      if (!content) return false;
+      if (!content.slug) return false; // No slug means unpublished
+      if (content._id?.startsWith('drafts.')) return false; // Draft document
+      return true;
+    });
+  }
+  
+  return result;
 }
 
 // Category functions

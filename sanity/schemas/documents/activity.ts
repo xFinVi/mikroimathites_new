@@ -1,5 +1,6 @@
 import { defineField, defineType } from "sanity";
 import { seo } from "../objects/seo";
+import { activityStep } from "../objects/activity-step";
 
 export const activity = defineType({
   name: "activity",
@@ -105,9 +106,12 @@ export const activity = defineType({
     }),
     defineField({
       name: "steps",
-      title: "Steps",
+      title: "Steps / Instructions",
       type: "array",
+      description: "Add steps for the activity. Each step can have an optional title, content, and image.",
       of: [
+        { type: "activityStep" },
+        // Keep legacy support for old PortableText format
         { type: "block" },
         { type: "image", options: { hotspot: true } },
         {
@@ -129,11 +133,52 @@ export const activity = defineType({
           ],
         },
       ],
+      validation: (Rule) => Rule.min(1).error("At least one step is required"),
     }),
     defineField({
       name: "safetyNotes",
       title: "Safety Notes",
       type: "text",
+    }),
+    defineField({
+      name: "enableCarousel",
+      title: "Enable Image Carousel",
+      type: "boolean",
+      initialValue: false,
+      description: "If enabled, display a carousel of images at the bottom of the activity page",
+    }),
+    defineField({
+      name: "carouselImages",
+      title: "Carousel Images",
+      type: "array",
+      of: [
+        {
+          type: "image",
+          options: { hotspot: true },
+          fields: [
+            defineField({
+              name: "alt",
+              title: "Alt Text",
+              type: "string",
+              description: "Important for accessibility",
+            }),
+            defineField({
+              name: "caption",
+              title: "Caption",
+              type: "string",
+            }),
+          ],
+        },
+      ],
+      validation: (Rule) =>
+        Rule.custom((images, context) => {
+          const parent = context.parent as { enableCarousel?: boolean };
+          if (parent?.enableCarousel && (!images || images.length < 3)) {
+            return "At least 3 images are required when carousel is enabled";
+          }
+          return true;
+        }),
+      hidden: ({ parent }) => !parent?.enableCarousel,
     }),
   ],
 });

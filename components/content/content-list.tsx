@@ -1,10 +1,11 @@
 import { Article, Recipe, Activity } from "@/lib/content";
 import { ArticleCard } from "@/components/articles/article-card";
 import { ActivityCard } from "@/components/activities/activity-card";
+import { ContentType, getContentUrl } from "@/lib/utils/content-url";
 import Link from "next/link";
 import Image from "next/image";
 
-type ContentItem = (Article & { _contentType?: 'article'; imageUrl?: string | null }) | (Recipe & { _contentType?: 'recipe'; imageUrl?: string | null }) | (Activity & { _contentType?: 'activity'; imageUrl?: string | null });
+type ContentItem = (Article & { _contentType?: ContentType; imageUrl?: string | null }) | (Recipe & { _contentType?: ContentType; imageUrl?: string | null }) | (Activity & { _contentType?: ContentType; imageUrl?: string | null });
 
 interface ContentListProps {
   items: ContentItem[];
@@ -16,7 +17,7 @@ function RecipeCard({ recipe }: { recipe: Recipe & { imageUrl?: string | null } 
   const imageUrl = recipe.imageUrl || null;
 
   return (
-    <Link href={`/gia-goneis/recipes/${recipe.slug}`}>
+    <Link href={getContentUrl("recipe", recipe.slug)}>
       <div className="bg-background-white rounded-[20px] overflow-hidden border-2 border-white hover:shadow-lg transition-all duration-300 cursor-pointer group flex flex-col h-full">
         {/* Image Section */}
         <div className="relative w-full h-64 bg-background-light overflow-hidden flex-shrink-0">
@@ -66,7 +67,7 @@ function ActivityCardCompact({ activity }: { activity: Activity & { imageUrl?: s
   const imageUrl = activity.imageUrl || null;
 
   return (
-    <Link href={`/drastiriotites/${activity.slug}`}>
+    <Link href={getContentUrl("activity", activity.slug)}>
       <div className="bg-background-white rounded-[20px] overflow-hidden border-2 border-white hover:shadow-lg transition-all duration-300 cursor-pointer group flex flex-col h-full">
         {/* Image Section */}
         <div className="relative w-full h-64 bg-background-light overflow-hidden flex-shrink-0">
@@ -134,11 +135,12 @@ export function ContentList({ items, title }: ContentListProps) {
       <h2 className="text-2xl sm:text-3xl font-bold text-text-dark">{title}</h2>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {items.map((item) => {
-          if (item._contentType === 'recipe' || ('ingredients' in item && !('steps' in item))) {
-            return <RecipeCard key={item._id} recipe={item as Recipe} />;
+          // Use _contentType field if available, otherwise fall back to type detection
+          if (item._contentType === 'recipe' || (!item._contentType && 'ingredients' in item && !('steps' in item))) {
+            return <RecipeCard key={item._id} recipe={item as Recipe & { imageUrl?: string | null }} />;
           }
-          if (item._contentType === 'activity' || ('steps' in item && 'materials' in item)) {
-            return <ActivityCardCompact key={item._id} activity={item as Activity} />;
+          if (item._contentType === 'activity' || (!item._contentType && 'steps' in item && 'materials' in item)) {
+            return <ActivityCardCompact key={item._id} activity={item as Activity & { imageUrl?: string | null }} />;
           }
           return <ArticleCard key={item._id} article={item as Article} compact />;
         })}

@@ -2,9 +2,9 @@
 
 import { useState, useRef, useEffect } from "react";
 import { Play, Pause, Volume2, VolumeX, ExternalLink } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import Image from "next/image";
+import { VIDEO_CONSTANTS } from "@/lib/constants/home-page";
 
 interface VideoSource {
   type: "youtube" | "local";
@@ -41,7 +41,7 @@ export function VideoSneakPeek({
 
     const interval = setInterval(() => {
       setCurrentIndex((prev) => (prev + 1) % videos.length);
-    }, 15000); // 15 seconds per video
+    }, VIDEO_CONSTANTS.AUTO_ADVANCE_INTERVAL);
 
     return () => clearInterval(interval);
   }, [isPlaying, videos.length]);
@@ -85,11 +85,14 @@ export function VideoSneakPeek({
         onMouseLeave={() => setIsHovered(false)}
       >
         {/* Video Player - Full Screen */}
-        <div className="absolute inset-0 w-full h-full bg-black">
+        <div className="absolute inset-0 w-full h-full bg-black overflow-hidden">
           {currentVideo.type === "youtube" ? (
             <iframe
               src={`https://www.youtube.com/embed/${currentVideo.url}?autoplay=1&mute=${isMuted ? 1 : 0}&loop=1&playlist=${currentVideo.url}&controls=1&modestbranding=1&rel=0&showinfo=0&enablejsapi=1&start=${currentVideo.startTime || 0}`}
-              className="absolute inset-0 w-full h-full"
+              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[177.77777778vh] h-[100vh] min-w-full min-h-[56.25vw]"
+              style={{
+                pointerEvents: "auto",
+              }}
               allow="autoplay; encrypted-media; picture-in-picture"
               allowFullScreen
               title={currentVideo.title || "YouTube video"}
@@ -100,7 +103,7 @@ export function VideoSneakPeek({
                 videoRefs.current[currentIndex] = el;
               }}
               src={currentVideo.url}
-              className="absolute inset-0 w-full h-full object-cover"
+              className="absolute inset-0 w-full h-full object-cover object-center"
               loop
               autoPlay
               muted={isMuted}
@@ -120,23 +123,6 @@ export function VideoSneakPeek({
               }}
             />
           )}
-
-          {/* Header - Overlay on Video */}
-          {/* <div className="absolute top-0 left-0 right-0 z-20 pt-12 md:pt-16 px-0">
-            <div className="w-full text-center">
-              <div className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-primary-pink/30 via-secondary-blue/30 to-accent-yellow/30 backdrop-blur-md text-white rounded-full text-sm font-bold shadow-2xl border border-white/20 mb-6">
-                <span className="text-xl">🎬</span>
-                <span>Sneak Peek</span>
-                <span className="text-xl">✨</span>
-              </div>
-              <h2 className="text-4xl sm:text-5xl md:text-6xl font-bold text-white mb-4 bg-gradient-to-r from-white via-primary-pink/90 to-white bg-clip-text text-transparent">
-                {title}
-              </h2>
-              <p className="text-lg sm:text-xl text-white/90 max-w-3xl mx-auto leading-relaxed drop-shadow-lg">
-                {subtitle}
-              </p>
-            </div>
-          </div> */}
 
           {/* Enhanced Overlay Controls - Bing Bunny Style */}
           <div 

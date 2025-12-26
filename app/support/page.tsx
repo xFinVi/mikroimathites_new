@@ -28,7 +28,7 @@ export default async function SupportPage() {
         <Container className="relative z-10 pt-12 sm:pt-16 md:pt-20">
           <div className="flex flex-col items-center text-center px-4">
             {/* Minimal Text - Top with better readability */}
-            <div className="space-y-4 max-w-2xl mb-8">
+            <div className="space-y-4 max-w-2xl mb-8 mt-8 sm:mt-12 md:mt-16">
               <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-text-dark drop-shadow-[0_2px_8px_rgba(255,255,255,0.8)]">
                 Η υποστήριξή σας μετράει! ❤️
               </h1>

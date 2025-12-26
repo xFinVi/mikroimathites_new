@@ -3,20 +3,41 @@ import { PageWrapper } from "@/components/pages/page-wrapper";
 import { PageHeader } from "@/components/pages/page-header";
 import { generateMetadataFor } from "@/lib/seo/generate-metadata";
 import { getAuthors, type Author } from "@/lib/content";
+import { generateImageUrl } from "@/lib/sanity/image-url";
+import { SXETIKA_CONSTANTS } from "@/lib/constants/sxetika";
+import { CONTACT_CONSTANTS } from "@/lib/constants/contact";
+import { logger } from "@/lib/utils/logger";
 import Image from "next/image";
 import Link from "next/link";
-import { urlFor } from "@/lib/sanity/image-url";
 
 export const metadata = generateMetadataFor("sxetika");
 
+// ISR revalidation - page doesn't use dynamic APIs, so ISR is safe
+export const revalidate = 600; // 10 minutes, same as other content pages
+
+// Explicit type for authors with image URLs
+type AuthorWithImageUrl = Author & { imageUrl: string | null };
+
 export default async function SxetikaPage() {
-  const authors = await getAuthors();
+  // Error handling for authors (non-critical data)
+  let authors: Author[] = [];
+  try {
+    authors = await getAuthors();
+  } catch (error) {
+    // Log error for debugging (logger is safe in server components)
+    logger.error("Failed to fetch authors for Sxetika page:", error);
+    // Page continues to render - team section just won't show (graceful degradation)
+  }
   
   // Pre-generate image URLs on server to avoid hydration mismatches
-  const authorsWithImageUrls = authors.map(author => ({
+  const authorsWithImageUrls: AuthorWithImageUrl[] = authors.map(author => ({
     ...author,
     imageUrl: author.profilePicture 
-      ? urlFor(author.profilePicture).width(300).height(300).quality(90).url() 
+      ? generateImageUrl(
+          author.profilePicture,
+          SXETIKA_CONSTANTS.IMAGE_SIZES.AUTHOR_PROFILE.width,
+          SXETIKA_CONSTANTS.IMAGE_SIZES.AUTHOR_PROFILE.height
+        )
       : null,
   }));
 
@@ -26,7 +47,7 @@ export default async function SxetikaPage() {
       <div className="relative overflow-hidden bg-background-light">
         <div className="absolute inset-0">
           <Image
-            src="/images/background.png"
+            src={CONTACT_CONSTANTS.BACKGROUND_IMAGE_PATH}
             alt="Σχετικά background"
             fill
             className="object-cover"
@@ -186,7 +207,7 @@ export default async function SxetikaPage() {
             <div className="flex  justify-center gap-6">
               {authorsWithImageUrls.map((author) => {
                 // Use pre-generated image URL from server (no client-side generation)
-                const imageUrl = (author as Author & { imageUrl?: string | null }).imageUrl || null;
+                const imageUrl = author.imageUrl || null;
                 return (
                   <div
                     key={author._id}
@@ -196,17 +217,6 @@ export default async function SxetikaPage() {
                       <div className="relative w-32 h-32 mx-auto rounded-full overflow-hidden ring-4 ring-primary-pink/20 shadow-lg">
                         <Image
                           src={imageUrl}
-                          alt={author.name}
-                          fill
-                          className="object-cover"
-                          sizes="128px"
-                          priority
-                        />
-                      </div>
-                    ) : author.profilePicture ? (
-                      <div className="relative w-32 h-32 mx-auto rounded-full overflow-hidden ring-4 ring-primary-pink/20 shadow-lg">
-                        <Image
-                          src={urlFor(author.profilePicture).width(300).height(300).quality(90).url()}
                           alt={author.name}
                           fill
                           className="object-cover"

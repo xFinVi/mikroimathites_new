@@ -2,6 +2,7 @@ import { Container } from "@/components/ui/container";
 import { PageWrapper } from "@/components/pages/page-wrapper";
 import { PageHeader } from "@/components/pages/page-header";
 import { generateMetadataFor } from "@/lib/seo/generate-metadata";
+import { CONTACT_CONSTANTS } from "@/lib/constants/contact";
 import Image from "next/image";
 
 export const metadata = generateMetadataFor("privacy");
@@ -233,10 +234,10 @@ export default function PrivacyPage() {
             <p className="text-text-medium mt-4">
               Για να ασκήσετε οποιοδήποτε από αυτά τα δικαιώματα, επικοινωνήστε μαζί μας στο{" "}
               <a
-                href="mailto:info@mikroimathites.gr"
+                href={`mailto:${CONTACT_CONSTANTS.EMAIL}`}
                 className="text-primary-pink hover:underline font-semibold"
               >
-                info@mikroimathites.gr
+                {CONTACT_CONSTANTS.EMAIL}
               </a>
             </p>
           </section>
@@ -319,10 +320,10 @@ export default function PrivacyPage() {
               <p>
                 <strong>Email:</strong>{" "}
                 <a
-                  href="mailto:info@mikroimathites.gr"
+                  href={`mailto:${CONTACT_CONSTANTS.EMAIL}`}
                   className="text-primary-pink hover:underline"
                 >
-                  info@mikroimathites.gr
+                  {CONTACT_CONSTANTS.EMAIL}
                 </a>
               </p>
               <p>

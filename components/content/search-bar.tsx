@@ -5,6 +5,7 @@ import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import { Search, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { GIA_GONEIS_CONSTANTS } from "@/lib/constants/gia-goneis";
 
 export function SearchBar() {
   const searchParams = useSearchParams();
@@ -16,9 +17,10 @@ export function SearchBar() {
   // Update local state when URL search param changes (e.g., from browser back/forward)
   useEffect(() => {
     const urlSearch = searchParams.get("search") || "";
-    if (urlSearch !== searchQuery) {
-      setSearchQuery(urlSearch);
-    }
+    setSearchQuery((prev) => {
+      // Only update if different to avoid unnecessary re-renders
+      return urlSearch !== prev ? urlSearch : prev;
+    });
   }, [searchParams]);
 
   // Cleanup debounce timer on unmount
@@ -51,10 +53,10 @@ export function SearchBar() {
       clearTimeout(debounceTimerRef.current);
     }
 
-    // Debounce URL update (wait 500ms after user stops typing)
+    // Debounce URL update (wait after user stops typing)
     debounceTimerRef.current = setTimeout(() => {
       updateURL(value);
-    }, 500);
+    }, GIA_GONEIS_CONSTANTS.SEARCH_DEBOUNCE_MS);
   };
 
   const clearSearch = () => {

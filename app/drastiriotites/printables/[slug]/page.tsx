@@ -2,7 +2,8 @@ import { notFound } from "next/navigation";
 import { Container } from "@/components/ui/container";
 import { PageWrapper } from "@/components/pages/page-wrapper";
 import { getPrintableBySlug, getPrintables } from "@/lib/content";
-import { urlFor } from "@/lib/sanity/image-url";
+import { generateImageUrl } from "@/lib/sanity/image-url";
+import { DRASTIRIOTITES_CONSTANTS } from "@/lib/constants/drastiriotites";
 import Image from "next/image";
 import Link from "next/link";
 import { PrintableContent } from "@/components/printables/printable-content";
@@ -33,9 +34,11 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   }
 
   const seo = printable.seo;
-  const ogImage = printable.coverImage
-    ? urlFor(printable.coverImage).width(1200).height(630).url()
-    : undefined;
+  const ogImage = generateImageUrl(
+    printable.coverImage,
+    DRASTIRIOTITES_CONSTANTS.IMAGE_SIZES.OG_IMAGE.width,
+    DRASTIRIOTITES_CONSTANTS.IMAGE_SIZES.OG_IMAGE.height
+  );
 
   return {
     title: seo?.title || printable.title,
@@ -65,9 +68,11 @@ export default async function PrintablePage({ params }: PageProps) {
     notFound();
   }
 
-  const coverImageUrl = printable.coverImage
-    ? urlFor(printable.coverImage).width(1200).height(600).url()
-    : null;
+  const coverImageUrl = generateImageUrl(
+    printable.coverImage,
+    DRASTIRIOTITES_CONSTANTS.IMAGE_SIZES.HERO.width,
+    DRASTIRIOTITES_CONSTANTS.IMAGE_SIZES.HERO.height
+  );
 
   return (
     <PageWrapper>

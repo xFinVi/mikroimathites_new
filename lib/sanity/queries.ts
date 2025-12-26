@@ -67,8 +67,35 @@ export const activityFields = `
   duration,
   goals,
   materials,
-  steps,
+  steps[] {
+    // Handle both structured steps and legacy PortableText blocks
+    _type,
+    _key,
+    // Structured step fields (only present if _type == "activityStep")
+    title,
+    content[] {
+      ...,
+      _type == "image" => {
+        ...,
+        asset->
+      }
+    },
+    image {
+      asset,
+      alt,
+      caption
+    },
+    // Legacy PortableText fields (blocks have these directly)
+    ...,
+    asset->
+  },
   safetyNotes,
+  enableCarousel,
+  carouselImages[] {
+    asset,
+    alt,
+    caption
+  },
   "category": category-> { _id, title, "slug": slug.current },
   "relatedContent": relatedContent[]-> {
     _type,
@@ -105,7 +132,7 @@ export const QAItemFields = `
 // Article queries
 export const articlesQuery = groq`*[_type == "article" && defined(slug.current) && !(_id in path("drafts.**"))]|order(publishedAt desc){${articleFields}}`;
 export const articleBySlugQuery = groq`*[_type == "article" && slug.current == $slug && !(_id in path("drafts.**"))][0]{${articleFields}}`;
-export const featuredArticlesQuery = groq`*[_type == "article" && featured == true && defined(slug.current) && !(_id in path("drafts.**"))]|order(publishedAt desc)[0...10]{${articleFields}}`;
+export const featuredArticlesQuery = groq`*[_type == "article" && featured == true && defined(slug.current) && defined(coverImage) && !(_id in path("drafts.**"))]|order(publishedAt desc)[0...10]{${articleFields}}`;
 
 // Recipe queries
 export const recipesQuery = groq`*[_type == "recipe" && defined(slug.current) && !(_id in path("drafts.**"))]|order(publishedAt desc){${recipeFields}}`;
@@ -123,7 +150,9 @@ export const printableBySlugQuery = groq`*[_type == "printable" && slug.current 
 export const featuredPrintablesQuery = groq`*[_type == "printable" && featured == true && defined(slug.current) && defined(coverImage) && !(_id in path("drafts.**"))]|order(publishedAt desc)[0...10]{${printableFields}}`;
 
 // QA Item queries
-export const qaItemsQuery = groq`*[_type == "qaItem" && defined(publishedAt)]|order(publishedAt desc)[0...10]{${QAItemFields}}`;
+// Show published items (not in drafts path)
+// Note: publishedAt is optional - if not set, we use _updatedAt for ordering
+export const qaItemsQuery = groq`*[_type == "qaItem" && !(_id in path("drafts.**"))]|order(coalesce(publishedAt, _updatedAt) desc)[0...10]{${QAItemFields}}`;
 
 // Curated Collection queries
 export const curatedCollectionFields = `
@@ -151,69 +180,6 @@ export const curatedCollectionsByPlacementQuery = groq`*[_type == "curatedCollec
 
 // Page Settings query (singleton)
 export const pageSettingsFields = `
-  home {
-    hero {
-      type,
-      image,
-      video {
-        url,
-        thumbnail,
-        autoplay,
-        loop
-      },
-      overlay {
-        enabled,
-        opacity,
-        color
-      },
-      content {
-        title,
-        subtitle,
-        ctaText,
-        ctaLink,
-        alignment
-      }
-    },
-    featuredBanner {
-      enabled,
-      type,
-      title,
-      subtitle,
-      description,
-      primaryCta {
-        text,
-        link
-      },
-      secondaryCta {
-        text,
-        link
-      },
-      "contentRef": contentRef-> {
-        _type,
-        _id,
-        title,
-        "slug": slug.current,
-        coverImage,
-        excerpt,
-        summary
-      },
-      youtubeVideo {
-        videoId,
-        thumbnail
-      },
-      customImage,
-      backgroundColor,
-      customBackgroundColor
-    },
-    seasonalBanner {
-      enabled,
-      title,
-      subtitle,
-      image,
-      startDate,
-      endDate
-    }
-  },
   forParents {
     hero {
       type,
@@ -257,6 +223,123 @@ export const pageSettingsFields = `
 `;
 
 export const pageSettingsQuery = groq`*[_type == "pageSettings"][0]{${pageSettingsFields}}`;
+
+// Home Hero Query
+export const homeHeroQuery = groq`*[_type == "homeHero" && !(_id in path("drafts.**"))][0]{
+  image
+}`;
+
+// Featured Content Section Query
+export const featuredContentSectionQuery = groq`*[_type == "featuredContentSection" && !(_id in path("drafts.**"))][0]{
+  title,
+  subtitle,
+  "contentItems": contentItems[]{
+    contentType,
+    "article": article-> {
+      _type,
+      _id,
+      title,
+      "slug": slug.current,
+      coverImage,
+      secondaryImage,
+      excerpt,
+      summary,
+      "author": author-> { _id, name, "slug": slug.current, profilePicture },
+      "category": category-> { _id, title, "slug": slug.current }
+    },
+    "activity": activity-> {
+      _type,
+      _id,
+      title,
+      "slug": slug.current,
+      coverImage,
+      secondaryImage,
+      excerpt,
+      summary,
+      "author": author-> { _id, name, "slug": slug.current, profilePicture },
+      "category": category-> { _id, title, "slug": slug.current }
+    },
+    "printable": printable-> {
+      _type,
+      _id,
+      title,
+      "slug": slug.current,
+      coverImage,
+      secondaryImage,
+      excerpt,
+      summary,
+      "author": author-> { _id, name, "slug": slug.current, profilePicture },
+      "category": category-> { _id, title, "slug": slug.current }
+    },
+    "recipe": recipe-> {
+      _type,
+      _id,
+      title,
+      "slug": slug.current,
+      coverImage,
+      secondaryImage,
+      excerpt,
+      summary,
+      "author": author-> { _id, name, "slug": slug.current, profilePicture },
+      "category": category-> { _id, title, "slug": slug.current }
+    }
+  }
+}`;
+
+// For Parents Section Query
+export const forParentsSectionQuery = groq`*[_type == "forParentsSection" && !(_id in path("drafts.**"))][0]{
+  title,
+  subtitle,
+  viewAllText,
+  viewAllLink,
+  "articles": articles[]-> {
+    _type,
+    _id,
+    title,
+    "slug": slug.current,
+    coverImage,
+    secondaryImage,
+    excerpt,
+    summary,
+    "author": author-> { _id, name, "slug": slug.current, profilePicture },
+    "category": category-> { _id, title, "slug": slug.current }
+  }
+}`;
+
+// Activities & Printables Section Query
+export const activitiesPrintablesSectionQuery = groq`*[_type == "activitiesPrintablesSection" && !(_id in path("drafts.**"))][0]{
+  title,
+  subtitle,
+  viewAllText,
+  viewAllLink,
+  "contentItems": contentItems[]{
+    contentType,
+    "activity": activity-> {
+      _type,
+      _id,
+      title,
+      "slug": slug.current,
+      coverImage,
+      secondaryImage,
+      excerpt,
+      summary,
+      "author": author-> { _id, name, "slug": slug.current, profilePicture },
+      "category": category-> { _id, title, "slug": slug.current }
+    },
+    "printable": printable-> {
+      _type,
+      _id,
+      title,
+      "slug": slug.current,
+      coverImage,
+      secondaryImage,
+      excerpt,
+      summary,
+      "author": author-> { _id, name, "slug": slug.current, profilePicture },
+      "category": category-> { _id, title, "slug": slug.current }
+    }
+  }
+}`;
 
 // Category queries
 export const categoryFields = `

@@ -1,6 +1,5 @@
 import { defineField, defineType } from "sanity";
 import { hero } from "../objects/hero";
-import { featuredBanner } from "../objects/featuredBanner";
 
 export const pageSettings = defineType({
   name: "pageSettings",
@@ -9,65 +8,6 @@ export const pageSettings = defineType({
   // Singleton pattern - only one document
   // In Sanity Studio, you'll need to create this document once, then it becomes the only one
   fields: [
-    defineField({
-      name: "home",
-      title: "Home Page",
-      type: "object",
-      fields: [
-        defineField({
-          name: "hero",
-          title: "Hero",
-          type: "hero",
-        }),
-        defineField({
-          name: "featuredBanner",
-          title: "Featured Banner (Section 2)",
-          type: "featuredBanner",
-          description: "Large featured banner shown after the hero image. Can display YouTube videos, featured articles, or custom content.",
-        }),
-        defineField({
-          name: "seasonalBanner",
-          title: "Seasonal Banner",
-          type: "object",
-          fields: [
-            defineField({
-              name: "enabled",
-              title: "Enabled",
-              type: "boolean",
-              initialValue: false,
-            }),
-            defineField({
-              name: "title",
-              title: "Title",
-              type: "string",
-            }),
-            defineField({
-              name: "subtitle",
-              title: "Subtitle",
-              type: "string",
-            }),
-            defineField({
-              name: "image",
-              title: "Image",
-              type: "image",
-              options: { hotspot: true },
-            }),
-            defineField({
-              name: "startDate",
-              title: "Start Date",
-              type: "date",
-              description: "For future date-based scheduling",
-            }),
-            defineField({
-              name: "endDate",
-              title: "End Date",
-              type: "date",
-              description: "For future date-based scheduling",
-            }),
-          ],
-        }),
-      ],
-    }),
     defineField({
       name: "forParents",
       title: "For Parents Page",
