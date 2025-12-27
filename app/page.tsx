@@ -18,8 +18,9 @@ import { logger } from "@/lib/utils/logger";
 
 export const metadata = generateMetadataFor("home");
 
-// Add time-based revalidation as fallback (revalidates every hour)
-export const revalidate = 3600;
+// Add time-based revalidation as fallback (revalidates every 10 minutes)
+// Note: Changes will appear immediately if Sanity webhook is configured
+export const revalidate = 600;
 
 // Helper function to get featured content with fallback logic
 function getFeaturedContentWithFallback(

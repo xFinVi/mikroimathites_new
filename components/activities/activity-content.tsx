@@ -185,9 +185,7 @@ export function ActivityContent({ activity, secondaryImageUrl }: ActivityContent
   const hasSidebar = (activity.goals && activity.goals.length > 0) || (activity.materials && activity.materials.length > 0);
   const isStructured = activity.steps && hasStructuredSteps(activity.steps);
   const structuredSteps = isStructured ? (activity.steps as ActivityStep[]) : null;
-  
-  // Debug logging
-  
+
   return (
     <div className="space-y-8">
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">

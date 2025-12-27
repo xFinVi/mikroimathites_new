@@ -59,8 +59,9 @@ export function VideoIdeaForm() {
         const data = await res.json().catch(() => ({}));
         throw new Error(data?.error || "Αποτυχία αποστολής");
       }
-    } catch (err: any) {
-      setError(err.message || "Κάτι πήγε στραβά");
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Κάτι πήγε στραβά";
+      setError(message);
       setIsSubmitting(false);
       return;
     }

@@ -78,12 +78,9 @@ export default async function ArticlePage({ params }: PageProps) {
     GIA_GONEIS_CONSTANTS.IMAGE_SIZES.HERO.height
   );
 
-  // Extract category for type safety
-  const category: Category | undefined = article.category;
-  
-  // Type-safe article data
-  const articleTitle: string = article.title;
-  const articleExcerpt: string | undefined = article.excerpt;
+  // Extract category - TypeScript inference issue with Sanity fetch results
+  // The category is properly typed in the Article interface, but TypeScript
+  // sometimes infers it as unknown from Sanity fetch. We'll handle this in the component.
 
   return (
     <PageWrapper>
@@ -131,7 +128,7 @@ export default async function ArticlePage({ params }: PageProps) {
             </Link>
 
             {/* Article Header */}
-            <ArticleHeader article={article} category={category} />
+            <ArticleHeader article={article} />
 
             {/* Article Stats */}
             <ArticleStats article={article} />

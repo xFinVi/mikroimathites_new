@@ -48,8 +48,18 @@ export function InlineQuickForm({ defaultType = "question", sourcePage }: Inline
     }
 
     try {
-      const payload: any = {
-        type: formData.type,
+      // Type-safe payload - matches SubmissionPayload interface from API
+      const payload: {
+        type: "video-idea" | "feedback" | "question" | "review" | "rating" | "suggestion" | "other";
+        message: string;
+        name?: string;
+        email?: string;
+        child_age_group?: "0-2" | "2-4" | "4-6" | "other";
+        topic?: "sleep" | "speech" | "food" | "emotions" | "screens" | "routines" | "other";
+        source_page?: string;
+        publish_consent?: boolean;
+      } = {
+        type: formData.type as "video-idea" | "feedback" | "question" | "review" | "rating" | "suggestion" | "other",
         message: formData.message,
         name: formData.name || undefined,
         email: formData.email || undefined,
@@ -89,8 +99,9 @@ export function InlineQuickForm({ defaultType = "question", sourcePage }: Inline
           publish_consent: false,
         });
       }, 3000);
-    } catch (err: any) {
-      setError(err.message || "Κάτι πήγε στραβά");
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Κάτι πήγε στραβά";
+      setError(message);
       setIsSubmitting(false);
     }
   };

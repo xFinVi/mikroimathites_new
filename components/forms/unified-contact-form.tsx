@@ -73,12 +73,25 @@ export function UnifiedContactForm() {
       // Get source page for tracking
       const sourcePage = typeof window !== 'undefined' ? window.location.pathname : undefined;
       
-      let payload: any = {
-        type: formData.submission_type,
+      // Type-safe payload - matches SubmissionPayload interface from API
+      let payload: {
+        type: "video-idea" | "feedback" | "question" | "review" | "rating" | "suggestion" | "other";
+        name?: string;
+        email?: string;
+        message: string;
+        rating?: number;
+        child_age_group?: "0-2" | "2-4" | "4-6" | "other";
+        topic?: "sleep" | "speech" | "food" | "emotions" | "screens" | "routines" | "other";
+        source_page?: string;
+        content_slug?: string;
+        publish_consent?: boolean;
+      } = {
+        type: formData.submission_type as "video-idea" | "feedback" | "question" | "review" | "rating" | "suggestion" | "other",
         name: formData.name || undefined,
         email: formData.email || undefined,
-        child_age_group: formData.child_age_group || undefined,
+        child_age_group: formData.child_age_group as "0-2" | "2-4" | "4-6" | "other" | undefined,
         source_page: sourcePage,
+        message: "", // Will be set in switch statement
       };
 
       // Build payload based on submission type
@@ -150,8 +163,9 @@ export function UnifiedContactForm() {
         const data = await res.json().catch(() => ({}));
         throw new Error(data?.error || "Αποτυχία αποστολής");
       }
-    } catch (err: any) {
-      setError(err.message || "Κάτι πήγε στραβά");
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Κάτι πήγε στραβά";
+      setError(message);
       setIsSubmitting(false);
       return;
     }

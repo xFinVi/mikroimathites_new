@@ -7,7 +7,16 @@ interface ArticleHeaderProps {
   category?: Category;
 }
 
-export function ArticleHeader({ article, category }: ArticleHeaderProps) {
+export function ArticleHeader({ article, category: propCategory }: ArticleHeaderProps) {
+  // Extract category from article if not provided as prop
+  // This handles TypeScript inference issues with Sanity fetch results
+  const category = propCategory || (article.category && 
+    typeof article.category === 'object' && 
+    'slug' in article.category && 
+    'title' in article.category
+      ? article.category as Category
+      : undefined);
+
   return (
     <div className="mb-8 space-y-4">
       {category && (
