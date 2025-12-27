@@ -158,13 +158,16 @@ Visit `http://localhost:3000/studio` to manage content.
 
 - `POST /api/newsletter` - Newsletter subscription
 - `POST /api/submissions` - Form submissions
-- `POST /api/analytics/view` - Content view tracking
+- `POST /api/analytics/views` - Content view tracking
+- `GET /api/analytics/views` - Get view counts
 - `POST /api/revalidate` - Revalidate pages (webhook)
 
 ## 📚 Documentation
 
-- `PROJECT_STATUS.md` - Current project status and next steps
-- `PRODUCTION_REVIEW.md` - Comprehensive production readiness review
+- [Documentation Index](docs/README.md) - All technical documentation
+- [Setup Guides](docs/setup/) - Environment and admin dashboard setup
+- [Features](docs/features/) - Analytics and view tracking guides
+- [Developer Guide](DEVELOPER_GUIDE.md) - Development workflow and best practices
 
 ## 🚀 Production Checklist
 

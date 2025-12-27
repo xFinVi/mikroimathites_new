@@ -56,7 +56,7 @@ export function useContentTracking(options: TrackViewOptions) {
       }
 
       try {
-        await fetch("/api/analytics/view", {
+        await fetch("/api/analytics/views", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -125,7 +125,7 @@ export function useContentTracking(options: TrackViewOptions) {
       const timeSpent = Math.round((Date.now() - startTime.current) / 1000);
 
       try {
-        await fetch("/api/analytics/view", {
+        await fetch("/api/analytics/views", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({

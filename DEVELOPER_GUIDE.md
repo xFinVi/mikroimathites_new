@@ -769,9 +769,12 @@ npm run lint
 - **shadcn/ui:** https://ui.shadcn.com
 
 ### Internal Docs
-- `README.md` - Quick start guide
-- `ENVIRONMENT_SETUP.md` - Environment configuration
-- `ADMIN_DASHBOARD_SETUP.md` - Admin dashboard setup
+- [README.md](README.md) - Quick start guide
+- [Documentation Index](docs/README.md) - All technical documentation
+- [Environment Setup](docs/setup/environment.md) - Environment configuration
+- [Admin Dashboard Setup](docs/setup/admin-dashboard.md) - Admin dashboard setup
+- [Analytics Setup](docs/features/analytics.md) - Google Analytics & AdSense
+- [View Tracking](docs/features/view-tracking.md) - Content view tracking
 
 ### Getting Help
 

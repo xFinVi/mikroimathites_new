@@ -44,51 +44,6 @@ export const sanityWriteClient =
     : null;
 
 /**
- * Helper function to create a qaItem in Sanity from a submission
- * @deprecated Use createQADraftInSanity for new workflow
- */
-export async function createQAItemInSanity(data: {
-  question: string;
-  answer: any; // PortableText content
-  categoryId?: string;
-  ageGroupIds?: string[];
-  publishedAt?: string;
-}): Promise<string | null> {
-  if (!sanityWriteClient) {
-    logger.error("Sanity write client not configured");
-    return null;
-  }
-
-  try {
-    const document = {
-      _type: "qaItem",
-      question: data.question,
-      answer: data.answer,
-      publishedAt: data.publishedAt || new Date().toISOString(),
-      ...(data.categoryId && {
-        category: {
-          _type: "reference",
-          _ref: data.categoryId,
-        },
-      }),
-      ...(data.ageGroupIds && data.ageGroupIds.length > 0 && {
-        ageGroups: data.ageGroupIds.map((id) => ({
-          _type: "reference",
-          _ref: id,
-        })),
-      }),
-    };
-
-    const result = await sanityWriteClient.create(document);
-    logger.info("Created Q&A item in Sanity", { id: result._id });
-    return result._id;
-  } catch (error) {
-    logger.error("Failed to create Q&A item in Sanity", error);
-    return null;
-  }
-}
-
-/**
  * Helper function to create a DRAFT qaItem in Sanity from a submission
  * This creates a draft that admin can review and publish from Sanity Studio
  * 

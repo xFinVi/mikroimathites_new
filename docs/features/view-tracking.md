@@ -40,7 +40,7 @@ supabase migration up
 
 1. **Page Load**: When a user visits a content page, the `ContentTracker` component mounts
 2. **Session ID**: A unique session ID is generated and stored in localStorage (for anonymous tracking)
-3. **API Call**: The view is sent to `/api/analytics/view` with:
+3. **API Call**: The view is sent to `/api/analytics/views` with:
    - Content type (article, activity, recipe, printable)
    - Content slug
    - Session ID
@@ -59,9 +59,9 @@ supabase migration up
 
 ### API Endpoints
 
-- **`POST /api/analytics/view`**: Records a new view
+- **`POST /api/analytics/views`**: Records a new view
 - **`GET /api/analytics/views`**: Fetches view counts
-  - Single item: `?content_type=article&content_slug=example`
+  - Single item: `?contentType=article&contentSlug=example`
   - Multiple items: `?items=[{"content_type":"article","content_slug":"example"}]`
 
 ### Database Schema
@@ -87,7 +87,7 @@ View counts are displayed:
 The view count shows:
 - An eye icon
 - The number of views (formatted with Greek locale)
-- "προβολές" label (for non-compact mode)
+- "προβολές" label
 
 ## Query Functions
 
@@ -115,5 +115,4 @@ Potential improvements:
 - Session IDs are generated client-side and stored in localStorage
 - Bot views are automatically filtered out
 - GDPR-friendly (no cookies required for basic tracking)
-
 
