@@ -9,7 +9,7 @@ import {
   getCategoryIdByTopic,
   getAgeGroupIdsByAgeGroup,
   textToPortableText,
-} from "@/lib/utils/sanity-mapping";
+} from "@/lib/utils/sanity";
 import type { NextRequest } from "next/server";
 
 /**

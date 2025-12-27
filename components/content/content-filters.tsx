@@ -10,7 +10,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { X } from "lucide-react";
-import { shouldHideCategory, getCategoryDisplayName } from "@/lib/utils/category-mapping";
+import { shouldHideCategory, getCategoryDisplayName } from "@/lib/utils/content";
 
 interface ContentFiltersProps {
   ageGroups?: Array<{ _id: string; title: string; slug: string }>;

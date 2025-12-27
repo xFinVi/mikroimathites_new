@@ -11,7 +11,7 @@ import { Pagination } from "@/components/content/pagination";
 import Image from "next/image";
 import Link from "next/link";
 import { generateImageUrl } from "@/lib/sanity/image-url";
-import { getContentUrl, type ContentType } from "@/lib/utils/content-url";
+import { getContentUrl, type ContentType } from "@/lib/utils/content";
 import { EmptyState } from "@/components/ui/empty-state";
 import { DRASTIRIOTITES_CONSTANTS } from "@/lib/constants";
 import { logger } from "@/lib/utils/logger";

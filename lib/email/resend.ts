@@ -1,6 +1,6 @@
 import { Resend } from "resend";
 import { logger } from "@/lib/utils/logger";
-import { escapeHtmlWithLineBreaks } from "@/lib/utils/html-escape";
+import { escapeHtmlWithLineBreaks } from "@/lib/utils/forms";
 
 function wrapEmail(params: {
   preheader: string;

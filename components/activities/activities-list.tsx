@@ -4,7 +4,7 @@ import { Activity, Printable } from "@/lib/content";
 import { ActivityCard } from "./activity-card";
 import Image from "next/image";
 import Link from "next/link";
-import { getContentUrl } from "@/lib/utils/content-url";
+import { getContentUrl } from "@/lib/utils/content";
 
 type ContentItem = (Activity | Printable) & { _contentType: "activity" | "printable"; imageUrl?: string | null };
 

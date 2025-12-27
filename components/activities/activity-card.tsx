@@ -2,7 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Activity } from "@/lib/content";
 import { Card, CardContent } from "@/components/ui/card";
-import { getContentUrl } from "@/lib/utils/content-url";
+import { getContentUrl } from "@/lib/utils/content";
 
 interface ActivityCardProps {
   activity: Activity & { imageUrl?: string | null };

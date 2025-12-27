@@ -13,7 +13,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { ArrowLeft, Loader2, Mail, User, Calendar, MessageSquare, Globe, Archive, Trash2 } from "lucide-react";
-import { getTopicLabel, getAgeGroupLabel, getTypeLabel, getStatusLabel } from "@/lib/utils/submission-labels";
+import { getTopicLabel, getAgeGroupLabel, getTypeLabel, getStatusLabel } from "@/lib/utils/forms";
 import { ADMIN_CONSTANTS } from "@/lib/constants";
 import type { Submission } from "@/lib/types/submission";
 import { EmailTemplates } from "@/components/admin/email-templates";

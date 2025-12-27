@@ -1,7 +1,7 @@
 import { Article, Recipe, Activity } from "@/lib/content";
 import { ArticleCard } from "@/components/articles/article-card";
 import { ActivityCard } from "@/components/activities/activity-card";
-import { ContentType, getContentUrl } from "@/lib/utils/content-url";
+import { ContentType, getContentUrl } from "@/lib/utils/content";
 import Link from "next/link";
 import Image from "next/image";
 

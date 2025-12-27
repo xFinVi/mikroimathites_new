@@ -23,7 +23,7 @@ function isPrintable(item: Activity | Printable): item is Printable {
   return 'file' in item || 'previewImages' in item;
 }
 
-import { getContentUrl } from "@/lib/utils/content-url";
+import { getContentUrl } from "@/lib/utils/content";
 
 interface FeaturedContentItem {
   _id: string;

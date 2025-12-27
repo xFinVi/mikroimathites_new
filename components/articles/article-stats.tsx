@@ -1,6 +1,6 @@
 "use client";
 
-import { calculateArticleStats, formatWordCount, estimateReadingTime } from "@/lib/utils/article-stats";
+import { calculateArticleStats, formatWordCount, estimateReadingTime } from "@/lib/utils/content";
 import type { Article } from "@/lib/content";
 
 interface ArticleStatsProps {

@@ -12,7 +12,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Search, X, FileText, ChevronLeft, ChevronRight } from "lucide-react";
-import { getTopicLabel, getAgeGroupLabel, getTypeLabel, getStatusLabel } from "@/lib/utils/submission-labels";
+import { getTopicLabel, getAgeGroupLabel, getTypeLabel, getStatusLabel } from "@/lib/utils/forms";
 import { ADMIN_CONSTANTS } from "@/lib/constants";
 
 interface Submission {

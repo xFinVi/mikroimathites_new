@@ -1,7 +1,6 @@
 import { RelatedContentItem } from "@/lib/content";
 import { generateImageUrl } from "@/lib/sanity/image-url";
-import { getContentUrl, type ContentType } from "@/lib/utils/content-url";
-import { getContentTypeLabel } from "@/lib/utils/content-utils";
+import { getContentUrl, type ContentType, getContentTypeLabel } from "@/lib/utils/content";
 import { GIA_GONEIS_CONSTANTS } from "@/lib/constants";
 import Image from "next/image";
 import Link from "next/link";

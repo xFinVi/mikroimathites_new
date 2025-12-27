@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useSearchParams, usePathname } from "next/navigation";
 import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { getCategoryDisplayName } from "@/lib/utils/category-mapping";
+import { getCategoryDisplayName } from "@/lib/utils/content";
 
 interface ActiveFiltersProps {
   ageGroups?: Array<{ _id: string; title: string; slug: string }>;

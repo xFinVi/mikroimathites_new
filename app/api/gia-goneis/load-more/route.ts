@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getParentsHubContent } from "@/lib/content";
-import { getMappedCategories } from "@/lib/utils/category-mapping";
+import { getMappedCategories } from "@/lib/utils/content";
 import { generateImageUrl } from "@/lib/sanity/image-url";
 import { GIA_GONEIS_CONSTANTS } from "@/lib/constants";
-import { ContentType } from "@/lib/utils/content-url";
+import { ContentType } from "@/lib/utils/content";
 import { logger } from "@/lib/utils/logger";
 
 export async function GET(request: NextRequest) {
