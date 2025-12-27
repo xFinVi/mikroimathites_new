@@ -8,7 +8,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { PortableText } from "@portabletext/react";
 import { ArticleContent } from "@/components/articles/article-content";
-import { ArticleMeta } from "@/components/articles/article-meta";
+import { ArticleHeader } from "@/components/articles/article-header";
 import { ArticleStats } from "@/components/articles/article-stats";
 import { ShareButtons } from "@/components/articles/share-buttons";
 import { RelatedArticles } from "@/components/articles/related-articles";
@@ -80,6 +80,10 @@ export default async function ArticlePage({ params }: PageProps) {
 
   // Extract category for type safety
   const category: Category | undefined = article.category;
+  
+  // Type-safe article data
+  const articleTitle: string = article.title;
+  const articleExcerpt: string | undefined = article.excerpt;
 
   return (
     <PageWrapper>
@@ -127,28 +131,7 @@ export default async function ArticlePage({ params }: PageProps) {
             </Link>
 
             {/* Article Header */}
-            <div className="mb-8 space-y-4">
-              {category && (
-                <Link
-                  href={`/gia-goneis?category=${category.slug}`}
-                  className="inline-block px-4 py-2 rounded-full bg-primary-pink/10 text-primary-pink text-sm font-semibold hover:bg-primary-pink/20 transition"
-                >
-                  {category.title}
-                </Link>
-              )}
-
-              <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-text-dark">
-                {article.title}
-              </h1>
-
-              {article.excerpt && (
-                <p className="text-xl text-text-medium leading-relaxed">
-                  {String(article.excerpt)}
-                </p>
-              )}
-
-              <ArticleMeta article={article} />
-            </div>
+            <ArticleHeader article={article} category={category} />
 
             {/* Article Stats */}
             <ArticleStats article={article} />
