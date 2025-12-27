@@ -13,20 +13,14 @@ import { DocumentActionComponent, DocumentActionProps } from "sanity";
 import { TrashIcon } from "@sanity/icons";
 
 const CONTENT_TYPES = ["article", "activity", "printable", "recipe"] as const;
-const REFERENCING_DOCUMENTS = [
-  "featuredContentSection",
-  "forParentsSection",
-  "activitiesPrintablesSection",
-  "curatedCollection",
-] as const;
 
 export const cleanupBrokenReferences: DocumentActionComponent = (
   props: DocumentActionProps
 ) => {
-  const { id, type, onComplete } = props;
+  const { type, onComplete } = props;
 
   // Only show for content types that can be referenced
-  if (!CONTENT_TYPES.includes(type as any)) {
+  if (!CONTENT_TYPES.includes(type as (typeof CONTENT_TYPES)[number])) {
     return null;
   }
 

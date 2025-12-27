@@ -7,6 +7,7 @@ import { DRASTIRIOTITES_CONSTANTS } from "@/lib/constants";
 import Image from "next/image";
 import type { PortableTextBlock } from "@portabletext/types";
 import { ActivityCarousel } from "./activity-carousel";
+import { logger } from "@/lib/utils/logger";
 
 interface ActivityContentProps {
   activity: Activity;
@@ -166,7 +167,7 @@ function StructuredStepCard({ step, stepNumber }: { step: ActivityStep; stepNumb
         
         // Debug in development
         if (process.env.NODE_ENV === 'development') {
-          console.warn('Step content is not in expected format:', {
+          logger.warn('Step content is not in expected format:', {
             step,
             content,
             contentType: typeof content,
