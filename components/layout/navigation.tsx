@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 
 const navItems = [
   { href: "/", label: "Αρχική" },
-  { href: "/gia-goneis", label: "Για Γονείς" },
+  { href: "/gia-goneis", label: "Γονείς" },
   { href: "/drastiriotites", label: "Δραστηριότητες" },
   { href: "/epikoinonia", label: "Επικοινωνία" },
   { href: "/sxetika", label: "Σχετικά" },

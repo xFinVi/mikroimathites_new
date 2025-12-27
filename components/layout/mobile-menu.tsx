@@ -18,6 +18,7 @@ const navItems = [
 
 export function MobileMenu() {
   const [isOpen, setIsOpen] = useState(false);
+  const [isClosing, setIsClosing] = useState(false);
   const [isAnimating, setIsAnimating] = useState(false);
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
   const pathname = usePathname();
@@ -44,32 +45,50 @@ export function MobileMenu() {
     }
   }, [pathname]);
 
-  // Prevent body scroll when menu is open
+  // Prevent body scroll when menu is open, but ensure menu itself is visible
   useEffect(() => {
     if (isOpen) {
+      // Store original overflow values
+      const originalBodyOverflow = document.body.style.overflow;
+      const originalHtmlOverflow = document.documentElement.style.overflow;
+      
+      // Hide body scroll but keep menu visible
       document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "";
+      document.documentElement.style.overflow = "hidden";
+      
+      return () => {
+        document.body.style.overflow = originalBodyOverflow;
+        document.documentElement.style.overflow = originalHtmlOverflow;
+      };
     }
-    return () => {
-      document.body.style.overflow = "";
-    };
   }, [isOpen]);
 
   const toggleMenu = () => {
     if (!isOpen) {
+      setIsClosing(false);
       setIsOpen(true);
-      setIsAnimating(true);
+      // Trigger animation after DOM update
+      requestAnimationFrame(() => {
+        setIsAnimating(true);
+      });
     } else {
       setIsAnimating(false);
+      setIsClosing(true);
       // Wait for exit animation before closing
-      setTimeout(() => setIsOpen(false), 300);
+      setTimeout(() => {
+        setIsOpen(false);
+        setIsClosing(false);
+      }, 300);
     }
   };
 
   const closeMenu = () => {
     setIsAnimating(false);
-    setTimeout(() => setIsOpen(false), 300);
+    setIsClosing(true);
+    setTimeout(() => {
+      setIsOpen(false);
+      setIsClosing(false);
+    }, 300);
   };
 
   return (
@@ -110,14 +129,24 @@ export function MobileMenu() {
         </div>
       </button>
 
-      {/* Mobile Menu Overlay */}
+      {/* Mobile Menu Overlay - Using fixed positioning to escape any parent overflow */}
       {isOpen && (
         <div
           className={cn(
-            "fixed inset-0 z-50 lg:hidden",
-            isAnimating ? "animate-backdrop-fade-in" : "animate-slide-out-to-right"
+            "fixed inset-0 z-[9999] lg:hidden",
+            isClosing ? "animate-slide-out-to-right" : "animate-backdrop-fade-in"
           )}
           onClick={closeMenu}
+          style={{ 
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            width: '100vw',
+            height: '100vh',
+            overflow: 'visible',
+          }}
         >
           {/* Backdrop with blur */}
           <div
@@ -126,16 +155,30 @@ export function MobileMenu() {
               "backdrop-blur-md transition-opacity",
               prefersReducedMotion ? "duration-0" : "duration-300"
             )}
+            style={{ zIndex: 1 }}
           />
 
           {/* Menu Panel - Slides in from right */}
           <div
             className={cn(
-              "absolute top-0 right-0 h-full w-full max-w-sm bg-gradient-to-b from-[#1a1f3a] via-[#1a1f3a] to-[#0d1330]",
+              "fixed top-0 right-0 h-full w-full max-w-sm bg-gradient-to-b from-[#1a1f3a] via-[#1a1f3a] to-[#0d1330]",
               "shadow-2xl border-l border-white/10",
               "flex flex-col",
-              !prefersReducedMotion && (isAnimating ? "animate-slide-in-from-right" : "animate-slide-out-to-right")
+              !prefersReducedMotion && isAnimating && (isClosing ? "animate-slide-out-to-right" : "animate-slide-in-from-right"),
+              prefersReducedMotion && "transform-none"
             )}
+            style={{ 
+              zIndex: 10000,
+              position: 'fixed',
+              top: 0,
+              right: 0,
+              height: '100vh',
+              width: '100%',
+              maxWidth: '384px',
+              overflow: 'visible',
+              // If reduced motion or animation hasn't started, show menu immediately
+              transform: prefersReducedMotion || (!isAnimating && !isClosing) ? 'translateX(0)' : undefined,
+            }}
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header with close button */}
@@ -163,7 +206,7 @@ export function MobileMenu() {
             </div>
 
             {/* Navigation Items with staggered animation */}
-            <nav className="flex-1 overflow-y-auto py-6 px-4">
+            <nav className="flex-1 overflow-y-auto overflow-x-visible py-6 px-4">
               <div className="space-y-2">
                 {navItems.map((item, index) => {
                   const Icon = item.icon;
@@ -182,8 +225,8 @@ export function MobileMenu() {
                           : "text-white/90 hover:text-white hover:bg-white/10 border-2 border-transparent"
                       )}
                       style={{
-                        animationDelay: isAnimating && !prefersReducedMotion ? `${index * 50}ms` : "0ms",
-                        animation: isAnimating && !prefersReducedMotion ? "menu-item-slide 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards" : "none",
+                        animationDelay: !isClosing && !prefersReducedMotion ? `${index * 50}ms` : "0ms",
+                        animation: !isClosing && !prefersReducedMotion ? "menu-item-slide 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards" : "none",
                       }}
                     >
                       {/* Icon with subtle animation */}
@@ -232,8 +275,8 @@ export function MobileMenu() {
                         : "text-white/90 hover:text-white hover:bg-white/10 border-2 border-transparent"
                     )}
                     style={{
-                      animationDelay: isAnimating && !prefersReducedMotion ? `${navItems.length * 50}ms` : "0ms",
-                      animation: isAnimating && !prefersReducedMotion ? "menu-item-slide 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards" : "none",
+                      animationDelay: !isClosing && !prefersReducedMotion ? `${navItems.length * 50}ms` : "0ms",
+                      animation: !isClosing && !prefersReducedMotion ? "menu-item-slide 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards" : "none",
                     }}
                   >
                     {/* Icon */}
