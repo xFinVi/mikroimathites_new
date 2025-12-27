@@ -6,7 +6,6 @@ import { generateImageUrl } from "@/lib/sanity/image-url";
 import { DRASTIRIOTITES_CONSTANTS } from "@/lib/constants/drastiriotites";
 import Image from "next/image";
 import type { PortableTextBlock } from "@portabletext/types";
-import { useEffect } from "react";
 import { ActivityCarousel } from "./activity-carousel";
 
 interface ActivityContentProps {
@@ -187,16 +186,6 @@ export function ActivityContent({ activity, secondaryImageUrl }: ActivityContent
   const structuredSteps = isStructured ? (activity.steps as ActivityStep[]) : null;
   
   // Debug logging
-  useEffect(() => {
-    if (process.env.NODE_ENV === 'development' && activity.steps) {
-      console.log('Activity Steps Data:', {
-        isStructured,
-        steps: activity.steps,
-        firstStep: Array.isArray(activity.steps) ? activity.steps[0] : null,
-        firstStepContent: Array.isArray(activity.steps) && activity.steps[0] ? (activity.steps[0] as any).content : null,
-      });
-    }
-  }, [activity.steps, isStructured]);
   
   return (
     <div className="space-y-8">
