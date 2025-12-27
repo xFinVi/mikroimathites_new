@@ -4,7 +4,8 @@
  * CLIENT-SAFE: Pure display logic
  * Used in: app/age/[slug]/page.tsx
  * 
- * TODO: Single-use utility - consider moving to app/age/ folder in Phase 6
+ * Decision: Keep in lib/utils/ - may be reused in other components (e.g., filters, cards)
+ * The utility is generic enough to be shared across the codebase.
  */
 
 /**

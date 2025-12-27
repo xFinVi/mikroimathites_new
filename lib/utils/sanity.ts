@@ -6,7 +6,9 @@ import "server-only"; // Prevent accidental client-side usage
  * Used in: app/api/admin/submissions/[id]/send-reply/route.ts
  * 
  * These functions make database queries and must only run server-side.
- * TODO: Consider moving to lib/sanity/ folder if usage grows beyond admin API
+ * 
+ * Decision: Keep in lib/utils/ - follows current codebase structure.
+ * If usage expands significantly beyond admin API, consider moving to lib/sanity/utils.ts
  */
 
 import { sanityClient } from "@/lib/sanity/client";
