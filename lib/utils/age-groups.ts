@@ -1,5 +1,10 @@
 /**
- * Utility functions for age group handling
+ * Age Group Display Utilities
+ * 
+ * CLIENT-SAFE: Pure display logic
+ * Used in: app/age/[slug]/page.tsx
+ * 
+ * TODO: Single-use utility - consider moving to app/age/ folder in Phase 6
  */
 
 /**

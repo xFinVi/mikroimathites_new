@@ -35,7 +35,6 @@ export function SubmissionDetail({
   const [status, setStatus] = useState<string>("");
   const [adminReply, setAdminReply] = useState<string>("");
   const [sendingEmail, setSendingEmail] = useState(false);
-  const [publishing, setPublishing] = useState(false);
   const [archiving, setArchiving] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
@@ -243,59 +242,6 @@ export function SubmissionDetail({
       setError(err instanceof Error ? err.message : "Failed to send reply");
     } finally {
       setSendingEmail(false);
-    }
-  };
-
-  const handlePublishToQA = async () => {
-    if (!submission || !adminReply.trim()) {
-      setError("Παρακαλώ γράψτε μια απάντηση πριν τη δημοσίευση.");
-      return;
-    }
-
-    if (!submission.is_approved) {
-      setError("Ο χρήστης δεν έχει δώσει συναίνεση για δημοσίευση.");
-      return;
-    }
-
-    setPublishing(true);
-    setError(null);
-    setSuccess(null);
-
-    try {
-      const response = await fetch("/api/admin/qa/publish", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          submissionId: submission.id,
-          answer: adminReply,
-          sendEmail: true, // Send email notification to user
-        }),
-      });
-
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.error || "Failed to publish Q&A");
-      }
-
-      // Refresh submission data
-      const resolvedParams = await params;
-      const refreshResponse = await fetch(`/api/admin/submissions/${resolvedParams.id}`);
-      if (refreshResponse.ok) {
-        const refreshData = await refreshResponse.json();
-        setSubmission(refreshData.submission);
-        setStatus(refreshData.submission.status);
-      }
-
-      setSuccess("Η ερώτηση δημοσιεύτηκε επιτυχώς στο Q&A!");
-      
-      // Clear success message after timeout
-      setTimeout(() => setSuccess(null), ADMIN_CONSTANTS.UI.SUCCESS_MESSAGE_TIMEOUT);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to publish Q&A");
-    } finally {
-      setPublishing(false);
     }
   };
 
