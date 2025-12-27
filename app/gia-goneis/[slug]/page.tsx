@@ -127,7 +127,7 @@ export default async function ArticlePage({ params }: PageProps) {
             </Link>
 
             {/* Article Header */}
-            <header className="mb-8 space-y-4">
+            <div className="mb-8 space-y-4">
               {category && (
                 <Link
                   href={`/gia-goneis?category=${category.slug}`}
@@ -148,7 +148,7 @@ export default async function ArticlePage({ params }: PageProps) {
               )}
 
               <ArticleMeta article={article} />
-            </header>
+            </div>
 
             {/* Article Stats */}
             <ArticleStats article={article} />

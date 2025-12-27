@@ -6,7 +6,7 @@ import { SANITY_PUBLIC } from "./config.public";
  * 
  * Used in: 
  * - lib/content/index.ts (primary data fetching)
- * - app/*/page.tsx (direct Server Component fetches)
+ * - app routes page.tsx files (direct Server Component fetches)
  * - lib/utils/sanity.ts (reference lookups)
  * 
  * CDN: Enabled for performance
