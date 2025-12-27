@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Image from "next/image";
 import { generateImageUrl } from "@/lib/sanity/image-url";
-import { DRASTIRIOTITES_CONSTANTS } from "@/lib/constants/drastiriotites";
+import { DRASTIRIOTITES_CONSTANTS } from "@/lib/constants";
 
 interface CarouselImage {
   asset?: unknown;
@@ -154,4 +154,5 @@ export function ActivityCarousel({ images, title }: ActivityCarouselProps) {
     </div>
   );
 }
+
 

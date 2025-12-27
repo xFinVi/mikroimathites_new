@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getParentsHubContent } from "@/lib/content";
 import { getMappedCategories } from "@/lib/utils/category-mapping";
 import { generateImageUrl } from "@/lib/sanity/image-url";
-import { GIA_GONEIS_CONSTANTS } from "@/lib/constants/gia-goneis";
+import { GIA_GONEIS_CONSTANTS } from "@/lib/constants";
 import { ContentType } from "@/lib/utils/content-url";
 import { logger } from "@/lib/utils/logger";
 
@@ -29,7 +29,7 @@ export async function GET(request: NextRequest) {
     });
 
     // Helper to determine content type
-    const getContentType = (item: { _type: string }): ContentType => {
+    const getContentType = (item: { _type?: string }): ContentType => {
       if (item._type === "article") return "article";
       if (item._type === "recipe") return "recipe";
       if (item._type === "activity") return "activity";
@@ -39,7 +39,7 @@ export async function GET(request: NextRequest) {
 
     // Pre-generate image URLs for all items
     const itemsWithImageUrls = result.items.map((item) => {
-      const contentType = getContentType(item);
+      const contentType = getContentType(item as { _type?: string });
       return {
         ...item,
         _contentType: contentType,

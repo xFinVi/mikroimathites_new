@@ -3,6 +3,7 @@ import { format } from "date-fns";
 import Image from "next/image";
 import { urlFor } from "@/lib/sanity/image-url";
 import Link from "next/link";
+import { ViewCount } from "@/components/analytics/view-count";
 
 interface ArticleMetaProps {
   article: Article;
@@ -79,6 +80,12 @@ export function ArticleMeta({ article }: ArticleMetaProps) {
           <span>{readingTime}</span>
         </div>
       )}
+
+      <ViewCount
+        content_type="article"
+        content_slug={article.slug}
+        showIcon={true}
+      />
 
       {article.ageGroups && article.ageGroups.length > 0 && (
         <div className="flex items-center gap-2 flex-wrap">

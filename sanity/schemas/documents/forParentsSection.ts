@@ -46,6 +46,7 @@ export const forParentsSection = defineType({
         {
           type: "reference",
           to: [{ type: "article" }],
+          weak: true, // Weak reference: allows deletion even if referenced
         },
       ],
     }),
@@ -63,4 +64,5 @@ export const forParentsSection = defineType({
     },
   },
 });
+
 

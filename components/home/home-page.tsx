@@ -11,7 +11,7 @@ import { ActivityCard } from "@/components/activities/activity-card";
 import { NewsletterSection } from "@/components/newsletter/newsletter-section";
 import { VideoSneakPeek } from "@/components/home/video-sneak-peek";
 import { User, ChevronDown } from "lucide-react";
-import { HOME_PAGE_LIMITS, YOUTUBE_VIDEO_IDS } from "@/lib/constants/home-page";
+import { HOME_PAGE_LIMITS, YOUTUBE_VIDEO_IDS } from "@/lib/constants";
 import { Button } from "@/components/ui/button";
 
 // Type guards for content items
@@ -263,12 +263,37 @@ export function HomePage({
       )}
 
       {/* Section 3: Featured Content Grid - Standalone Section */}
-      {featuredContent.length > 0 && (
+      {featuredContent.length > 0 ? (
         <FeaturedContentSection 
           featuredContent={featuredContent}
           title={featuredContentSection?.title}
           subtitle={featuredContentSection?.subtitle}
         />
+      ) : (
+        // Empty state for featured content - section still shows but with message
+        featuredContentSection && (
+          <section className="relative bg-[#E8F4F8] pb-16 md:pb-20 overflow-hidden w-full">
+            <div className="bg-[#1a1f3a] py-12 md:py-16 mb-12">
+              <Container>
+                <div className="text-center">
+                  <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-4">
+                    {featuredContentSection.title || "Προτεινόμενο"}
+                  </h2>
+                  <p className="text-lg sm:text-xl text-white/90 max-w-2xl mx-auto">
+                    {featuredContentSection.subtitle || "Συμβουλές για γονείς, ιδέες για παιδιά και πρακτικό περιεχόμενο"}
+                  </p>
+                </div>
+              </Container>
+            </div>
+            <Container>
+              <div className="text-center py-12">
+                <p className="text-text-medium text-lg">
+                  Δεν υπάρχει διαθέσιμο προτεινόμενο περιεχόμενο αυτή τη στιγμή. Ελέγξτε σύντομα!
+                </p>
+              </div>
+            </Container>
+          </section>
+        )
       )}
 
       {/* Section 4: Featured Articles / Parent Tips */}

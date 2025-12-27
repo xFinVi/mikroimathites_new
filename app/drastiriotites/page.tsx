@@ -13,7 +13,7 @@ import Link from "next/link";
 import { generateImageUrl } from "@/lib/sanity/image-url";
 import { getContentUrl, type ContentType } from "@/lib/utils/content-url";
 import { EmptyState } from "@/components/ui/empty-state";
-import { DRASTIRIOTITES_CONSTANTS } from "@/lib/constants/drastiriotites";
+import { DRASTIRIOTITES_CONSTANTS } from "@/lib/constants";
 import { logger } from "@/lib/utils/logger";
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
@@ -42,14 +42,14 @@ export async function generateMetadata({
   const suffix = parts.length ? ` — ${parts.join(" • ")}` : "";
 
   // Handle title - extract string from metadata object
-  const getTitleString = (title: string | { default?: string } | undefined): string => {
+  const getTitleString = (title: string | { default?: string } | null | undefined): string => {
     if (typeof title === "string") return title;
     if (title && typeof title === "object" && "default" in title) {
       return title.default ?? "Δραστηριότητες & Εκτυπώσιμα";
     }
     return "Δραστηριότητες & Εκτυπώσιμα";
   };
-  const baseTitle = getTitleString(base.title);
+  const baseTitle = getTitleString(base.title as string | { default?: string } | null | undefined);
 
   // Canonical: don't include page param, and use base URL for search pages (noindex)
   const hasSearch = !!params.search;
@@ -143,16 +143,15 @@ export default async function DrastiriotitesPage({ searchParams }: PageProps) {
   // Determine if we should show filtered content or all content
   const hasFilters = !!(params.age || params.type || params.search);
 
-  // Helper to determine content type
-  const getContentType = (item: { _type: string }): ContentType => {
-    if (item._type === "activity") return "activity";
+  // Helper to determine content type (only activity or printable for this page)
+  const getContentType = (item: { _type?: string }): "activity" | "printable" => {
     if (item._type === "printable") return "printable";
-    return "activity";
+    return "activity"; // Default to activity
   };
 
-  // Pre-generate image URLs for all items
-  const itemsWithImageUrls = items.map((item) => {
-    const contentType = getContentType(item);
+    // Pre-generate image URLs for all items
+    const itemsWithImageUrls = items.map((item) => {
+      const contentType = getContentType(item as { _type?: string });
     return {
       ...item,
       _contentType: contentType,
@@ -257,7 +256,8 @@ export default async function DrastiriotitesPage({ searchParams }: PageProps) {
             description: "Διασκεδαστικές δραστηριότητες και εκτυπώσιμα για παιδιά 0-6 ετών",
             numberOfItems: total,
             itemListElement: itemsWithImageUrls.slice(0, 10).map((item, index) => {
-              const contentType = getContentType(item);
+              // Use _contentType that was already set during mapping
+              const contentType = item._contentType;
               const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://mikroimathites.gr";
               const itemUrl = getContentUrl(contentType, item.slug);
               

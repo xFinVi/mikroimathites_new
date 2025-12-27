@@ -2,7 +2,7 @@ import { Container } from "@/components/ui/container";
 import { PageWrapper } from "@/components/pages/page-wrapper";
 import { PageHeader } from "@/components/pages/page-header";
 import { generateMetadataFor } from "@/lib/seo/generate-metadata";
-import { CONTACT_CONSTANTS } from "@/lib/constants/contact";
+import { CONTACT_CONSTANTS } from "@/lib/constants";
 import Image from "next/image";
 
 export const metadata = generateMetadataFor("terms");

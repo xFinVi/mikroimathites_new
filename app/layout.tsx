@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Inter, Poppins } from "next/font/google";
-import { GoogleAnalytics } from "@/components/analytics/google-analytics";
+import { ConditionalAnalytics } from "@/components/analytics/conditional-analytics";
 import { CookieConsentModal } from "@/components/cookies/cookie-consent-modal";
 import { Providers } from "@/components/providers";
 import "./globals.css";
@@ -41,12 +41,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   const gaId = process.env.NEXT_PUBLIC_GA_ID;
+  const adsenseClient = process.env.NEXT_PUBLIC_ADSENSE_CLIENT;
 
   return (
     <html lang="el" suppressHydrationWarning>
       <body className={`${inter.variable} ${poppins.variable} font-sans antialiased`}>
         <Providers>
-          <GoogleAnalytics gaId={gaId} />
+          {/* Conditional Analytics - respects cookie consent */}
+          <ConditionalAnalytics gaId={gaId} adsenseClient={adsenseClient} />
           <CookieConsentModal />
           {children}
         </Providers>

@@ -20,7 +20,7 @@ import { logger } from "@/lib/utils/logger";
 import type { Metadata } from "next";
 import { getMappedCategories } from "@/lib/utils/category-mapping";
 import { getContentUrl, type ContentType } from "@/lib/utils/content-url";
-import { GIA_GONEIS_CONSTANTS } from "@/lib/constants/gia-goneis";
+import { GIA_GONEIS_CONSTANTS } from "@/lib/constants";
 import { EmptyState } from "@/components/ui/empty-state";
 import { QuickTipsSection } from "@/components/gia-goneis/quick-tips-section";
 import { LoadMoreContent } from "@/components/gia-goneis/load-more-content";

@@ -3,11 +3,12 @@ import { Container } from "@/components/ui/container";
 import { PageWrapper } from "@/components/pages/page-wrapper";
 import { getRecipeBySlug, getRecipes } from "@/lib/content";
 import { generateImageUrl } from "@/lib/sanity/image-url";
-import { GIA_GONEIS_CONSTANTS } from "@/lib/constants/gia-goneis";
+import { GIA_GONEIS_CONSTANTS } from "@/lib/constants";
 import Image from "next/image";
 import Link from "next/link";
 import { PortableText } from "@portabletext/react";
 import { ContentTracker } from "@/components/analytics/content-tracker";
+import { ViewCount } from "@/components/analytics/view-count";
 import type { Metadata } from "next";
 
 interface PageProps {
@@ -165,6 +166,11 @@ export default async function RecipePage({ params }: PageProps) {
                     <span>{recipe.servings}</span>
                   </div>
                 )}
+                <ViewCount
+                  content_type="recipe"
+                  content_slug={slug}
+                  showIcon={true}
+                />
               </div>
             </header>
 

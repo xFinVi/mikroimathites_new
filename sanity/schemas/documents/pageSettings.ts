@@ -29,9 +29,9 @@ export const pageSettings = defineType({
           title: "Featured Content",
           type: "array",
           of: [
-            { type: "reference", name: "featuredArticle", to: [{ type: "article" }] },
-            { type: "reference", name: "featuredRecipe", to: [{ type: "recipe" }] },
-            { type: "reference", name: "featuredActivity", to: [{ type: "activity" }] },
+            { type: "reference", name: "featuredArticle", to: [{ type: "article" }], weak: true },
+            { type: "reference", name: "featuredRecipe", to: [{ type: "recipe" }], weak: true },
+            { type: "reference", name: "featuredActivity", to: [{ type: "activity" }], weak: true },
           ],
         }),
       ],

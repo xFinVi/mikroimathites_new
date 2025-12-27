@@ -53,60 +53,36 @@ export const featuredContentSection = defineType({
               title: "Article",
               type: "reference",
               to: [{ type: "article" }],
+              weak: true, // Weak reference: allows deletion even if referenced
               hidden: ({ parent }) => parent?.contentType !== "article",
-              validation: (Rule) =>
-                Rule.custom((value, context) => {
-                  const parent = context.parent as { contentType?: string };
-                  if (parent?.contentType === "article" && !value) {
-                    return "Article is required when content type is Article";
-                  }
-                  return true;
-                }),
+              // Broken references will be filtered out in queries
             }),
             defineField({
               name: "activity",
               title: "Activity",
               type: "reference",
               to: [{ type: "activity" }],
+              weak: true, // Weak reference: allows deletion even if referenced
               hidden: ({ parent }) => parent?.contentType !== "activity",
-              validation: (Rule) =>
-                Rule.custom((value, context) => {
-                  const parent = context.parent as { contentType?: string };
-                  if (parent?.contentType === "activity" && !value) {
-                    return "Activity is required when content type is Activity";
-                  }
-                  return true;
-                }),
+              // Broken references will be filtered out in queries
             }),
             defineField({
               name: "printable",
               title: "Printable",
               type: "reference",
               to: [{ type: "printable" }],
+              weak: true, // Weak reference: allows deletion even if referenced
               hidden: ({ parent }) => parent?.contentType !== "printable",
-              validation: (Rule) =>
-                Rule.custom((value, context) => {
-                  const parent = context.parent as { contentType?: string };
-                  if (parent?.contentType === "printable" && !value) {
-                    return "Printable is required when content type is Printable";
-                  }
-                  return true;
-                }),
+              // Broken references will be filtered out in queries
             }),
             defineField({
               name: "recipe",
               title: "Recipe",
               type: "reference",
               to: [{ type: "recipe" }],
+              weak: true, // Weak reference: allows deletion even if referenced
               hidden: ({ parent }) => parent?.contentType !== "recipe",
-              validation: (Rule) =>
-                Rule.custom((value, context) => {
-                  const parent = context.parent as { contentType?: string };
-                  if (parent?.contentType === "recipe" && !value) {
-                    return "Recipe is required when content type is Recipe";
-                  }
-                  return true;
-                }),
+              // Broken references will be filtered out in queries
             }),
           ],
           preview: {
@@ -147,4 +123,5 @@ export const featuredContentSection = defineType({
     },
   },
 });
+
 

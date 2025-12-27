@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/select";
 import { Search, X, FileText, ChevronLeft, ChevronRight } from "lucide-react";
 import { getTopicLabel, getAgeGroupLabel, getTypeLabel, getStatusLabel } from "@/lib/utils/submission-labels";
-import { ADMIN_CONSTANTS } from "@/lib/constants/admin";
+import { ADMIN_CONSTANTS } from "@/lib/constants";
 
 interface Submission {
   id: string;

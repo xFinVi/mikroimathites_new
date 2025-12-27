@@ -43,6 +43,7 @@ export function CookieSettingsModal({ isOpen, onClose }: CookieSettingsModalProp
     const allAccepted: CookiePreferences = {
       essential: true,
       analytics: true,
+      advertising: true,
     };
     savePreferences(allAccepted, true);
     onClose();
@@ -52,6 +53,7 @@ export function CookieSettingsModal({ isOpen, onClose }: CookieSettingsModalProp
     const rejected: CookiePreferences = {
       essential: true,
       analytics: false,
+      advertising: false,
     };
     savePreferences(rejected, true);
     onClose();
@@ -167,6 +169,46 @@ export function CookieSettingsModal({ isOpen, onClose }: CookieSettingsModalProp
               <p>• Στατιστικά επισκεψιμότητας</p>
               <p>• Ανώνυμα δεδομένα χρήσης</p>
               <p>• Βελτίωση του περιεχομένου</p>
+            </div>
+          </div>
+
+          {/* Advertising Cookies */}
+          <div className="bg-background-light rounded-xl p-5 border-2 border-border/50">
+            <div className="flex items-start justify-between mb-3">
+              <div className="flex-1">
+                <div className="flex items-center gap-2 mb-2">
+                  <h3 className="text-lg font-bold text-text-dark">Διαφημίσεις Cookies</h3>
+                  {localPreferences.advertising && (
+                    <span className="text-xs bg-accent-green/10 text-accent-green px-2 py-1 rounded-full font-semibold">
+                      Ενεργό
+                    </span>
+                  )}
+                </div>
+                <p className="text-sm text-text-medium">
+                  Χρησιμοποιούνται για την εμφάνιση διαφημίσεων (Google AdSense). Οι διαφημίσεις
+                  βοηθούν στη χρηματοδότηση του ιστότοπου.
+                </p>
+              </div>
+              <button
+                onClick={() => toggleCategory("advertising")}
+                className={`flex-shrink-0 ml-4 w-12 h-6 rounded-full transition-colors relative ${
+                  localPreferences.advertising
+                    ? "bg-accent-yellow"
+                    : "bg-text-light"
+                }`}
+                aria-label="Εναλλαγή διαφημίσεων cookies"
+              >
+                <div
+                  className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-transform ${
+                    localPreferences.advertising ? "translate-x-6" : "translate-x-1"
+                  }`}
+                />
+              </button>
+            </div>
+            <div className="text-xs text-text-light space-y-1">
+              <p>• Προσωποποιημένες διαφημίσεις</p>
+              <p>• Μετρήσεις αποτελεσματικότητας</p>
+              <p>• Χρηματοδότηση του ιστότοπου</p>
             </div>
           </div>
 

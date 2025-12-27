@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { FileText, ChevronDown } from "lucide-react";
-import { EMAIL_TEMPLATES, getTemplatesByCategory, replaceTemplateVariables, type EmailTemplate } from "@/lib/constants/email-templates";
+import { EMAIL_TEMPLATES, getTemplatesByCategory, replaceTemplateVariables, type EmailTemplate } from "@/lib/constants";
 
 interface EmailTemplatesProps {
   submissionType: string;

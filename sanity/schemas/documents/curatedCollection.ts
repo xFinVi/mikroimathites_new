@@ -34,6 +34,7 @@ export const curatedCollection = defineType({
           name: "collectionArticle", 
           title: "Article",
           to: [{ type: "article" }],
+          weak: true, // Weak reference: allows deletion even if referenced
           options: {
             filter: '!(_id in path("drafts.**")) && defined(slug.current)',
           },
@@ -43,6 +44,7 @@ export const curatedCollection = defineType({
           name: "collectionRecipe",
           title: "Recipe",
           to: [{ type: "recipe" }],
+          weak: true, // Weak reference: allows deletion even if referenced
           options: {
             filter: '!(_id in path("drafts.**")) && defined(slug.current)',
           },
@@ -52,6 +54,7 @@ export const curatedCollection = defineType({
           name: "collectionActivity",
           title: "Activity",
           to: [{ type: "activity" }],
+          weak: true, // Weak reference: allows deletion even if referenced
           options: {
             filter: '!(_id in path("drafts.**")) && defined(slug.current)',
           },
@@ -61,12 +64,14 @@ export const curatedCollection = defineType({
           name: "collectionPrintable",
           title: "Printable",
           to: [{ type: "printable" }],
+          weak: true, // Weak reference: allows deletion even if referenced
           options: {
             filter: '!(_id in path("drafts.**")) && defined(slug.current)',
           },
         },
       ],
-      validation: (Rule) => Rule.required().min(1),
+      // Allow empty collections - broken references will be filtered out
+      // Minimum validation removed to allow cascading deletion
     }),
     defineField({
       name: "placement",

@@ -5,7 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { signOut, useSession } from "next-auth/react";
-import { LogOut, Home, FileText, Settings, Menu, X } from "lucide-react";
+import { LogOut, Home, FileText, Settings, Menu, X, Layout } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -23,6 +23,7 @@ export function AdminNavbar() {
   const navLinks = [
     { href: "/admin/dashboard", label: "Dashboard", icon: Home },
     { href: "/admin/submissions?status=not_answered", label: "Αιτήματα", icon: FileText },
+    { href: "/studio", label: "Studio", icon: Layout },
   ];
 
   return (

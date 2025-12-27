@@ -1,6 +1,7 @@
 import { Activity } from "@/lib/content";
 import { format } from "date-fns";
 import Link from "next/link";
+import { ViewCount } from "@/components/analytics/view-count";
 
 interface ActivityMetaProps {
   activity: Activity;
@@ -50,6 +51,12 @@ export function ActivityMeta({ activity }: ActivityMetaProps) {
           <span>{publishedDate}</span>
         </div>
       )}
+
+      <ViewCount
+        content_type="activity"
+        content_slug={activity.slug}
+        showIcon={true}
+      />
 
       {activity.ageGroups && activity.ageGroups.length > 0 && (
         <div className="flex items-center gap-2 flex-wrap">

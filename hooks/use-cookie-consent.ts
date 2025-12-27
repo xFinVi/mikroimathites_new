@@ -1,12 +1,14 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { logger } from "@/lib/utils/logger";
 
-export type CookieCategory = "essential" | "analytics";
+export type CookieCategory = "essential" | "analytics" | "advertising";
 
 export interface CookiePreferences {
   essential: boolean; // Always true, cannot be disabled
   analytics: boolean;
+  advertising: boolean;
 }
 
 const COOKIE_CONSENT_KEY = "cookie-consent";
@@ -16,6 +18,7 @@ const COOKIE_PREFERENCES_KEY = "cookie-preferences";
 const defaultPreferences: CookiePreferences = {
   essential: true, // Always enabled
   analytics: false,
+  advertising: false,
 };
 
 export function useCookieConsent() {
@@ -57,6 +60,7 @@ export function useCookieConsent() {
     const allAccepted: CookiePreferences = {
       essential: true,
       analytics: true,
+      advertising: true,
     };
     savePreferences(allAccepted, true);
   };

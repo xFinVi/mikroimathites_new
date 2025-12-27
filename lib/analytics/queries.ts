@@ -121,35 +121,40 @@ export async function getContentViewCounts(
   try {
     if (items.length === 0) return new Map();
 
-    // Build query for all items
-    const conditions = items
-      .map(
-        (item) =>
-          `(content_type = '${item.content_type}' AND content_slug = '${item.content_slug}')`
-      )
-      .join(" OR ");
-
-    const { data, error } = await supabaseAdmin
-      .from("content_views")
-      .select("content_type, content_slug")
-      .eq("is_bot", false)
-      .or(conditions);
-
-    if (error) {
-      logger.error("Error getting view counts:", error);
-      return new Map();
-    }
-
-    if (!data || data.length === 0) {
-      return new Map();
-    }
-
-    // Count views per content
+    // For multiple items, we'll query each type separately and combine
+    // This is more efficient than complex OR queries
     const counts = new Map<string, number>();
-    data.forEach((view) => {
-      const key = `${view.content_type}:${view.content_slug}`;
-      counts.set(key, (counts.get(key) || 0) + 1);
+
+    // Group by content_type for more efficient queries
+    const byType = new Map<ContentType, string[]>();
+    items.forEach((item) => {
+      if (!byType.has(item.content_type)) {
+        byType.set(item.content_type, []);
+      }
+      byType.get(item.content_type)!.push(item.content_slug);
     });
+
+    // Query each content type separately
+    for (const [content_type, slugs] of byType.entries()) {
+      const { data, error } = await supabaseAdmin
+        .from("content_views")
+        .select("content_slug")
+        .eq("content_type", content_type)
+        .eq("is_bot", false)
+        .in("content_slug", slugs);
+
+      if (error) {
+        logger.error(`Error getting view counts for ${content_type}:`, error);
+        continue;
+      }
+
+      if (data && data.length > 0) {
+        data.forEach((view) => {
+          const key = `${content_type}:${view.content_slug}`;
+          counts.set(key, (counts.get(key) || 0) + 1);
+        });
+      }
+    }
 
     return counts;
   } catch (error) {

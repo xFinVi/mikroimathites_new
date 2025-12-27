@@ -426,8 +426,23 @@ export async function getCuratedCollectionsByPlacement(
   placement: string
 ): Promise<CuratedCollection[]> {
   if (!safeClient) return [];
-  return safeClient.fetch<CuratedCollection[]>(curatedCollectionsByPlacementQuery, {
+  const results = await safeClient.fetch<CuratedCollection[]>(curatedCollectionsByPlacementQuery, {
     placement,
+  });
+  
+  // Filter out broken references from all collections
+  return results.map((collection) => {
+    if (collection.items) {
+      collection.items = collection.items.filter((item: any) => {
+        if (!item || !item._id) return false;
+        // Check if it's a draft (draft IDs start with "drafts.")
+        if (item._id.startsWith('drafts.')) return false;
+        // Check if it has required fields
+        if (!item.slug || !item.title) return false;
+        return true;
+      });
+    }
+    return collection;
   });
 }
 
@@ -464,7 +479,7 @@ export interface FeaturedContentSection {
 
 export async function getFeaturedContentSection(): Promise<FeaturedContentSection | null> {
   if (!safeClient) return null;
-  return safeClient.fetch<FeaturedContentSection | null>(
+  const result = await safeClient.fetch<FeaturedContentSection | null>(
     `*[_type == "featuredContentSection" && !(_id in path("drafts.**"))][0]{
       title,
       subtitle,
@@ -521,6 +536,17 @@ export async function getFeaturedContentSection(): Promise<FeaturedContentSectio
       }
     }`
   );
+  
+  // Filter out items where the referenced document doesn't exist, is a draft, or doesn't have a slug
+  if (result?.contentItems) {
+    result.contentItems = result.contentItems.filter((item) => {
+      const content = item.article || item.activity || item.printable || item.recipe;
+      // Only include items that exist, are published (have slug), and match the content type
+      return content && content.slug && content._type && !content._id.includes("drafts");
+    });
+  }
+  
+  return result;
 }
 
 // For Parents Section
@@ -534,7 +560,7 @@ export interface ForParentsSection {
 
 export async function getForParentsSection(): Promise<ForParentsSection | null> {
   if (!safeClient) return null;
-  return safeClient.fetch<ForParentsSection | null>(
+  const result = await safeClient.fetch<ForParentsSection | null>(
     `*[_type == "forParentsSection" && !(_id in path("drafts.**"))][0]{
       title,
       subtitle,
@@ -554,6 +580,15 @@ export async function getForParentsSection(): Promise<ForParentsSection | null> 
       }
     }`
   );
+  
+  // Filter out articles where the referenced document doesn't exist, is a draft, or doesn't have a slug
+  if (result?.articles) {
+    result.articles = result.articles.filter((article) => {
+      return article && article.slug && article._type && !article._id.includes("drafts");
+    });
+  }
+  
+  return result;
 }
 
 // Activities & Printables Section

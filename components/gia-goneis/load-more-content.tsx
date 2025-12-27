@@ -5,7 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { ContentList } from "@/components/content/content-list";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
-import { GIA_GONEIS_CONSTANTS } from "@/lib/constants/gia-goneis";
+import { GIA_GONEIS_CONSTANTS } from "@/lib/constants";
 
 interface LoadMoreContentProps {
   initialItems: Array<{

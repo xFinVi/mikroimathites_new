@@ -1,5 +1,6 @@
 import { defineConfig } from "sanity";
 import { deskTool } from "sanity/desk";
+import { structure } from "./sanity/plugins/structure";
 import schemas from "./sanity/schemas";
 
 // For client-side Studio, use NEXT_PUBLIC_ prefixed vars
@@ -32,7 +33,7 @@ export default defineConfig({
   dataset,
   apiVersion,
   basePath: "/studio",
-  plugins: [deskTool()],
+  plugins: [deskTool({ structure })],
   schema: {
     types: schemas,
   },

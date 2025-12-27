@@ -80,9 +80,9 @@ export const activity = defineType({
       title: "Related Content",
       type: "array",
       of: [
-        { type: "reference", name: "relatedArticle", to: [{ type: "article" }] },
-        { type: "reference", name: "relatedRecipe", to: [{ type: "recipe" }] },
-        { type: "reference", name: "relatedActivity", to: [{ type: "activity" }] },
+        { type: "reference", name: "relatedArticle", to: [{ type: "article" }], weak: true },
+        { type: "reference", name: "relatedRecipe", to: [{ type: "recipe" }], weak: true },
+        { type: "reference", name: "relatedActivity", to: [{ type: "activity" }], weak: true },
       ],
     }),
     // Activity-specific fields

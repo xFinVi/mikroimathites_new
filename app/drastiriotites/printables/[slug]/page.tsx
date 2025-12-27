@@ -3,7 +3,7 @@ import { Container } from "@/components/ui/container";
 import { PageWrapper } from "@/components/pages/page-wrapper";
 import { getPrintableBySlug, getPrintables } from "@/lib/content";
 import { generateImageUrl } from "@/lib/sanity/image-url";
-import { DRASTIRIOTITES_CONSTANTS } from "@/lib/constants/drastiriotites";
+import { DRASTIRIOTITES_CONSTANTS } from "@/lib/constants";
 import Image from "next/image";
 import Link from "next/link";
 import { PrintableContent } from "@/components/printables/printable-content";

@@ -3,7 +3,7 @@
 import { Activity, ActivityStep } from "@/lib/content";
 import { PortableText } from "@portabletext/react";
 import { generateImageUrl } from "@/lib/sanity/image-url";
-import { DRASTIRIOTITES_CONSTANTS } from "@/lib/constants/drastiriotites";
+import { DRASTIRIOTITES_CONSTANTS } from "@/lib/constants";
 import Image from "next/image";
 import type { PortableTextBlock } from "@portabletext/types";
 import { ActivityCarousel } from "./activity-carousel";

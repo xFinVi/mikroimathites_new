@@ -84,6 +84,15 @@ export function CookieConsentModal() {
               </span>
             </div>
           </div>
+          <div className="flex items-start gap-2">
+            <span className="text-accent-yellow mt-1">📢</span>
+            <div className="flex-1">
+              <span className="font-semibold text-text-dark">Διαφημίσεις cookies:</span>
+              <span className="text-sm text-text-medium ml-2">
+                Χρησιμοποιούνται για την εμφάνιση διαφημίσεων (Google AdSense)
+              </span>
+            </div>
+          </div>
         </div>
 
         {/* Links */}

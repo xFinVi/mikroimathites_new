@@ -1,5 +1,6 @@
 import { Printable } from "@/lib/content";
 import { format } from "date-fns";
+import { ViewCount } from "@/components/analytics/view-count";
 import Link from "next/link";
 
 interface PrintableMetaProps {
@@ -64,6 +65,12 @@ export function PrintableMeta({ printable }: PrintableMetaProps) {
           ))}
         </div>
       )}
+
+      <ViewCount
+        content_type="printable"
+        content_slug={printable.slug}
+        showIcon={true}
+      />
     </div>
   );
 }

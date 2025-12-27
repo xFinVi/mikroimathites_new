@@ -1,9 +1,9 @@
 import { notFound } from "next/navigation";
 import { Container } from "@/components/ui/container";
 import { PageWrapper } from "@/components/pages/page-wrapper";
-import { getArticleBySlug, getArticles } from "@/lib/content";
+import { getArticleBySlug, getArticles, type Category } from "@/lib/content";
 import { generateImageUrl } from "@/lib/sanity/image-url";
-import { GIA_GONEIS_CONSTANTS } from "@/lib/constants/gia-goneis";
+import { GIA_GONEIS_CONSTANTS } from "@/lib/constants";
 import Image from "next/image";
 import Link from "next/link";
 import { PortableText } from "@portabletext/react";
@@ -78,6 +78,9 @@ export default async function ArticlePage({ params }: PageProps) {
     GIA_GONEIS_CONSTANTS.IMAGE_SIZES.HERO.height
   );
 
+  // Extract category for type safety
+  const category: Category | undefined = article.category;
+
   return (
     <PageWrapper>
       <ContentTracker
@@ -125,14 +128,18 @@ export default async function ArticlePage({ params }: PageProps) {
 
             {/* Article Header */}
             <header className="mb-8 space-y-4">
-              {article.category && (
-                <Link
-                  href={`/gia-goneis?category=${article.category.slug}`}
-                  className="inline-block px-4 py-2 rounded-full bg-primary-pink/10 text-primary-pink text-sm font-semibold hover:bg-primary-pink/20 transition"
-                >
-                  {article.category.title}
-                </Link>
-              )}
+              {category ? (() => {
+                const categoryHref: string = `/gia-goneis?category=${category.slug}`;
+                const categoryTitle: string = category.title;
+                return (
+                  <Link
+                    href={categoryHref}
+                    className="inline-block px-4 py-2 rounded-full bg-primary-pink/10 text-primary-pink text-sm font-semibold hover:bg-primary-pink/20 transition"
+                  >
+                    {categoryTitle}
+                  </Link>
+                );
+              })() : null}
 
               <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-text-dark">
                 {article.title}
@@ -140,7 +147,7 @@ export default async function ArticlePage({ params }: PageProps) {
 
               {article.excerpt && (
                 <p className="text-xl text-text-medium leading-relaxed">
-                  {article.excerpt}
+                  {String(article.excerpt)}
                 </p>
               )}
 

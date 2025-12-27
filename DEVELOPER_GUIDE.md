@@ -260,7 +260,7 @@ export const GIA_GONEIS_CONSTANTS = {
 
 **Usage:**
 ```typescript
-import { GIA_GONEIS_CONSTANTS } from "@/lib/constants/gia-goneis";
+import { GIA_GONEIS_CONSTANTS } from "@/lib/constants";
 
 const pageSize = GIA_GONEIS_CONSTANTS.PAGE_SIZE;
 ```
@@ -289,7 +289,7 @@ function processSubmission(submission: Submission) {
 **Always use `generateImageUrl` for Sanity images:**
 ```typescript
 import { generateImageUrl } from "@/lib/sanity/image-url";
-import { GIA_GONEIS_CONSTANTS } from "@/lib/constants/gia-goneis";
+import { GIA_GONEIS_CONSTANTS } from "@/lib/constants";
 
 const imageUrl = generateImageUrl(
   article.coverImage,
@@ -800,7 +800,7 @@ import { getContentUrl } from "@/lib/utils/content-url";
 import { logger } from "@/lib/utils/logger";
 
 // Constants
-import { GIA_GONEIS_CONSTANTS } from "@/lib/constants/gia-goneis";
+import { GIA_GONEIS_CONSTANTS } from "@/lib/constants";
 
 // Types
 import type { Article } from "@/lib/content";
@@ -835,4 +835,5 @@ export async function POST(request: Request) {
 **Happy coding! 🚀**
 
 If you have questions or need clarification, don't hesitate to ask the team.
+
 

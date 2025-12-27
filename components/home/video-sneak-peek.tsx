@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import { Play, Pause, Volume2, VolumeX, ExternalLink } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
-import { VIDEO_CONSTANTS } from "@/lib/constants/home-page";
+import { VIDEO_CONSTANTS } from "@/lib/constants";
 
 interface VideoSource {
   type: "youtube" | "local";

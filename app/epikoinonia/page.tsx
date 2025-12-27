@@ -5,7 +5,7 @@ import { generateMetadataFor } from "@/lib/seo/generate-metadata";
 import { UnifiedContactForm } from "@/components/forms/unified-contact-form";
 import { QAPreview } from "@/components/qa/qa-preview";
 import { getQAItems, type QAItem } from "@/lib/content";
-import { CONTACT_CONSTANTS } from "@/lib/constants/contact";
+import { CONTACT_CONSTANTS } from "@/lib/constants";
 import { logger } from "@/lib/utils/logger";
 import Image from "next/image";
 import Link from "next/link";
