@@ -770,11 +770,7 @@ npm run lint
 
 ### Internal Docs
 - [README.md](README.md) - Quick start guide
-- [Documentation Index](docs/README.md) - All technical documentation
-- [Environment Setup](docs/setup/environment.md) - Environment configuration
-- [Admin Dashboard Setup](docs/setup/admin-dashboard.md) - Admin dashboard setup
-- [Analytics Setup](docs/features/analytics.md) - Google Analytics & AdSense
-- [View Tracking](docs/features/view-tracking.md) - Content view tracking
+- [PROJECT_SUMMARY.md](PROJECT_SUMMARY.md) - Complete project overview and summary
 
 ### Getting Help
 

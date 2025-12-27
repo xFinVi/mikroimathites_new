@@ -164,10 +164,8 @@ Visit `http://localhost:3000/studio` to manage content.
 
 ## 📚 Documentation
 
-- [Documentation Index](docs/README.md) - All technical documentation
-- [Setup Guides](docs/setup/) - Environment and admin dashboard setup
-- [Features](docs/features/) - Analytics and view tracking guides
-- [Developer Guide](DEVELOPER_GUIDE.md) - Development workflow and best practices
+- **[PROJECT_SUMMARY.md](PROJECT_SUMMARY.md)** - Complete project overview and summary
+- [Developer Guide](DEVELOPER_GUIDE.md) - Detailed development guide and best practices
 
 ## 🚀 Production Checklist
 
