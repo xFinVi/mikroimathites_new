@@ -128,18 +128,14 @@ export default async function ArticlePage({ params }: PageProps) {
 
             {/* Article Header */}
             <header className="mb-8 space-y-4">
-              {category ? (() => {
-                const categoryHref: string = `/gia-goneis?category=${category.slug}`;
-                const categoryTitle: string = category.title;
-                return (
-                  <Link
-                    href={categoryHref}
-                    className="inline-block px-4 py-2 rounded-full bg-primary-pink/10 text-primary-pink text-sm font-semibold hover:bg-primary-pink/20 transition"
-                  >
-                    {categoryTitle}
-                  </Link>
-                );
-              })() : null}
+              {category && (
+                <Link
+                  href={`/gia-goneis?category=${category.slug}`}
+                  className="inline-block px-4 py-2 rounded-full bg-primary-pink/10 text-primary-pink text-sm font-semibold hover:bg-primary-pink/20 transition"
+                >
+                  {category.title}
+                </Link>
+              )}
 
               <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-text-dark">
                 {article.title}
