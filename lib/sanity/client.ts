@@ -1,32 +1,38 @@
 import { createClient } from "next-sanity";
-import { logger } from "@/lib/utils/logger";
+import { SANITY_PUBLIC } from "./config.public";
 
-// Support both NEXT_PUBLIC_ (client-side) and non-prefixed (server-side) versions
-// This matches the pattern used in sanity.config.ts
-const projectId =
-  process.env.SANITY_PROJECT_ID || process.env.NEXT_PUBLIC_SANITY_PROJECT_ID;
-const dataset =
-  process.env.SANITY_DATASET || process.env.NEXT_PUBLIC_SANITY_DATASET;
-const apiVersion =
-  process.env.SANITY_API_VERSION ||
-  process.env.NEXT_PUBLIC_SANITY_API_VERSION ||
-  "2024-03-01";
-const token = process.env.SANITY_READ_TOKEN || process.env.SANITY_TOKEN;
+/**
+ * Sanity Read Client
+ * 
+ * Used in: 
+ * - lib/content/index.ts (primary data fetching)
+ * - app/*/page.tsx (direct Server Component fetches)
+ * - lib/utils/sanity.ts (reference lookups)
+ * 
+ * CDN: Enabled for performance
+ * Caching: Requests automatically memoized by Next.js fetch cache
+ * 
+ * Safe for: Both server and client contexts (read-only, no secrets)
+ */
 
-if (!projectId || !dataset) {
-  logger.warn("Sanity client not configured: missing SANITY_PROJECT_ID or SANITY_DATASET");
-}
-
-export const sanityClient =
-  projectId && dataset
+// Gracefully handle missing config (log warning instead of throwing)
+export const sanityClient = 
+  SANITY_PUBLIC.projectId && SANITY_PUBLIC.dataset
     ? createClient({
-        projectId,
-        dataset,
-        apiVersion,
-        useCdn: true, // set false if you need freshest drafts
-        token, // optional; required for drafts/authed reads
+        projectId: SANITY_PUBLIC.projectId,
+        dataset: SANITY_PUBLIC.dataset,
+        apiVersion: SANITY_PUBLIC.apiVersion,
+        useCdn: true,
+        token: process.env.SANITY_READ_TOKEN, // Optional read token
       })
     : null;
+
+// Warn in development if not configured
+if (!sanityClient && process.env.NODE_ENV === "development") {
+  console.warn(
+    "[Sanity] Client not configured. Check NEXT_PUBLIC_SANITY_PROJECT_ID and NEXT_PUBLIC_SANITY_DATASET"
+  );
+}
 
 /**
  * Wrapper function to add timeout to Sanity fetch operations
@@ -43,4 +49,3 @@ export async function fetchWithTimeout<T>(
     ),
   ]);
 }
-

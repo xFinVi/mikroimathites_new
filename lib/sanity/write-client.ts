@@ -1,47 +1,47 @@
+import "server-only"; // Critical: prevent client-side usage
 import { createClient } from "next-sanity";
+import { getSanityServerConfig } from "./config.server";
 import { logger } from "@/lib/utils/logger";
 
-// Support both NEXT_PUBLIC_ (client-side) and non-prefixed (server-side) versions
-// This matches the pattern used in sanity.config.ts
-const projectId =
-  process.env.SANITY_PROJECT_ID || process.env.NEXT_PUBLIC_SANITY_PROJECT_ID;
-const dataset =
-  process.env.SANITY_DATASET || process.env.NEXT_PUBLIC_SANITY_DATASET;
-const apiVersion =
-  process.env.SANITY_API_VERSION ||
-  process.env.NEXT_PUBLIC_SANITY_API_VERSION ||
-  "2024-03-01";
-// Use SANITY_TOKEN as primary, fallback to SANITY_WRITE_TOKEN
-const writeToken = process.env.SANITY_TOKEN || process.env.SANITY_WRITE_TOKEN;
-
-if (!projectId || !dataset) {
-  logger.warn("Sanity write client not configured: missing SANITY_PROJECT_ID or SANITY_DATASET");
-}
-
-if (!writeToken) {
-  logger.warn("Sanity write client not configured: missing SANITY_TOKEN or SANITY_WRITE_TOKEN");
-}
-
 /**
- * Sanity client with write permissions for admin operations.
+ * Sanity Write Client (SERVER-ONLY)
  * 
- * This client is used for:
- * - Publishing Q&A items from submissions
- * - Creating/updating content programmatically
+ * Used in:
+ * - app/api/admin/submissions/[id]/send-reply/route.ts (create Q&A drafts)
+ * - Future: Programmatic content creation
  * 
- * IMPORTANT: This client should only be used in authenticated admin API routes.
- * Never expose the write token to the client-side.
+ * Security: Contains write token - MUST remain server-only
+ * Never import in: Client components, shared utilities, lib/content
  */
-export const sanityWriteClient =
-  projectId && dataset && writeToken
-    ? createClient({
-        projectId,
-        dataset,
-        apiVersion,
-        useCdn: false, // Don't use CDN for writes (need fresh data)
-        token: writeToken, // Required for write operations
-      })
-    : null;
+
+// Lazy initialization - only create client when config is available
+let _writeClient: ReturnType<typeof createClient> | null = null;
+
+export function getSanityWriteClient() {
+  if (_writeClient) return _writeClient;
+
+  const config = getSanityServerConfig();
+  
+  if (!config.writeToken) {
+    throw new Error(
+      "Sanity write client requires a token. " +
+      "Set SANITY_TOKEN in .env.local"
+    );
+  }
+
+  _writeClient = createClient({
+    projectId: config.projectId,
+    dataset: config.dataset,
+    apiVersion: config.apiVersion,
+    useCdn: false, // Never use CDN for writes
+    token: config.writeToken,
+  });
+
+  return _writeClient;
+}
+
+// Convenience export for existing code
+export const sanityWriteClient = getSanityWriteClient();
 
 /**
  * Helper function to create a DRAFT qaItem in Sanity from a submission
@@ -211,5 +211,3 @@ export async function createQADraftInSanity(
     return null;
   }
 }
-
-
