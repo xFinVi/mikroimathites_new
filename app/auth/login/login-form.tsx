@@ -7,7 +7,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
-import { toast } from "sonner";
 
 export function LoginForm() {
   const router = useRouter();
@@ -24,9 +23,6 @@ export function LoginForm() {
   useEffect(() => {
     if (registered) {
       setShowSuccess(true);
-      toast.success("Επιτυχής εγγραφή! 🎉", {
-        description: "Μπορείτε τώρα να συνδεθείτε στον λογαριασμό σας.",
-      });
       // Clear the success message after 5 seconds
       const timer = setTimeout(() => setShowSuccess(false), 5000);
       return () => clearTimeout(timer);
@@ -46,27 +42,16 @@ export function LoginForm() {
       });
 
       if (result?.error) {
-        const errorMsg = "Λάθος email ή password. Παρακαλώ δοκιμάστε ξανά.";
-        setError(errorMsg);
-        toast.error("Σφάλμα σύνδεσης", {
-          description: errorMsg,
-        });
+        setError("Λάθος email ή password. Παρακαλώ δοκιμάστε ξανά.");
         setIsLoading(false);
         return;
       }
 
       // Successful login
-      toast.success("Σύνδεση επιτυχής! 🎉", {
-        description: "Καλώς ήρθατε!",
-      });
       router.push(callbackUrl);
       router.refresh();
     } catch (err) {
-      const errorMsg = "Κάτι πήγε στραβά. Παρακαλώ δοκιμάστε ξανά.";
-      setError(errorMsg);
-      toast.error("Σφάλμα", {
-        description: errorMsg,
-      });
+      setError("Κάτι πήγε στραβά. Παρακαλώ δοκιμάστε ξανά.");
       setIsLoading(false);
     }
   };

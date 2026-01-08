@@ -14,7 +14,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { toast } from "sonner";
 
 interface InlineQuickFormProps {
   defaultType?: "video-idea" | "question";
@@ -43,11 +42,7 @@ export function InlineQuickForm({ defaultType = "question", sourcePage }: Inline
 
     // Validation
     if (!formData.message || formData.message.trim().length < 10) {
-      const errorMsg = "Παρακαλώ εισάγετε ένα μήνυμα (τουλάχιστον 10 χαρακτήρες)";
-      setError(errorMsg);
-      toast.error("Μη έγκυρο μήνυμα", {
-        description: errorMsg,
-      });
+      setError("Παρακαλώ εισάγετε ένα μήνυμα (τουλάχιστον 10 χαρακτήρες)");
       setIsSubmitting(false);
       return;
     }
@@ -88,14 +83,6 @@ export function InlineQuickForm({ defaultType = "question", sourcePage }: Inline
         throw new Error(data?.error || "Αποτυχία αποστολής");
       }
 
-      // Success toast
-      const successMsg = formData.type === "question"
-        ? "Η ερώτησή σας έχει καταγραφεί! Θα σας απαντήσουμε σύντομα."
-        : "Η ιδέα σας έχει καταγραφεί! Θα την εξετάσουμε σύντομα.";
-      toast.success("Επιτυχία! 🎉", {
-        description: successMsg,
-      });
-
       setIsSubmitted(true);
       setIsSubmitting(false);
 
@@ -115,9 +102,6 @@ export function InlineQuickForm({ defaultType = "question", sourcePage }: Inline
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : "Κάτι πήγε στραβά";
       setError(message);
-      toast.error("Αποτυχία αποστολής", {
-        description: message,
-      });
       setIsSubmitting(false);
     }
   };

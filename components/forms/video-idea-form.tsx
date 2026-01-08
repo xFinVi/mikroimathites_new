@@ -13,7 +13,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { toast } from "sonner";
 
 interface VideoIdeaFormData {
   name: string;
@@ -60,16 +59,9 @@ export function VideoIdeaForm() {
         const data = await res.json().catch(() => ({}));
         throw new Error(data?.error || "Αποτυχία αποστολής");
       }
-
-      toast.success("Επιτυχία! 🎉", {
-        description: "Η ιδέα σας έχει καταγραφεί! Θα την εξετάσουμε σύντομα.",
-      });
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : "Κάτι πήγε στραβά";
       setError(message);
-      toast.error("Αποτυχία αποστολής", {
-        description: message,
-      });
       setIsSubmitting(false);
       return;
     }
