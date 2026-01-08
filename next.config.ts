@@ -16,7 +16,7 @@ const nextConfig: NextConfig = {
       {
         protocol: "https",
         hostname: "cdn.sanity.io",
-        pathname: "/images/**",
+        pathname: "/**",
       },
       {
         protocol: "https",
@@ -24,6 +24,8 @@ const nextConfig: NextConfig = {
         pathname: "/vi/**",
       },
     ],
+    // Allow unoptimized images as fallback (for development/debugging)
+    unoptimized: false,
   },
 };
 
