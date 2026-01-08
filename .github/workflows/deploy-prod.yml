@@ -1,0 +1,80 @@
+name: Deploy Production
+
+on:
+  workflow_run:
+    workflows: ["CI"]
+    branches: [main]
+    types: [completed]
+
+# Explicit permissions - least privilege principle
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: production-deploy
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    name: Deploy to Production VPS
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    environment: production
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Setup SSH key
+        run: |
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+          echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -H "$SSH_HOST" >> ~/.ssh/known_hosts
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.VPS_SSH_PRIVATE_KEY }}
+          SSH_HOST: ${{ secrets.VPS_HOST }}
+
+      - name: Redeploy on VPS
+        run: |
+          ssh -o StrictHostKeyChecking=accept-new "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}" << 'ENDSSH'
+            set -e
+            cd "${{ secrets.VPS_APP_PATH }}"
+            echo "🚀 Starting production deployment from GitHub Actions..."
+            echo "📦 Branch: main"
+            echo "✅ CI passed - proceeding with deployment"
+            git fetch origin
+            git checkout main
+            git pull origin main
+            echo "🔨 Building and starting containers..."
+            docker compose up -d --build
+          ENDSSH
+
+      - name: Verify deployment
+        run: |
+          sleep 15
+          ssh -o StrictHostKeyChecking=accept-new "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}" << 'ENDSSH'
+            cd "${{ secrets.VPS_APP_PATH }}"
+            echo "🏥 Checking application health..."
+            if curl -f http://localhost:3000/api/health > /dev/null 2>&1; then
+              echo "✅ Production deployment verified - application is healthy"
+            else
+              echo "⚠️ Health check failed - check logs manually"
+              docker compose logs --tail=50
+              exit 1
+            fi
+          ENDSSH
+
+      - name: Deployment notification
+        if: always()
+        run: |
+          if [ "${{ job.status }}" == "success" ]; then
+            echo "✅ Production deployment completed successfully"
+          else
+            echo "❌ Production deployment failed"
+            exit 1
+          fi
