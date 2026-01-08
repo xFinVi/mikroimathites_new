@@ -80,57 +80,6 @@ export function ArticleStats({ article }: ArticleStatsProps) {
           </span>
         </div>
       </div>
-
-      {/* Recommendation Status */}
-      <div className="mt-4 pt-4 border-t border-primary-pink/10">
-        <div className="flex items-start gap-2">
-          {stats.meetsRecommendation ? (
-            <svg
-              className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-              />
-            </svg>
-          ) : (
-            <svg
-              className="w-5 h-5 text-amber-600 mt-0.5 flex-shrink-0"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-              />
-            </svg>
-          )}
-          <div>
-            <p
-              className={`text-sm font-medium ${
-                stats.meetsRecommendation ? "text-green-700" : "text-amber-700"
-              }`}
-            >
-              {stats.recommendationMessage}
-            </p>
-            <p className="text-xs text-text-medium mt-1">
-              Συνιστάται {stats.recommendedImages.min}
-              {stats.recommendedImages.max > stats.recommendedImages.min
-                ? `-${stats.recommendedImages.max}`
-                : ""}{" "}
-              εικόνες για {stats.wordCount} λέξεις
-            </p>
-          </div>
-        </div>
-      </div>
     </div>
   );
 }

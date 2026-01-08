@@ -2,8 +2,10 @@ import { defineField, defineType } from "sanity";
 
 export const qaItem = defineType({
   name: "qaItem",
-  title: "Q&A Item (Published)",
+  title: "Q&A Item",
   type: "document",
+  // Ensure liveEdit is false to enable publish/unpublish actions
+  liveEdit: false,
   fields: [
     defineField({
       name: "question",

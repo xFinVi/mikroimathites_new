@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 import { SuccessMessage } from "./success-message";
+import { toast } from "sonner";
 
 type SubmissionType = "video-idea" | "feedback" | "question" | "";
 
@@ -64,7 +65,11 @@ export function UnifiedContactForm() {
 
     // Validation
     if (!formData.submission_type) {
-      setError("Παρακαλώ επιλέξτε τύπο υποβολής");
+      const errorMsg = "Παρακαλώ επιλέξτε τύπο υποβολής";
+      setError(errorMsg);
+      toast.error(errorMsg, {
+        description: "Επιλέξτε έναν τύπο υποβολής πριν συνεχίσετε",
+      });
       setIsSubmitting(false);
       return;
     }
@@ -98,7 +103,11 @@ export function UnifiedContactForm() {
       switch (formData.submission_type) {
         case "video-idea":
           if (!formData.message) {
-            setError("Το μήνυμα είναι υποχρεωτικό");
+            const errorMsg = "Το μήνυμα είναι υποχρεωτικό";
+            setError(errorMsg);
+            toast.error(errorMsg, {
+              description: "Παρακαλώ περιγράψτε την ιδέα σας για βίντεο",
+            });
             setIsSubmitting(false);
             return;
           }
@@ -111,12 +120,20 @@ export function UnifiedContactForm() {
 
         case "feedback":
           if (!formData.rating) {
-            setError("Η αξιολόγηση είναι υποχρεωτική");
+            const errorMsg = "Η αξιολόγηση είναι υποχρεωτική";
+            setError(errorMsg);
+            toast.error(errorMsg, {
+              description: "Παρακαλώ επιλέξτε μια αξιολόγηση (αστέρια)",
+            });
             setIsSubmitting(false);
             return;
           }
           if (!formData.feedback_message) {
-            setError("Το feedback είναι υποχρεωτικό");
+            const errorMsg = "Το feedback είναι υποχρεωτικό";
+            setError(errorMsg);
+            toast.error(errorMsg, {
+              description: "Παρακαλώ γράψτε το feedback σας",
+            });
             setIsSubmitting(false);
             return;
           }
@@ -129,7 +146,11 @@ export function UnifiedContactForm() {
 
         case "question":
           if (!formData.message) {
-            setError("Η ερώτηση είναι υποχρεωτική");
+            const errorMsg = "Η ερώτηση είναι υποχρεωτική";
+            setError(errorMsg);
+            toast.error(errorMsg, {
+              description: "Παρακαλώ γράψτε την ερώτησή σας",
+            });
             setIsSubmitting(false);
             return;
           }
@@ -143,7 +164,11 @@ export function UnifiedContactForm() {
 
         default:
           if (!formData.message) {
-            setError("Το μήνυμα είναι υποχρεωτικό");
+            const errorMsg = "Το μήνυμα είναι υποχρεωτικό";
+            setError(errorMsg);
+            toast.error(errorMsg, {
+              description: "Παρακαλώ γράψτε το μήνυμά σας",
+            });
             setIsSubmitting(false);
             return;
           }
@@ -163,9 +188,23 @@ export function UnifiedContactForm() {
         const data = await res.json().catch(() => ({}));
         throw new Error(data?.error || "Αποτυχία αποστολής");
       }
+
+      // Success toast
+      const successMessages: Record<Exclude<SubmissionType, "">, string> = {
+        "video-idea": "Η ιδέα σας έχει καταγραφεί! Θα την εξετάσουμε σύντομα.",
+        "feedback": "Το feedback σας είναι πολύτιμο! Ευχαριστούμε.",
+        "question": "Η ερώτησή σας έχει καταγραφεί! Θα σας απαντήσουμε σύντομα.",
+      };
+      const successMsg = formData.submission_type && successMessages[formData.submission_type as Exclude<SubmissionType, "">] || "Η υποβολή σας έχει καταγραφεί!";
+      toast.success("Επιτυχία! 🎉", {
+        description: successMsg,
+      });
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : "Κάτι πήγε στραβά";
       setError(message);
+      toast.error("Αποτυχία αποστολής", {
+        description: message,
+      });
       setIsSubmitting(false);
       return;
     }
@@ -251,7 +290,6 @@ export function UnifiedContactForm() {
             )}
           >
             <div className="flex flex-col items-start gap-3">
-              <div className="text-3xl">💬</div>
               <div>
                 <div className="font-semibold text-text-dark text-base mb-1">
                   Feedback / Σχόλια
@@ -283,7 +321,6 @@ export function UnifiedContactForm() {
             )}
           >
             <div className="flex flex-col items-start gap-3">
-              <div className="text-3xl">💡</div>
               <div>
                 <div className="font-semibold text-text-dark text-base mb-1">
                   Ιδέα για βίντεο
@@ -315,7 +352,6 @@ export function UnifiedContactForm() {
             )}
           >
             <div className="flex flex-col items-start gap-3">
-              <div className="text-3xl">❓</div>
               <div>
                 <div className="font-semibold text-text-dark text-base mb-1">
                   Ερώτηση (Q&A)
@@ -566,7 +602,7 @@ export function UnifiedContactForm() {
           type="submit"
           size="lg"
           disabled={isSubmitting || !formData.submission_type}
-          className="w-full sm:w-auto bg-primary-pink hover:bg-primary-pink/90 text-white text-lg px-8 py-6 rounded-button shadow-lg hover:shadow-xl transition-all"
+          className="w-full sm:w-auto bg-primary-pink hover:bg-primary-pink/90 text-white text-lg px-12 py-2 rounded-button shadow-lg hover:shadow-xl transition-all"
         >
           {isSubmitting ? "Αποστολή..." : "Στείλτε"}
         </Button>

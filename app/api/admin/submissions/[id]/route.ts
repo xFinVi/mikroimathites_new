@@ -3,6 +3,7 @@ import { supabaseAdmin } from "@/lib/supabase/server";
 import { logger } from "@/lib/utils/logger";
 import { requireAdmin } from "@/lib/auth/middleware";
 import type { NextRequest } from "next/server";
+import { deleteQADocumentFromSanity } from "@/lib/sanity/write-client";
 
 /**
  * GET /api/admin/submissions/[id]
@@ -142,18 +143,60 @@ export async function DELETE(
   try {
     const { id } = await params;
 
+    // First, fetch the submission to check if it's published to Sanity
+    const { data: submission, error: fetchError } = await supabaseAdmin
+      .from("submissions")
+      .select("published_to_sanity, sanity_qa_item_id")
+      .eq("id", id)
+      .single();
+
+    if (fetchError) {
+      logger.error("Failed to fetch submission before deletion", fetchError);
+      return NextResponse.json(
+        { error: "Failed to fetch submission" },
+        { status: 500 }
+      );
+    }
+
+    // If published to Sanity, delete from Sanity first
+    if (submission?.published_to_sanity && submission?.sanity_qa_item_id) {
+      logger.info("Deleting published Q&A from Sanity", {
+        submissionId: id,
+        sanityId: submission.sanity_qa_item_id,
+      });
+
+      const sanityDeleted = await deleteQADocumentFromSanity(
+        submission.sanity_qa_item_id
+      );
+
+      if (!sanityDeleted) {
+        logger.warn("Failed to delete from Sanity, but continuing with Supabase deletion", {
+          submissionId: id,
+          sanityId: submission.sanity_qa_item_id,
+        });
+        // Continue with Supabase deletion even if Sanity deletion fails
+        // This prevents orphaned records in Supabase
+      }
+    }
+
+    // Delete from Supabase
     const { error } = await supabaseAdmin
       .from("submissions")
       .delete()
       .eq("id", id);
 
     if (error) {
-      logger.error("Failed to delete submission", error);
+      logger.error("Failed to delete submission from Supabase", error);
       return NextResponse.json(
         { error: "Failed to delete submission" },
         { status: 500 }
       );
     }
+
+    logger.info("Successfully deleted submission", {
+      submissionId: id,
+      wasPublished: submission?.published_to_sanity || false,
+    });
 
     return NextResponse.json({ success: true });
   } catch (error) {

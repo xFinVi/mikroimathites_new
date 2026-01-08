@@ -134,6 +134,42 @@ export const articlesQuery = groq`*[_type == "article" && defined(slug.current) 
 export const articleBySlugQuery = groq`*[_type == "article" && slug.current == $slug && !(_id in path("drafts.**"))][0]{${articleFields}}`;
 export const featuredArticlesQuery = groq`*[_type == "article" && featured == true && defined(slug.current) && defined(coverImage) && !(_id in path("drafts.**"))]|order(publishedAt desc)[0...10]{${articleFields}}`;
 
+// Next Article Query
+// Gets the next newer article (published after $currentDate), or falls back to the most recent article
+export const nextArticleQuery = groq`
+  *[
+    _type == "article" &&
+    defined(slug.current) &&
+    !(_id in path("drafts.**")) &&
+    _id != $currentId &&
+    publishedAt > $currentDate
+  ]|order(publishedAt asc)[0]{
+    _id,
+    title,
+    "slug": slug.current,
+    excerpt,
+    coverImage,
+    publishedAt
+  }
+`;
+
+// Fallback to most recent article (for when no newer article exists)
+export const mostRecentArticleQuery = groq`
+  *[
+    _type == "article" &&
+    defined(slug.current) &&
+    !(_id in path("drafts.**")) &&
+    _id != $currentId
+  ]|order(publishedAt desc)[0]{
+    _id,
+    title,
+    "slug": slug.current,
+    excerpt,
+    coverImage,
+    publishedAt
+  }
+`;
+
 // Recipe queries
 export const recipesQuery = groq`*[_type == "recipe" && defined(slug.current) && !(_id in path("drafts.**"))]|order(publishedAt desc){${recipeFields}}`;
 export const recipeBySlugQuery = groq`*[_type == "recipe" && slug.current == $slug && !(_id in path("drafts.**"))][0]{${recipeFields}}`;
@@ -176,6 +212,24 @@ export const curatedCollectionFields = `
 
 export const curatedCollectionsQuery = groq`*[_type == "curatedCollection" && defined(placement)]|order(order asc, publishedAt desc){${curatedCollectionFields}}`;
 export const curatedCollectionByPlacementQuery = groq`*[_type == "curatedCollection" && placement == $placement && !(_id in path("drafts.**"))]|order(order asc, publishedAt desc)[0]{${curatedCollectionFields}}`;
+
+// Sponsor queries
+export const sponsorFields = `
+  _id,
+  companyName,
+  logo,
+  website,
+  category,
+  tier,
+  isActive,
+  isFeatured,
+  databaseId
+`;
+
+// Fetch active sponsors (synced from database)
+// Only show sponsors that are active and synced to Sanity
+// Note: isActive might be null/undefined, so we check for != false
+export const sponsorsQuery = groq`*[_type == "sponsor" && (isActive == true || isActive == null) && !(_id in path("drafts.**"))]|order(isFeatured desc, tier asc, companyName asc){${sponsorFields}}`;
 export const curatedCollectionsByPlacementQuery = groq`*[_type == "curatedCollection" && placement == $placement]|order(order asc, publishedAt desc){${curatedCollectionFields}}`;
 
 // Page Settings query (singleton)
@@ -407,7 +461,7 @@ export const relatedContentQuery = groq`
 `;
 
 // Parents Hub Content Query (server-side search + pagination)
-// Note: All params ($search, $age, $categories) must be provided (can be null)
+// Note: All params ($search, $age, $categories, $tag) must be provided (can be null)
 // IMPORTANT: Count query below must use EXACT same filter logic
 export const parentsHubContentQuery = groq`
   *[
@@ -433,6 +487,11 @@ export const parentsHubContentQuery = groq`
       $categories == null ||
       count($categories) == 0 ||
       (defined(category) && category->slug.current in $categories)
+    ) &&
+    (
+      $tag == null ||
+      $tag == "" ||
+      count(tags[]->slug.current[slug.current == $tag]) > 0
     )
   ]
   | order(publishedAt desc)
@@ -482,6 +541,11 @@ export const parentsHubContentCountQuery = groq`
       $categories == null ||
       count($categories) == 0 ||
       (defined(category) && category->slug.current in $categories)
+    ) &&
+    (
+      $tag == null ||
+      $tag == "" ||
+      count(tags[]->slug.current[slug.current == $tag]) > 0
     )
   ])
 `;

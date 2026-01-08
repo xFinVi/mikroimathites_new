@@ -11,10 +11,12 @@ import {
   getFeaturedContentSection,
   getForParentsSection,
   getActivitiesPrintablesSection,
+  getSponsors,
 } from "@/lib/content";
 import { generateImageUrl } from "@/lib/sanity/image-url";
 import { HOME_PAGE_LIMITS, HOME_PAGE_IMAGE_SIZES } from "@/lib/constants";
 import { logger } from "@/lib/utils/logger";
+import { type Sponsor } from "@/components/sponsors";
 
 export const metadata = generateMetadataFor("home");
 
@@ -40,6 +42,7 @@ function getFeaturedContentWithFallback(
     _id: string;
     name: string;
     slug?: string;
+    profilePicture?: unknown;
   };
   category?: {
     _id: string;
@@ -239,6 +242,15 @@ export default async function Home() {
     HOME_PAGE_IMAGE_SIZES.HERO.height
   );
 
+  // Fetch real sponsors from Sanity (only active, synced sponsors)
+  let sponsors: Sponsor[] = [];
+  try {
+    sponsors = await getSponsors();
+  } catch (error) {
+    logger.error('Failed to fetch sponsors for home page:', error);
+    // Continue with empty array - section will just not show sponsors
+  }
+
   return (
     <HomePage
       homeHeroImage={homeHeroImageUrl}
@@ -261,6 +273,7 @@ export default async function Home() {
         viewAllLink: activitiesPrintablesSection.viewAllLink,
         items: activitiesPrintablesItems,
       } : undefined}
+      sponsors={sponsors}
     />
   );
 }

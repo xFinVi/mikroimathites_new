@@ -211,3 +211,35 @@ export async function createQADraftInSanity(
     return null;
   }
 }
+
+/**
+ * Delete a Q&A document from Sanity
+ * This will delete both the published version and any drafts
+ * 
+ * @param documentId - The Sanity document ID to delete
+ * @returns true if deletion succeeded, false otherwise
+ */
+export async function deleteQADocumentFromSanity(
+  documentId: string
+): Promise<boolean> {
+  if (!sanityWriteClient) {
+    logger.error("Sanity write client not configured for deletion");
+    return false;
+  }
+
+  try {
+    // First, try to delete the published document
+    // Sanity delete() will delete both published and draft versions
+    await sanityWriteClient.delete(documentId);
+    
+    logger.info("✅ Deleted Q&A document from Sanity", { documentId });
+    return true;
+  } catch (error) {
+    logger.error("❌ Failed to delete Q&A document from Sanity", {
+      error,
+      documentId,
+      errorMessage: error instanceof Error ? error.message : String(error),
+    });
+    return false;
+  }
+}

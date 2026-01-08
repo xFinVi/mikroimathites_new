@@ -18,28 +18,30 @@ export function ArticleHeader({ article, category: propCategory }: ArticleHeader
       : undefined);
 
   return (
-    <div className="mb-8 space-y-4">
+    <header className="space-y-6">
       {category && (
         <Link
           href={`/gia-goneis?category=${category.slug}`}
-          className="inline-block px-4 py-2 rounded-full bg-primary-pink/10 text-primary-pink text-sm font-semibold hover:bg-primary-pink/20 transition"
+          className="inline-block px-5 py-2.5 rounded-full bg-gradient-to-r from-primary-pink/10 to-accent-yellow/10 text-primary-pink text-sm font-bold hover:from-primary-pink/20 hover:to-accent-yellow/20 transition-all shadow-sm border border-primary-pink/20"
         >
           {category.title}
         </Link>
       )}
 
-      <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-text-dark">
+      <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold text-text-dark leading-tight tracking-tight">
         {article.title}
       </h1>
 
       {article.excerpt && (
-        <p className="text-xl text-text-medium leading-relaxed">
+        <p className="text-xl md:text-2xl text-text-medium leading-relaxed max-w-3xl font-light">
           {article.excerpt}
         </p>
       )}
 
-      <ArticleMeta article={article} />
-    </div>
+      <div className="pt-4">
+        <ArticleMeta article={article} />
+      </div>
+    </header>
   );
 }
 

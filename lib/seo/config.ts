@@ -23,6 +23,12 @@ export const seoConfig = {
       "Στείλτε ιδέα για βίντεο, feedback ή ερώτηση. Η γνώμη σας μετράει.",
     ogImage: "/images/logo.png",
   },
+  "gine-xorigos": {
+    title: "Γίνετε Χορηγός | Μικροί Μαθητές",
+    description:
+      "Υποστηρίξτε την κοινότητά μας και φτάστε σε χιλιάδες γονείς. Κάντε αίτηση για να γίνετε χορηγός.",
+    ogImage: "/images/logo.png",
+  },
   sxetika: {
     title: "Σχετικά | Μικροί Μαθητές",
     description:

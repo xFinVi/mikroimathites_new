@@ -26,58 +26,13 @@ export function QuickTipsSection({ quickTips }: QuickTipsSectionProps) {
     return "article"; // Default fallback
   };
 
-  // If no quick tips collection, show empty state with CMS instructions
-  if (!quickTips) {
-    return (
-      <section className="space-y-6">
-        <div className="flex items-center justify-between gap-4">
-          <h2 className="text-2xl sm:text-3xl font-bold text-text-dark">
-            Γρήγορες λύσεις (5')
-          </h2>
-        </div>
-        <div className="bg-background-light rounded-card p-6 border border-border/50">
-          <p className="text-sm text-text-medium text-center">
-            <strong className="text-text-dark">
-              Δημιουργήστε μια Curated Collection στο Sanity Studio:
-            </strong>
-            <br />
-            <span className="text-text-light mt-2 block">
-              • Placement:{" "}
-              <code className="bg-background-white px-2 py-1 rounded text-xs">
-                "quick-tips"
-              </code>{" "}
-              ή{" "}
-              <code className="bg-background-white px-2 py-1 rounded text-xs">
-                "parentsPageQuickTips"
-              </code>
-              <br />
-              • Προσθέστε 4+ άρθρα/δραστηριότητες/συνταγές για να εμφανίζονται εδώ
-            </span>
-          </p>
-        </div>
-      </section>
-    );
-  }
-
   // Filter valid items
   const validItems =
-    quickTips.items?.filter((item) => item && item.slug && item.title) || [];
+    quickTips?.items?.filter((item) => item && item.slug && item.title) || [];
 
-  // If collection exists but has no valid items, show empty state
-  if (validItems.length === 0) {
-    return (
-      <section className="space-y-6">
-        <div className="flex items-center justify-between gap-4">
-          <h2 className="text-2xl sm:text-3xl font-bold text-text-dark">
-            {quickTips.title || "Γρήγορες λύσεις (5')"}
-          </h2>
-        </div>
-        <EmptyState
-          title="Δεν υπάρχουν στοιχεία προς εμφάνιση"
-          description="Η συλλογή βρέθηκε αλλά δεν περιέχει έγκυρα στοιχεία. Βεβαιωθείτε ότι όλα τα στοιχεία είναι δημοσιευμένα και έχουν slug."
-        />
-      </section>
-    );
+  // Only show section if we have items (more than 0)
+  if (!quickTips || validItems.length === 0) {
+    return null;
   }
 
   // Render Quick Tips grid

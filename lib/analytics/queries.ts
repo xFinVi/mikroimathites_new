@@ -174,3 +174,66 @@ export async function getTrendingContent(
   return getMostViewedContent(type, limit, period);
 }
 
+/**
+ * Get download count for a specific printable
+ */
+export async function getDownloadCount(
+  content_slug: string
+): Promise<number> {
+  try {
+    const { count, error } = await supabaseAdmin
+      .from("content_downloads")
+      .select("*", { count: "exact", head: true })
+      .eq("content_type", "printable")
+      .eq("content_slug", content_slug)
+      .eq("is_bot", false);
+
+    if (error) {
+      logger.error("Error getting download count:", error);
+      return 0;
+    }
+
+    return count || 0;
+  } catch (error) {
+    logger.error("Error in getDownloadCount:", error);
+    return 0;
+  }
+}
+
+/**
+ * Get download counts for multiple printables at once
+ */
+export async function getDownloadCounts(
+  slugs: string[]
+): Promise<Map<string, number>> {
+  try {
+    if (slugs.length === 0) return new Map();
+
+    const counts = new Map<string, number>();
+
+    const { data, error } = await supabaseAdmin
+      .from("content_downloads")
+      .select("content_slug")
+      .eq("content_type", "printable")
+      .eq("is_bot", false)
+      .in("content_slug", slugs);
+
+    if (error) {
+      logger.error("Error getting download counts:", error);
+      return counts;
+    }
+
+    if (data && data.length > 0) {
+      data.forEach((download) => {
+        const key = `printable:${download.content_slug}`;
+        counts.set(key, (counts.get(key) || 0) + 1);
+      });
+    }
+
+    return counts;
+  } catch (error) {
+    logger.error("Error in getDownloadCounts:", error);
+    return new Map();
+  }
+}
+

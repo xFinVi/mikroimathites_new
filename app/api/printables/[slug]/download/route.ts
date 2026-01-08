@@ -34,6 +34,8 @@ export async function GET(
       { assetId: fileAsset.asset._ref }
     );
 
+    let fileUrl: string;
+    
     if (!asset?.url) {
       // Fallback: construct URL manually
       const projectId = process.env.SANITY_PROJECT_ID || process.env.NEXT_PUBLIC_SANITY_PROJECT_ID;
@@ -47,15 +49,52 @@ export async function GET(
       }
 
       // Sanity file URL format: https://cdn.sanity.io/files/{projectId}/{dataset}/{assetRef}
-      const fileUrl = `https://cdn.sanity.io/files/${projectId}/${dataset}/${fileAsset.asset._ref}`;
-      return NextResponse.json({ url: fileUrl });
+      fileUrl = `https://cdn.sanity.io/files/${projectId}/${dataset}/${fileAsset.asset._ref}`;
+    } else {
+      fileUrl = asset.url;
     }
 
-    return NextResponse.json({ url: asset.url });
+    // Fetch the PDF file from Sanity CDN
+    const fileResponse = await fetch(fileUrl, {
+      headers: {
+        'Accept': 'application/pdf',
+      },
+    });
+    
+    if (!fileResponse.ok) {
+      logger.error(`Failed to fetch file from Sanity: ${fileResponse.status} ${fileResponse.statusText}`);
+      return NextResponse.json(
+        { error: "Failed to fetch file" },
+        { status: 500 }
+      );
+    }
+
+    // Get the file as an ArrayBuffer for proper streaming
+    const fileBuffer = await fileResponse.arrayBuffer();
+    
+    // Get filename from asset or use slug
+    const filename = asset?.originalFilename || `${slug}.pdf`;
+    
+    // Sanitize filename for Content-Disposition header
+    const sanitizedFilename = filename.replace(/[^a-zA-Z0-9._-]/g, '_');
+    
+    // Return the file with proper download headers
+    // This forces the browser to download instead of navigate
+    return new NextResponse(fileBuffer, {
+      status: 200,
+      headers: {
+        'Content-Type': 'application/pdf',
+        'Content-Disposition': `attachment; filename="${sanitizedFilename}"; filename*=UTF-8''${encodeURIComponent(filename)}`,
+        'Content-Length': fileBuffer.byteLength.toString(),
+        'Cache-Control': 'private, no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0',
+      },
+    });
   } catch (error) {
-    logger.error("Error generating file URL:", error);
+    logger.error("Error downloading file:", error);
     return NextResponse.json(
-      { error: "Failed to generate file URL" },
+      { error: "Failed to download file" },
       { status: 500 }
     );
   }

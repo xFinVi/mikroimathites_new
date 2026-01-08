@@ -2,7 +2,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { Article } from "@/lib/content";
 import { format } from "date-fns";
-import { Info, User } from "lucide-react";
+import { Info, User, Clock, Calendar } from "lucide-react";
+import { generateImageUrl } from "@/lib/sanity/image-url";
 
 interface ArticleCardProps {
   article: Article & { imageUrl?: string | null };
@@ -46,17 +47,56 @@ export function ArticleCard({ article, compact = false }: ArticleCardProps) {
           </div>
 
           {/* White Text Section Below Image */}
-          <div className="p-5 bg-white flex-1 flex flex-col">
+          <div className="p-5 bg-white flex-1 flex flex-col gap-3">
+            {/* Category */}
+            {article.category && (
+              <div className="text-xs font-semibold text-primary-pink uppercase tracking-wide">
+                {article.category.title}
+              </div>
+            )}
+
             {/* Title */}
-            <h3 className="text-base font-bold text-text-dark line-clamp-2 mb-2 group-hover:text-primary-pink transition-colors flex-shrink-0">
+            <h3 className="text-base font-bold text-text-dark line-clamp-2 group-hover:text-primary-pink transition-colors flex-shrink-0">
               {article.title}
             </h3>
             
+            {/* Meta Information */}
+            <div className="flex flex-wrap items-center gap-2 text-xs text-text-light mt-auto">
+              {publishedDate && (
+                <div className="flex items-center gap-1">
+                  <Calendar className="w-3 h-3" />
+                  <span>{publishedDate}</span>
+                </div>
+              )}
+              {article.readingTime && (
+                <div className="flex items-center gap-1">
+                  <Clock className="w-3 h-3" />
+                  <span>{article.readingTime} λεπτά</span>
+                </div>
+              )}
+            </div>
+
             {/* Author */}
             {article.author && (
-              <div className="flex items-center gap-1.5 mt-auto">
-                <User className="w-3 h-3 text-text-medium flex-shrink-0" />
-                <p className="text-xs text-text-medium">
+              <div className="flex items-center gap-2 pt-2 border-t border-border/20">
+                {article.author.profilePicture ? (
+                  <div className="w-6 h-6 rounded-full overflow-hidden border border-border/30 flex-shrink-0">
+                    <Image
+                      src={generateImageUrl(article.author.profilePicture, 24, 24) || ""}
+                      alt={article.author.name}
+                      width={24}
+                      height={24}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                ) : (
+                  <div className="w-6 h-6 bg-primary-pink/20 rounded-full flex items-center justify-center flex-shrink-0">
+                    <span className="text-xs font-bold text-primary-pink">
+                      {article.author.name.charAt(0).toUpperCase()}
+                    </span>
+                  </div>
+                )}
+                <p className="text-xs text-text-medium font-medium">
                   {article.author.name}
                 </p>
               </div>
@@ -77,7 +117,7 @@ export function ArticleCard({ article, compact = false }: ArticleCardProps) {
               src={imageUrl!}
               alt={article.title}
               fill
-              className="object-cover group-hover:scale-105 transition-transform duration-300"
+              className="object-contain group-hover:scale-105 transition-transform duration-300"
             />
           </div>
         ) : (
@@ -102,17 +142,51 @@ export function ArticleCard({ article, compact = false }: ArticleCardProps) {
               {article.excerpt}
             </p>
           )}
-          <div className="flex flex-wrap gap-2 items-center text-xs text-text-light mt-auto">
-            {publishedDate && <span>{publishedDate}</span>}
+          <div className="flex flex-wrap gap-2 items-center text-xs text-text-light">
+            {publishedDate && (
+              <div className="flex items-center gap-1">
+                <Calendar className="w-3 h-3" />
+                <span>{publishedDate}</span>
+              </div>
+            )}
             {article.readingTime && (
-              <>
-                {publishedDate && <span>•</span>}
+              <div className="flex items-center gap-1">
+                <Clock className="w-3 h-3" />
                 <span>{article.readingTime} λεπτά</span>
-              </>
+              </div>
             )}
           </div>
+
+          {/* Author with Profile Picture */}
+          {article.author && (
+            <div className="flex items-center gap-2 pt-2 border-t border-border/20 mt-auto">
+              {article.author.profilePicture ? (
+                <div className="w-8 h-8 rounded-full overflow-hidden border border-border/30 flex-shrink-0">
+                  <Image
+                    src={generateImageUrl(article.author.profilePicture, 32, 32) || ""}
+                    alt={article.author.name}
+                    width={32}
+                    height={32}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              ) : (
+                <div className="w-8 h-8 bg-primary-pink/20 rounded-full flex items-center justify-center flex-shrink-0">
+                  <span className="text-xs font-bold text-primary-pink">
+                    {article.author.name.charAt(0).toUpperCase()}
+                  </span>
+                </div>
+              )}
+              <div className="flex flex-col">
+                <p className="text-xs text-text-medium font-medium">
+                  {article.author.name}
+                </p>
+              </div>
+            </div>
+          )}
+
           {article.ageGroups && article.ageGroups.length > 0 && (
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-2 pt-2">
               {article.ageGroups.map((ageGroup) => (
                 <span
                   key={ageGroup._id}

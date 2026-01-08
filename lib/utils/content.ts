@@ -279,3 +279,4 @@ export function estimateReadingTime(wordCount: number): number {
   return Math.ceil(wordCount / 200);
 }
 
+

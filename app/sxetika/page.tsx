@@ -78,27 +78,27 @@ export default async function SxetikaPage() {
           
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-10">
             {/* Card 1: Mission */}
-            <div className="group relative bg-gradient-to-br from-primary-pink/10 via-primary-pink/5 to-white rounded-3xl p-8 sm:p-10 shadow-lg hover:shadow-2xl border-2 border-primary-pink/20 hover:border-primary-pink/40 transition-all duration-300 transform hover:-translate-y-2">
+            <div className="group relative bg-gradient-to-br from-primary-pink/10 via-primary-pink/5 to-white rounded-3xl py-6 px-4 sm:py-8 sm:px-5 shadow-lg hover:shadow-2xl border-2 border-primary-pink/20 hover:border-primary-pink/40 transition-all duration-300 transform hover:-translate-y-2">
               {/* Decorative Elements */}
               <div className="absolute top-4 right-4 w-20 h-20 bg-primary-pink/10 rounded-full blur-2xl opacity-50 group-hover:opacity-75 transition-opacity" />
               <div className="absolute bottom-4 left-4 w-16 h-16 bg-primary-pink/5 rounded-full blur-xl opacity-30" />
               
-              <div className="relative z-10 space-y-6">
+              <div className="relative z-10 space-y-5">
                 <div className="flex items-center gap-4">
                   <div className="w-16 h-16 bg-gradient-to-br from-primary-pink to-primary-pink/70 rounded-2xl flex items-center justify-center text-4xl shadow-lg transform group-hover:scale-110 transition-transform duration-300">
                     🎯
                   </div>
-                  <h3 className="text-2xl sm:text-3xl font-bold text-text-dark">Η αποστολή μας</h3>
+                  <h3 className="text-xl sm:text-2xl font-bold text-text-dark">Η αποστολή μας</h3>
                 </div>
                 
-                <div className="space-y-4">
-                  <p className="text-base sm:text-lg text-text-dark leading-relaxed font-medium">
+                <div className="space-y-3">
+                  <p className="text-sm sm:text-base text-text-dark leading-relaxed font-medium">
                     Να στηρίζουμε τους γονείς με απλές, πρακτικές ιδέες που κάνουν την καθημερινότητα πιο εύκολη.
                   </p>
-                  <p className="text-sm sm:text-base text-text-medium leading-relaxed">
+                  <p className="text-xs sm:text-sm text-text-medium leading-relaxed">
                     Ξέρουμε από πρώτο χέρι πόσο πιεστική μπορεί να είναι μια μέρα για έναν γονέα και πόσο δύσκολο είναι να κρατήσεις ισορροπία με την τεχνολογία. Γι' αυτό δημιουργούμε κάτι διασκεδαστικό αλλά και εκπαιδευτικό για τα παιδιά μας.
                   </p>
-                  <ul className="space-y-2 text-sm text-text-medium">
+                  <ul className="space-y-2 text-xs sm:text-sm text-text-medium">
                     <li className="flex items-start gap-2">
                       <span className="text-primary-pink mt-1">✓</span>
                       <span>Πρακτικές τεχνικές που χρησιμοποιούνται σε σχολεία και νηπιαγωγεία</span>
@@ -117,30 +117,30 @@ export default async function SxetikaPage() {
             </div>
 
             {/* Card 2: Why We Started */}
-            <div className="group relative bg-gradient-to-br from-secondary-blue/10 via-secondary-blue/5 to-white rounded-3xl p-8 sm:p-10 shadow-lg hover:shadow-2xl border-2 border-secondary-blue/20 hover:border-secondary-blue/40 transition-all duration-300 transform hover:-translate-y-2">
+            <div className="group relative bg-gradient-to-br from-secondary-blue/10 via-secondary-blue/5 to-white rounded-3xl py-6 px-4 sm:py-8 sm:px-5 shadow-lg hover:shadow-2xl border-2 border-secondary-blue/20 hover:border-secondary-blue/40 transition-all duration-300 transform hover:-translate-y-2">
               {/* Decorative Elements */}
               <div className="absolute top-4 right-4 w-20 h-20 bg-secondary-blue/10 rounded-full blur-2xl opacity-50 group-hover:opacity-75 transition-opacity" />
               <div className="absolute bottom-4 left-4 w-16 h-16 bg-secondary-blue/5 rounded-full blur-xl opacity-30" />
               
-              <div className="relative z-10 space-y-6">
+              <div className="relative z-10 space-y-5">
                 <div className="flex items-center gap-4">
                   <div className="w-16 h-16 bg-gradient-to-br from-secondary-blue to-secondary-blue/70 rounded-2xl flex items-center justify-center text-4xl shadow-lg transform group-hover:scale-110 transition-transform duration-300">
                     💡
                   </div>
-                  <h3 className="text-2xl sm:text-3xl font-bold text-text-dark">Γιατί ξεκινήσαμε</h3>
+                  <h3 className="text-xl sm:text-2xl font-bold text-text-dark">Γιατί ξεκινήσαμε</h3>
                 </div>
                 
-                <div className="space-y-4">
-                  <p className="text-base sm:text-lg text-text-dark leading-relaxed font-medium">
+                <div className="space-y-3">
+                  <p className="text-sm sm:text-base text-text-dark leading-relaxed font-medium">
                     Με τον ερχομό της κόρης μας, ως Έλληνες στο εξωτερικό ξέραμε ότι τα Αγγλικά θα της βγουν φυσικά. Αυτό που θέλαμε όμως ήταν να κρατήσει και τα Ελληνικά όχι μόνο σαν λέξεις, αλλά και με σωστή προφορά,όσο πιο κοντά γίνεται στη φυσική προφορά ενός Έλληνα.
                   </p>
-                  <p className="text-sm sm:text-base text-text-medium leading-relaxed">
+                  <p className="text-xs sm:text-sm text-text-medium leading-relaxed">
                     Ψάξαμε για κάτι αντίστοιχο και δεν το βρήκαμε: ελληνικό περιεχόμενο με έναν επαγγελματία μπροστά στην κάμερα, χωρίς υπερβολικά cartoons και animations. Έτσι αποφασίσαμε να κάνουμε το πρώτο βήμα για τη δική μας οικογένεια.
                   </p>
-                  <p className="text-sm sm:text-base text-text-medium leading-relaxed">
+                  <p className="text-xs sm:text-sm text-text-medium leading-relaxed">
                     Στην πορεία είδαμε τη στήριξη κι από άλλους γονείς και αυτό μας έδωσε δύναμη να συνεχίσουμε. Ακούσαμε τις ανάγκες και τις δυσκολίες σας και προσαρμόζουμε τα βίντεο ώστε να βοηθούν παιδιά και γονείς σαν εμάς στο εξωτερικό, αλλά και οικογένειες στην Ελλάδα.
                   </p>
-                  <ul className="space-y-2 text-sm text-text-medium">
+                  <ul className="space-y-2 text-xs sm:text-sm text-text-medium">
                     <li className="flex items-start gap-2">
                       <span className="text-secondary-blue mt-1">✓</span>
                       <span>Ελληνικά για παιδιά 0–6, με έμφαση σε γλώσσα & προφορά</span>
@@ -159,27 +159,27 @@ export default async function SxetikaPage() {
             </div>
 
             {/* Card 3: What You'll Find */}
-            <div className="group relative bg-gradient-to-br from-accent-yellow/10 via-accent-yellow/5 to-white rounded-3xl p-8 sm:p-10 shadow-lg hover:shadow-2xl border-2 border-accent-yellow/20 hover:border-accent-yellow/40 transition-all duration-300 transform hover:-translate-y-2">
+            <div className="group relative bg-gradient-to-br from-accent-yellow/10 via-accent-yellow/5 to-white rounded-3xl py-6 px-4 sm:py-8 sm:px-5 shadow-lg hover:shadow-2xl border-2 border-accent-yellow/20 hover:border-accent-yellow/40 transition-all duration-300 transform hover:-translate-y-2">
               {/* Decorative Elements */}
               <div className="absolute top-4 right-4 w-20 h-20 bg-accent-yellow/10 rounded-full blur-2xl opacity-50 group-hover:opacity-75 transition-opacity" />
               <div className="absolute bottom-4 left-4 w-16 h-16 bg-accent-yellow/5 rounded-full blur-xl opacity-30" />
               
-              <div className="relative z-10 space-y-6">
+              <div className="relative z-10 space-y-5">
                 <div className="flex items-center gap-4">
                   <div className="w-16 h-16 bg-gradient-to-br from-accent-yellow to-accent-yellow/70 rounded-2xl flex items-center justify-center text-4xl shadow-lg transform group-hover:scale-110 transition-transform duration-300">
                     📚
                   </div>
-                  <h3 className="text-2xl sm:text-3xl font-bold text-text-dark">Τι θα βρείτε εδώ</h3>
+                  <h3 className="text-xl sm:text-2xl font-bold text-text-dark">Τι θα βρείτε εδώ</h3>
                 </div>
                 
-                <div className="space-y-4">
-                  <p className="text-base sm:text-lg text-text-dark leading-relaxed font-medium">
+                <div className="space-y-3">
+                  <p className="text-sm sm:text-base text-text-dark leading-relaxed font-medium">
                     Μια προσπάθεια να δημιουργήσουμε μια κοινότητα που συνδέει γονείς με επαγγελματίες και ακαδημαϊκή έρευνα, με στόχο την ουσιαστική στήριξη του κάθε γονέα.
                   </p>
-                  <p className="text-sm sm:text-base text-text-medium leading-relaxed">
+                  <p className="text-xs sm:text-sm text-text-medium leading-relaxed">
                     Όλα είναι φτιαγμένα ώστε να είναι εύκολα στην ανάγνωση και άμεσα εφαρμόσιμα: απλοποιημένες ακαδημαϊκές έρευνες, υγιεινές συνταγές, πρακτικές συμβουλές και ιδέες για δραστηριότητες που φέρνουν γονείς και παιδιά ένα βήμα πιο κοντά.
                   </p>
-                  <ul className="space-y-2 text-sm text-text-medium">
+                  <ul className="space-y-2 text-xs sm:text-sm text-text-medium">
                     <li className="flex items-start gap-2">
                       <span className="text-accent-yellow mt-1">✓</span>
                       <span>Απλοποιημένες ακαδημαϊκές έρευνες & πρακτική γνώση</span>

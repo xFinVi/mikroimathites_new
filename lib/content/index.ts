@@ -1,8 +1,12 @@
 import { sanityClient } from "@/lib/sanity/client";
+import { type Sponsor } from "@/components/sponsors";
+import { logger } from "@/lib/utils/logger";
 import {
   articlesQuery,
   articleBySlugQuery,
   featuredArticlesQuery,
+  nextArticleQuery,
+  mostRecentArticleQuery,
   recipesQuery,
   recipeBySlugQuery,
   featuredRecipesQuery,
@@ -25,6 +29,7 @@ import {
   parentsHubContentCountQuery,
   activitiesHubContentQuery,
   activitiesHubContentCountQuery,
+  sponsorsQuery,
 } from "@/lib/sanity/queries";
 
 // Common types
@@ -336,6 +341,39 @@ export async function getArticleBySlug(slug: string): Promise<Article | null> {
   return safeClient.fetch<Article | null>(articleBySlugQuery, { slug });
 }
 
+/**
+ * Get the next article to read
+ * Returns the next newer article (published after the current one)
+ * If no newer article exists, returns the most recent article as a fallback
+ */
+export async function getNextArticle(
+  currentId: string,
+  currentDate: string
+): Promise<{ article: Article | null; isNewer: boolean }> {
+  if (!safeClient) return { article: null, isNewer: false };
+
+  try {
+    // First, try to get the next newer article (published after current)
+    const newerArticle = await safeClient.fetch<Article | null>(nextArticleQuery, {
+      currentId,
+      currentDate,
+    });
+
+    if (newerArticle) {
+      return { article: newerArticle, isNewer: true };
+    }
+
+    // If no newer article, fallback to the most recent article
+    const mostRecent = await safeClient.fetch<Article | null>(mostRecentArticleQuery, {
+      currentId,
+    });
+
+    return { article: mostRecent, isNewer: false };
+  } catch (error) {
+    return { article: null, isNewer: false };
+  }
+}
+
 export async function getFeaturedArticles(): Promise<Article[]> {
   if (!safeClient) return [];
   return safeClient.fetch<Article[]>(featuredArticlesQuery);
@@ -399,6 +437,47 @@ export async function getQAItems(): Promise<QAItem[]> {
 export async function getCuratedCollections(): Promise<CuratedCollection[]> {
   if (!safeClient) return [];
   return safeClient.fetch<CuratedCollection[]>(curatedCollectionsQuery);
+}
+
+// Sponsor functions
+export async function getSponsors(): Promise<Sponsor[]> {
+  if (!safeClient) {
+    logger.warn("Sanity client not available for fetching sponsors");
+    return [];
+  }
+  try {
+    const sponsors = await safeClient.fetch<Array<{
+      _id: string;
+      companyName: string;
+      logo?: unknown;
+      website?: string;
+      category?: string;
+      tier?: string;
+      isActive?: boolean;
+      isFeatured?: boolean;
+      databaseId?: string;
+    }>>(sponsorsQuery);
+    
+    logger.info(`Fetched ${sponsors.length} sponsors from Sanity`);
+    
+    // Map Sanity fields to Sponsor interface
+    const mappedSponsors = sponsors.map(sponsor => ({
+      _id: sponsor._id,
+      name: sponsor.companyName,
+      logo: sponsor.logo,
+      website: sponsor.website,
+      category: sponsor.category as Sponsor['category'],
+      tier: sponsor.tier as Sponsor['tier'],
+      featured: sponsor.isFeatured || false,
+      isActive: sponsor.isActive ?? true,
+    }));
+    
+    logger.info(`Mapped ${mappedSponsors.length} sponsors`);
+    return mappedSponsors;
+  } catch (error) {
+    logger.error("Failed to fetch sponsors from Sanity", error);
+    return [];
+  }
 }
 
 export async function getCuratedCollectionByPlacement(
@@ -735,6 +814,7 @@ export interface ParentsHubContentOptions {
   search?: string;
   age?: string;
   categories?: string[];
+  tag?: string;
   page: number;
   pageSize: number;
 }
@@ -763,6 +843,7 @@ export async function getParentsHubContent(
   const search = cleaned ? `*${cleaned.toLocaleLowerCase("el-GR")}*` : null;
   const age = opts.age?.trim() ? opts.age.trim() : null;
   const categories = opts.categories && opts.categories.length > 0 ? opts.categories : null;
+  const tag = opts.tag?.trim() ? opts.tag.trim() : null;
 
   try {
     const [items, total] = await Promise.all([
@@ -772,11 +853,13 @@ export async function getParentsHubContent(
         search,
         age,
         categories,
+        tag,
       }),
       safeClient.fetch<number>(parentsHubContentCountQuery, {
         search,
         age,
         categories,
+        tag,
       }),
     ]);
 

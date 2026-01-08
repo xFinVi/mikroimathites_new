@@ -130,3 +130,4 @@ export function escapeHtmlAttribute(text: string): string {
     .replace(/'/g, "&#039;");
 }
 
+

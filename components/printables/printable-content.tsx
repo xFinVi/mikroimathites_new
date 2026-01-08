@@ -4,7 +4,7 @@ import { Printable } from "@/lib/content";
 import { PortableText } from "@portabletext/react";
 import { urlFor } from "@/lib/sanity/image-url";
 import Image from "next/image";
-import { Button } from "@/components/ui/button";
+import { PrintableDownloadButton } from "./printable-download-button";
 import type { PortableTextBlock } from "@portabletext/types";
 
 interface PrintableContentProps {
@@ -72,88 +72,33 @@ const portableTextComponents = {
 };
 
 export function PrintableContent({ printable }: PrintableContentProps) {
-  const handleDownload = async () => {
-    if (printable.file) {
-      try {
-        // Fetch file URL from API
-        const response = await fetch(`/api/printables/${printable.slug}/download`);
-        if (response.ok) {
-          const data = await response.json();
-          if (data.url) {
-            // Create a temporary link and trigger download
-            const link = document.createElement('a');
-            link.href = data.url;
-            link.download = `${printable.slug}.pdf`;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-          }
-        }
-      } catch (error) {
-        console.error("Error downloading file:", error);
-      }
-    }
-  };
-
   return (
     <div className="space-y-8">
-      {/* Download Button */}
+      {/* Download Button - Mobile Only (Desktop has it in sidebar) */}
       {printable.file && (
-        <div className="bg-primary-pink/10 border-2 border-primary-pink rounded-card p-6 text-center">
-          <h3 className="text-xl font-bold text-text-dark mb-3">Κατεβάστε το εκτυπώσιμο</h3>
-          <p className="text-text-medium mb-4">
+        <div className="lg:hidden bg-gradient-to-br from-primary-pink to-accent-yellow rounded-2xl shadow-2xl border-2 border-white/50 p-4 sm:p-6 text-white text-center">
+          <h3 className="text-xl sm:text-2xl font-bold mb-2">Κατεβάστε το εκτυπώσιμο</h3>
+          <p className="text-white/90 text-sm mb-4">
             Κάντε κλικ στο παρακάτω κουμπί για να κατεβάσετε το PDF
           </p>
-          <Button
-            onClick={handleDownload}
-            size="lg"
-            className="bg-primary-pink hover:bg-primary-pink/90 text-white"
-          >
-            <svg
-              className="w-5 h-5 mr-2"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
-              />
-            </svg>
-            Κατεβάστε PDF
-          </Button>
-        </div>
-      )}
-
-      {/* Preview Images */}
-      {printable.previewImages && printable.previewImages.length > 0 && (
-        <div className="space-y-4">
-          <h3 className="text-xl font-bold text-text-dark">Προεπισκόπηση</h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {printable.previewImages.map((image: any, idx: number) => {
-              const imageUrl = urlFor(image).width(600).height(800).url();
-              return (
-                <div key={idx} className="relative aspect-[3/4] rounded-lg overflow-hidden">
-                  <Image
-                    src={imageUrl}
-                    alt={`${printable.title} preview ${idx + 1}`}
-                    fill
-                    className="object-cover"
-                  />
-                </div>
-              );
-            })}
+          <div className="flex justify-center">
+            <PrintableDownloadButton slug={printable.slug} variant="gradient" />
           </div>
         </div>
       )}
 
       {/* Instructions */}
       {printable.instructions && (
-        <div className="bg-background-white rounded-card p-6 shadow-subtle border border-border/50">
-          <h3 className="text-2xl font-bold text-text-dark mb-4">Οδηγίες</h3>
-          <div className="prose prose-lg max-w-none">
+        <div className="bg-white rounded-2xl shadow-xl border-2 border-white/50 p-6 sm:p-8">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-12 h-12 bg-primary-pink/10 rounded-xl flex items-center justify-center">
+              <svg className="w-6 h-6 text-primary-pink" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+              </svg>
+            </div>
+            <h3 className="text-2xl font-bold text-text-dark">Οδηγίες</h3>
+          </div>
+          <div className="prose prose-lg max-w-none text-text-dark">
             <PortableText
               value={printable.instructions as PortableTextBlock[]}
               components={portableTextComponents}
@@ -164,13 +109,24 @@ export function PrintableContent({ printable }: PrintableContentProps) {
 
       {/* Goals */}
       {printable.goals && printable.goals.length > 0 && (
-        <div className="bg-accent-green/10 border-l-4 border-accent-green rounded-r-lg p-6">
-          <h3 className="text-lg font-semibold text-text-dark mb-3">Στόχοι</h3>
-          <ul className="space-y-2">
+        <div className="bg-gradient-to-br from-accent-green/10 to-secondary-blue/10 rounded-2xl shadow-xl border-2 border-accent-green/30 p-6 sm:p-8">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-12 h-12 bg-accent-green/20 rounded-xl flex items-center justify-center">
+              <svg className="w-6 h-6 text-accent-green" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <h3 className="text-2xl font-bold text-text-dark">Στόχοι</h3>
+          </div>
+          <ul className="space-y-3">
             {printable.goals.map((goal, idx) => (
-              <li key={idx} className="flex items-start gap-2 text-text-dark">
-                <span className="text-accent-green mt-1">✓</span>
-                <span>{goal}</span>
+              <li key={idx} className="flex items-start gap-3 text-text-dark bg-white/50 rounded-lg p-4">
+                <span className="text-accent-green mt-0.5 flex-shrink-0">
+                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                  </svg>
+                </span>
+                <span className="text-base leading-relaxed">{goal}</span>
               </li>
             ))}
           </ul>

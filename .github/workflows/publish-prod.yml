@@ -34,3 +34,4 @@ jobs:
             ${{ env.IMAGE_NAME }}:prod-latest
             ${{ env.IMAGE_NAME }}:prod-${{ github.sha }}
 
+

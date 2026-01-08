@@ -42,7 +42,7 @@ export function Header() {
         "fixed top-0 left-0 right-0 z-50 w-full transition-all duration-500 ease-in-out",
         shouldShowDarkNavbar
           ? "bg-[#0d1330]/90 shadow-xl backdrop-blur-sm border-b border-white/10"
-          : "bg-transparent backdrop-blur-none border-b border-transparent"
+          : "bg-[#0d1330]/20 backdrop-blur-sm border-b border-white/5"
       )}
     >
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">

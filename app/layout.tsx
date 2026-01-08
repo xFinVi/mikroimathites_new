@@ -3,6 +3,7 @@ import { Inter, Poppins } from "next/font/google";
 import { ConditionalAnalytics } from "@/components/analytics/conditional-analytics";
 import { CookieConsentModal } from "@/components/cookies/cookie-consent-modal";
 import { Providers } from "@/components/providers";
+import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
 
 const inter = Inter({
@@ -50,6 +51,7 @@ export default function RootLayout({
           {/* Conditional Analytics - respects cookie consent */}
           <ConditionalAnalytics gaId={gaId} adsenseClient={adsenseClient} />
           <CookieConsentModal />
+          <Toaster position="top-right" richColors />
           {children}
         </Providers>
       </body>

@@ -2,12 +2,16 @@ import { notFound } from "next/navigation";
 import { Container } from "@/components/ui/container";
 import { PageWrapper } from "@/components/pages/page-wrapper";
 import { getPrintableBySlug, getPrintables } from "@/lib/content";
-import { generateImageUrl } from "@/lib/sanity/image-url";
+import { generateImageUrl, urlFor } from "@/lib/sanity/image-url";
 import { DRASTIRIOTITES_CONSTANTS } from "@/lib/constants";
 import Image from "next/image";
 import Link from "next/link";
 import { PrintableContent } from "@/components/printables/printable-content";
 import { PrintableMeta } from "@/components/printables/printable-meta";
+import { PrintableDownloadButton } from "@/components/printables/printable-download-button";
+import { PrintableColorWrapper } from "@/components/printables/printable-color-wrapper";
+import { PrintableHeader } from "@/components/printables/printable-header";
+import { DownloadCount } from "@/components/analytics/download-count";
 import { ShareButtons } from "@/components/articles/share-buttons";
 import { ContentTracker } from "@/components/analytics/content-tracker";
 import type { Metadata } from "next";
@@ -68,86 +72,155 @@ export default async function PrintablePage({ params }: PageProps) {
     notFound();
   }
 
-  const coverImageUrl = generateImageUrl(
-    printable.coverImage,
-    DRASTIRIOTITES_CONSTANTS.IMAGE_SIZES.HERO.width,
-    DRASTIRIOTITES_CONSTANTS.IMAGE_SIZES.HERO.height
-  );
+  // Generate full-size image URL to show complete printable without cropping
+  // Use large dimensions with fit('max') to preserve aspect ratio and show full image
+  const coverImageUrl = printable.coverImage 
+    ? urlFor(printable.coverImage).width(2400).fit('max').auto('format').url()
+    : null;
 
   return (
-    <PageWrapper>
-      <ContentTracker
-        content_type="printable"
-        content_slug={slug}
-      />
-      <article className="bg-background-light">
-        {/* Hero Section */}
-        {coverImageUrl && (
-          <div className="relative h-64 sm:h-80 md:h-96 overflow-hidden">
-            <Image
-              src={coverImageUrl}
-              alt={printable.title}
-              fill
-              className="object-cover"
-              style={{ objectPosition: 'center top' }}
-              priority
-            />
-            <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-background-light" />
-          </div>
-        )}
+    <PrintableColorWrapper>
+      <PageWrapper>
+        <ContentTracker
+          content_type="printable"
+          content_slug={slug}
+        />
+        <article className="min-h-screen">
+          {/* Full-Width Title Header with Random Bright Color */}
+          <PrintableHeader title={printable.title} />
+          
+          <Container className="pt-6 sm:pt-8 md:pt-10 pb-8 sm:pb-12 md:pb-16">
+          <div className="max-w-7xl mx-auto">
 
-        <Container className={`py-8 sm:py-12 md:py-16 ${!coverImageUrl ? 'pt-16 sm:pt-20 md:pt-24' : ''}`}>
-          <div className="max-w-4xl mx-auto">
-            {/* Back Link */}
-            <Link
-              href="/drastiriotites"
-              className="inline-flex items-center gap-2 text-text-medium hover:text-primary-pink transition mb-6 relative z-10 cursor-pointer py-2 -ml-2 pl-2 pr-4 rounded-md hover:bg-background-white"
-            >
-              <svg
-                className="w-4 h-4"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M15 19l-7-7 7-7"
+            {/* Image Preview and Description - Side by Side */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 mb-8">
+              {/* Left Column - Image Preview */}
+              <div className="space-y-6">
+                {/* Cover Image - Large Preview (Old Site Style) */}
+                {coverImageUrl && (
+                  <div className="bg-white border-2 border-gray-800 rounded-lg overflow-hidden shadow-lg">
+                    {/* Red Banner */}
+                    <div className="bg-red-600 text-white py-2 px-4 text-center">
+                      <p className="font-bold text-sm sm:text-base">Παιδικές Χειροτεχνίες</p>
+                    </div>
+                    
+                    {/* Logo Section */}
+                    <div className="px-4 py-3 bg-white border-b border-gray-200 flex items-center justify-center gap-2">
+                      <Image
+                        src="/images/logo.png"
+                        alt="Μικροί Μαθητές"
+                        width={120}
+                        height={40}
+                        className="h-6 sm:h-8 w-auto object-contain"
+                      />
+                      <span className="text-xs sm:text-sm font-bold text-gray-800">ΜΙΚΡΟΙ ΜΑΘΗΤΕΣ</span>
+                    </div>
+                    
+                    {/* Cover Image */}
+                    <div className="p-4 bg-white">
+                      <div className="w-full bg-white border border-gray-300 rounded overflow-hidden">
+                        <div className="w-full flex items-center justify-center p-2">
+                          {coverImageUrl && (
+                            <Image
+                              src={coverImageUrl}
+                              alt={printable.title}
+                              width={2400}
+                              height={3200}
+                              className="w-full h-auto object-contain"
+                              priority
+                              sizes="(max-width: 1024px) 100vw, 50vw"
+                              unoptimized={false}
+                            />
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Preview Images Gallery */}
+                {printable.previewImages && printable.previewImages.length > 0 && (
+                  <div className="bg-white rounded-2xl shadow-xl border-2 border-white/50 p-6">
+                    <h3 className="text-xl font-bold text-text-dark mb-4 flex items-center gap-2">
+                      <svg className="w-5 h-5 text-primary-pink" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                      </svg>
+                      Προεπισκόπηση ({printable.previewImages.length})
+                    </h3>
+                    <div className="grid grid-cols-2 gap-4">
+                      {printable.previewImages.map((image: any, idx: number) => {
+                        const imageUrl = generateImageUrl(image, 400, 600);
+                        return (
+                          <div key={idx} className="relative aspect-[3/4] bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg overflow-hidden border-2 border-gray-200 hover:border-primary-pink/50 transition-colors">
+                            {imageUrl && (
+                              <Image
+                                src={imageUrl}
+                                alt={`${printable.title} preview ${idx + 1}`}
+                                fill
+                                className="object-contain"
+                                sizes="(max-width: 1024px) 50vw, 25vw"
+                              />
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Right Column - Combined Meta and Description */}
+              <div className="flex flex-col">
+                {/* Combined Meta and Description Card - Matches cover image height */}
+                <div className="bg-gradient-to-br from-primary-pink/5 via-accent-yellow/5 to-secondary-blue/5 rounded-2xl shadow-xl border-2 border-primary-pink/20 p-6 sm:p-8 flex flex-col h-full min-h-[600px]">
+                  {/* Meta Information */}
+                  <div className="mb-6">
+                    <PrintableMeta printable={printable} />
+                  </div>
+
+                  {/* Description */}
+                  {printable.summary && (
+                    <div className="flex-1 flex flex-col">
+                      <div className="flex items-center gap-2 mb-4">
+                        <svg className="w-5 h-5 text-primary-pink" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                        <h2 className="text-lg font-bold text-text-dark">Περιγραφή</h2>
+                      </div>
+                      <p className="text-base sm:text-lg text-text-dark leading-relaxed flex-1">
+                        {printable.summary}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Download Section - Prominent Button */}
+            {printable.file && (
+              <div className="flex justify-center mb-8 mt-6">
+                <PrintableDownloadButton slug={printable.slug} variant="bright-green" />
+              </div>
+            )}
+
+            {/* Additional Content - Full Width */}
+            <div className="max-w-4xl mx-auto">
+              {/* Printable Content Component */}
+              <PrintableContent printable={printable} />
+
+              {/* Share Buttons */}
+              <div className="mt-12">
+                <ShareButtons
+                  title={printable.title}
+                  url={`/drastiriotites/printables/${printable.slug}`}
                 />
-              </svg>
-              Επιστροφή στα εκτυπώσιμα
-            </Link>
-
-            {/* Printable Header */}
-            <header className="mb-8 space-y-4">
-              {/* Printables don't have categories, so skip category display */}
-
-              <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-text-dark">
-                {printable.title}
-              </h1>
-
-              {printable.summary && (
-                <p className="text-xl text-text-medium leading-relaxed">
-                  {printable.summary}
-                </p>
-              )}
-
-              <PrintableMeta printable={printable} />
-            </header>
-
-            {/* Printable Content */}
-            <PrintableContent printable={printable} />
-
-            {/* Share Buttons */}
-            <ShareButtons
-              title={printable.title}
-              url={`/drastiriotites/printables/${printable.slug}`}
-            />
+              </div>
+            </div>
           </div>
         </Container>
-      </article>
-    </PageWrapper>
+        </article>
+      </PageWrapper>
+    </PrintableColorWrapper>
   );
 }
 

@@ -15,6 +15,7 @@ export async function GET(request: NextRequest) {
     const search = searchParams.get("search") || undefined;
     const age = searchParams.get("age") || undefined;
     const category = searchParams.get("category") || undefined;
+    const tag = searchParams.get("tag") || undefined;
 
     // Get mapped categories if category filter is active
     const mappedCategories = category ? getMappedCategories(category) : undefined;
@@ -24,6 +25,7 @@ export async function GET(request: NextRequest) {
       search,
       age,
       categories: mappedCategories,
+      tag,
       page,
       pageSize: GIA_GONEIS_CONSTANTS.LOAD_MORE_SIZE,
     });

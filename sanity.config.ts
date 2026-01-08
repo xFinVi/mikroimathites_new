@@ -3,6 +3,7 @@ import { deskTool } from "sanity/desk";
 import { structure } from "./sanity/plugins/structure";
 import schemas from "./sanity/schemas";
 import { assertSanityPublic } from "./lib/sanity/config.public";
+import { qaPublishActions } from "./sanity/plugins/qa-publish-action";
 
 /**
  * Sanity Studio Configuration
@@ -21,5 +22,8 @@ export default defineConfig({
   plugins: [deskTool({ structure })],
   schema: {
     types: schemas,
+  },
+  document: {
+    actions: qaPublishActions,
   },
 });

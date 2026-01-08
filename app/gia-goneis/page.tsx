@@ -30,13 +30,14 @@ const INITIAL_PAGE_SIZE = GIA_GONEIS_CONSTANTS.INITIAL_PAGE_SIZE;
 export async function generateMetadata({
   searchParams,
 }: {
-  searchParams?: Promise<{ age?: string; category?: string; search?: string; page?: string }>;
+  searchParams?: Promise<{ age?: string; category?: string; search?: string; tag?: string; page?: string }>;
 }): Promise<Metadata> {
   const resolvedSearchParams = await searchParams;
   const params = (resolvedSearchParams ?? {}) as {
     age?: string;
     category?: string;
     search?: string;
+    tag?: string;
     page?: string;
   };
   const base = generateMetadataFor("gia-goneis");
@@ -44,6 +45,7 @@ export async function generateMetadata({
   const parts: string[] = [];
   if (params.category) parts.push("Κατηγορία");
   if (params.age) parts.push("Ηλικία");
+  if (params.tag) parts.push("Ετικέτα");
   if (params.search) parts.push(`Αναζήτηση: ${params.search}`);
   const suffix = parts.length ? ` — ${parts.join(" • ")}` : "";
 
@@ -63,6 +65,7 @@ export async function generateMetadata({
     const qs = new URLSearchParams();
     if (params.category) qs.set("category", params.category);
     if (params.age) qs.set("age", params.age);
+    if (params.tag) qs.set("tag", params.tag);
     return `/gia-goneis${qs.toString() ? `?${qs.toString()}` : ""}`;
   })();
 
@@ -88,7 +91,7 @@ export async function generateMetadata({
 export const revalidate = 600;
 
 interface PageProps {
-  searchParams?: Promise<{ age?: string; category?: string; search?: string; page?: string }>;
+  searchParams?: Promise<{ age?: string; category?: string; search?: string; tag?: string; page?: string }>;
 }
 
 
@@ -98,6 +101,7 @@ export default async function GiaGoneisPage({ searchParams }: PageProps) {
     age?: string;
     category?: string;
     search?: string;
+    tag?: string;
     page?: string;
   };
   
@@ -123,6 +127,7 @@ export default async function GiaGoneisPage({ searchParams }: PageProps) {
       search: params.search,
       age: params.age,
       categories: mappedCategories,
+      tag: params.tag,
       page: 1, // Always start with page 1
       pageSize: INITIAL_PAGE_SIZE, // Show only 9 items initially
     }),
@@ -163,7 +168,7 @@ export default async function GiaGoneisPage({ searchParams }: PageProps) {
   const quickTips = quickTipsFromQuickTipsData || quickTipsFromParentsData;
 
   // Determine if we should show featured content or search results
-  const hasFilters = !!(params.age || params.category || params.search);
+  const hasFilters = !!(params.age || params.category || params.search || params.tag);
 
   // Pre-generate image URLs for all items
   // Type guard to determine content type safely

@@ -17,6 +17,7 @@ import { getTopicLabel, getAgeGroupLabel, getTypeLabel, getStatusLabel } from "@
 import { ADMIN_CONSTANTS } from "@/lib/constants";
 import type { Submission } from "@/lib/types/submission";
 import { EmailTemplates } from "@/components/admin/email-templates";
+import { ConfirmationDialog } from "@/components/admin/confirmation-dialog";
 
 export function SubmissionDetail({
   params,
@@ -37,6 +38,8 @@ export function SubmissionDetail({
   const [sendingEmail, setSendingEmail] = useState(false);
   const [archiving, setArchiving] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [showArchiveDialog, setShowArchiveDialog] = useState(false);
 
   useEffect(() => {
     async function fetchSubmission() {
@@ -99,13 +102,14 @@ export function SubmissionDetail({
     }
   };
 
-  const handleArchive = async () => {
+  const handleArchive = () => {
     if (!submission) return;
+    setShowArchiveDialog(true);
+  };
 
-    if (!confirm("Είστε σίγουροι ότι θέλετε να αρχειοθετήσετε αυτή την υποβολή;")) {
-      return;
-    }
-
+  const confirmArchive = async () => {
+    if (!submission) return;
+    setShowArchiveDialog(false);
     setArchiving(true);
     setError(null);
     setSuccess(null);
@@ -139,13 +143,14 @@ export function SubmissionDetail({
     }
   };
 
-  const handleDelete = async () => {
+  const handleDelete = () => {
     if (!submission) return;
+    setShowDeleteDialog(true);
+  };
 
-    if (!confirm("Είστε σίγουροι ότι θέλετε να διαγράψετε αυτή την υποβολή; Αυτή η ενέργεια δεν μπορεί να αναιρεθεί.")) {
-      return;
-    }
-
+  const confirmDelete = async () => {
+    if (!submission) return;
+    setShowDeleteDialog(false);
     setDeleting(true);
     setError(null);
     setSuccess(null);
@@ -156,7 +161,8 @@ export function SubmissionDetail({
       });
 
       if (!response.ok) {
-        throw new Error("Failed to delete submission");
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || "Failed to delete submission");
       }
 
       setSuccess("Η υποβολή διαγράφηκε επιτυχώς!");
@@ -379,35 +385,17 @@ export function SubmissionDetail({
               variant="outline"
               className="flex-1 border-orange-200 text-orange-700 hover:bg-orange-50 hover:border-orange-300"
             >
-              {archiving ? (
-                <>
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Αρχειοθεσία...
-                </>
-              ) : (
-                <>
-                  <Archive className="h-4 w-4 mr-2" />
-                  Αρχειοθεσία
-                </>
-              )}
+              <Archive className="h-4 w-4 mr-2" />
+              Αρχειοθεσία
             </Button>
             <Button
-              onClick={handleDelete}
+              onClick={() => setShowDeleteDialog(true)}
               disabled={deleting}
               variant="outline"
               className="flex-1 border-red-200 text-red-700 hover:bg-red-50 hover:border-red-300"
             >
-              {deleting ? (
-                <>
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Διαγραφή...
-                </>
-              ) : (
-                <>
-                  <Trash2 className="h-4 w-4 mr-2" />
-                  Διαγραφή
-                </>
-              )}
+              <Trash2 className="h-4 w-4 mr-2" />
+              Διαγραφή
             </Button>
           </div>
         </div>
@@ -673,6 +661,36 @@ export function SubmissionDetail({
         )}
         </div>
       </div>
+
+      {/* Archive Confirmation Dialog */}
+      {submission && (
+        <ConfirmationDialog
+          open={showArchiveDialog}
+          onOpenChange={setShowArchiveDialog}
+          action="custom"
+          customTitle="Επιβεβαίωση Αρχειοθεσίας"
+          customDescription="Είστε σίγουροι ότι θέλετε να αρχειοθετήσετε αυτή την υποβολή;"
+          customConfirmLabel="Αρχειοθεσία"
+          onConfirm={confirmArchive}
+          isLoading={archiving}
+        />
+      )}
+
+      {/* Delete Confirmation Dialog */}
+      {submission && (
+        <ConfirmationDialog
+          open={showDeleteDialog}
+          onOpenChange={setShowDeleteDialog}
+          action="delete"
+          customDescription={
+            submission.published_to_sanity && submission.sanity_qa_item_id
+              ? "Είστε σίγουροι ότι θέλετε να διαγράψετε αυτή την υποβολή; Αυτή η ερώτηση έχει δημοσιευτεί. Η διαγραφή θα αφαιρέσει την ερώτηση και από το Sanity CMS και από τη βάση δεδομένων."
+              : undefined
+          }
+          onConfirm={confirmDelete}
+          isLoading={deleting}
+        />
+      )}
     </div>
   );
 }

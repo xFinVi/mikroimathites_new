@@ -68,6 +68,9 @@ export const activitiesPrintablesSection = defineType({
               to: [{ type: "activity" }],
               weak: true, // Weak reference: allows deletion even if referenced
               hidden: ({ parent }) => parent?.contentType !== "activity",
+              options: {
+                filter: '!(_id in path("drafts.**")) && defined(slug.current)',
+              },
               // Broken references will be filtered out in queries
             }),
             defineField({
@@ -77,6 +80,9 @@ export const activitiesPrintablesSection = defineType({
               to: [{ type: "printable" }],
               weak: true, // Weak reference: allows deletion even if referenced
               hidden: ({ parent }) => parent?.contentType !== "printable",
+              options: {
+                filter: '!(_id in path("drafts.**")) && defined(slug.current)',
+              },
               // Broken references will be filtered out in queries
             }),
           ],

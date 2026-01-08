@@ -38,25 +38,21 @@ export function ActivitiesList({ items, title }: ActivitiesListProps) {
               e.stopPropagation();
               if (printable.file) {
                 try {
-                  // Fetch file URL from API
-                  const response = await fetch(`/api/printables/${printable.slug}/download`);
-                  if (response.ok) {
-                    const data = await response.json();
-                    if (data.url) {
-                      // Create a temporary link and trigger download
-                      const link = document.createElement('a');
-                      link.href = data.url;
-                      link.download = `${printable.slug}.pdf`;
-                      document.body.appendChild(link);
-                      link.click();
-                      document.body.removeChild(link);
-                    }
-                  } else {
-                    // Fallback to detail page
-                    window.location.href = getContentUrl("printable", printable.slug);
-                  }
+                  // Direct download - API returns the file with proper Content-Disposition headers
+                  const link = document.createElement('a');
+                  link.href = `/api/printables/${printable.slug}/download`;
+                  link.download = `${printable.slug}.pdf`;
+                  link.style.display = 'none';
+                  document.body.appendChild(link);
+                  link.click();
+                  
+                  // Clean up after a short delay
+                  setTimeout(() => {
+                    document.body.removeChild(link);
+                  }, 100);
                 } catch (error) {
                   // Fallback to detail page on error
+                  console.error("Error downloading file:", error);
                   window.location.href = getContentUrl("printable", printable.slug);
                 }
               }

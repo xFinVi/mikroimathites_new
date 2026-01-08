@@ -4,6 +4,18 @@ export const category = defineType({
   name: "category",
   title: "Category",
   type: "document",
+  preview: {
+    select: {
+      title: "title",
+      subtitle: "slug.current",
+    },
+    prepare({ title, subtitle }) {
+      return {
+        title: title || "Untitled Category",
+        subtitle: subtitle ? `/${subtitle}` : "No slug",
+      };
+    },
+  },
   fields: [
     defineField({
       name: "title",

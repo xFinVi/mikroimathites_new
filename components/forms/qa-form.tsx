@@ -14,6 +14,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { toast } from "sonner";
 
 interface QAFormData {
   name: string;
@@ -60,9 +61,16 @@ export function QAForm() {
         const data = await res.json().catch(() => ({}));
         throw new Error(data?.error || "Αποτυχία αποστολής");
       }
+
+      toast.success("Επιτυχία! 🎉", {
+        description: "Η ερώτησή σας έχει καταγραφεί! Θα σας απαντήσουμε σύντομα.",
+      });
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : "Κάτι πήγε στραβά";
       setError(message);
+      toast.error("Αποτυχία αποστολής", {
+        description: message,
+      });
       setIsSubmitting(false);
       return;
     }

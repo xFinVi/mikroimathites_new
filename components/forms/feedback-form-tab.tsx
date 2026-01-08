@@ -61,8 +61,16 @@ export function FeedbackFormTab() {
         const data = await res.json().catch(() => ({}));
         throw new Error(data?.error || "Αποτυχία αποστολής");
       }
+
+      toast.success("Επιτυχία! 🎉", {
+        description: "Το feedback σας είναι πολύτιμο! Ευχαριστούμε.",
+      });
     } catch (err: any) {
-      setError(err.message || "Κάτι πήγε στραβά");
+      const errorMsg = err.message || "Κάτι πήγε στραβά";
+      setError(errorMsg);
+      toast.error("Αποτυχία αποστολής", {
+        description: errorMsg,
+      });
       setIsSubmitting(false);
       return;
     }
