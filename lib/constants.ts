@@ -25,8 +25,8 @@ export const ADMIN_CONSTANTS = {
 
 export const CONTACT_CONSTANTS = {
   // Contact email address (used in epikoinonia, privacy, terms pages)
-  // Future: Can add env override: process.env.CONTACT_EMAIL ?? "info@mikroimathites.gr"
-  EMAIL: "info@mikroimathites.gr",
+  // Future: Can add env override: process.env.CONTACT_EMAIL ?? "mikrimathites@outlook.com"
+  EMAIL: "mikrimathites@outlook.com",
   
   // Background image path (used in multiple pages)
   BACKGROUND_IMAGE_PATH: "/images/background.png",

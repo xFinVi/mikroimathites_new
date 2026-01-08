@@ -109,7 +109,7 @@ const isDevelopment = process.env.NODE_ENV === 'development' ||
 const resendApiKey = process.env.RESEND_API_KEY?.trim();
 const adminEmail = process.env.ADMIN_EMAIL?.trim();
 // Resend account owner email (for test domain - must match Resend account email)
-const resendAccountEmail = process.env.RESEND_ACCOUNT_EMAIL?.trim() || "philterzidis@hotmail.com";
+const resendAccountEmail = process.env.RESEND_ACCOUNT_EMAIL?.trim() || "mikrimathites@outlook.com";
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL?.trim() || "http://localhost:3000";
 
 // Email "from" address - use test domain in dev, verified domain in production
@@ -142,7 +142,7 @@ export async function sendSubmissionNotificationToAdmin(data: {
   const runtimeResendApiKey = process.env.RESEND_API_KEY?.trim();
   const runtimeSiteUrl = process.env.NEXT_PUBLIC_SITE_URL?.trim() || "http://localhost:3000";
   const runtimeIsDevelopment = runtimeSiteUrl.includes('localhost') || runtimeSiteUrl.includes('127.0.0.1');
-  const runtimeResendAccountEmail = process.env.RESEND_ACCOUNT_EMAIL?.trim() || "philterzidis@hotmail.com";
+  const runtimeResendAccountEmail = process.env.RESEND_ACCOUNT_EMAIL?.trim() || "mikrimathites@outlook.com";
   const runtimeAdminEmail = process.env.ADMIN_EMAIL?.trim();
   
   // Create Resend client with runtime API key
@@ -234,7 +234,7 @@ export async function sendAnswerNotificationToUser(data: {
   const runtimeResendApiKey = process.env.RESEND_API_KEY?.trim();
   const runtimeSiteUrl = process.env.NEXT_PUBLIC_SITE_URL?.trim() || "http://localhost:3000";
   const runtimeIsDevelopment = runtimeSiteUrl.includes('localhost') || runtimeSiteUrl.includes('127.0.0.1');
-  const runtimeResendAccountEmail = process.env.RESEND_ACCOUNT_EMAIL?.trim() || "philterzidis@hotmail.com";
+  const runtimeResendAccountEmail = process.env.RESEND_ACCOUNT_EMAIL?.trim() || "mikrimathites@outlook.com";
   
   // Create Resend client with runtime API key
   const activeResend = runtimeResendApiKey ? new Resend(runtimeResendApiKey) : resend;
