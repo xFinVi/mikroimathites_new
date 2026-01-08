@@ -12,9 +12,9 @@ interface ConditionalAnalyticsProps {
 /**
  * Conditional Analytics Component
  * 
- * Respects cookie consent preferences and only loads:
- * - Google Analytics if analytics cookies are allowed
- * - Google AdSense if advertising cookies are allowed
+ * Respects cookie consent preferences:
+ * - Google Analytics: only loads if analytics cookies are allowed
+ * - Google AdSense: script always loads (for verification), but ads only initialize when advertising cookies are allowed
  * 
  * Uses Next.js Script component for optimal performance and automatic
  * page view tracking in Next.js App Router.
@@ -58,7 +58,8 @@ export function ConditionalAnalytics({ gaId, adsenseClient }: ConditionalAnalyti
       )}
       
       {/* Google AdSense - Global script (required for all ad units) */}
-      {adsenseClient && shouldLoadAds && (
+      {/* Always load script for AdSense verification, but only initialize ads when consent is given */}
+      {adsenseClient && (
         <Script
           id="adsense-init"
           strategy="afterInteractive"
