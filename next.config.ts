@@ -1,6 +1,9 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // Standalone output for Docker builds
+  // This creates a minimal production build with only necessary files
+  output: "standalone",
   typescript: {
     // Pre-existing TypeScript inference issue with Sanity fetch results
     // Workaround implemented: Category extraction moved to ArticleHeader component with type guard
