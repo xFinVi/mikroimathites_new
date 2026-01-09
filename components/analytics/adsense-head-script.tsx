@@ -1,39 +1,38 @@
-"use client";
-
-import { useEffect } from "react";
+import Script from "next/script";
 
 interface AdSenseHeadScriptProps {
   client?: string;
 }
 
 /**
- * Injects the Google AdSense script directly into the document head.
- * This is necessary for AdSense verification and to avoid issues with
- * Next.js Script component adding `data-nscript` attributes, which AdSense
- * does not support.
- *
- * The script is always loaded for verification, but ad initialization
- * still respects user consent via the ConditionalAnalytics component.
+ * AdSense Head Script Component (Server Component)
+ * 
+ * Uses Next.js Script component with "beforeInteractive" strategy to ensure
+ * the AdSense script is in the <head> tag and visible to Google's crawler
+ * for site verification.
+ * 
+ * The "beforeInteractive" strategy:
+ * - Injects the script into the initial HTML <head> during SSR
+ * - Loads before the page becomes interactive
+ * - Visible to crawlers (including Google AdSense verification)
+ * 
+ * This script is required for AdSense site verification and must be
+ * loaded before ad units can be initialized.
+ * 
+ * Note: In Next.js App Router, beforeInteractive scripts are automatically
+ * moved to the <head> even if placed in the body.
  */
 export function AdSenseHeadScript({ client }: AdSenseHeadScriptProps) {
-  useEffect(() => {
-    if (client && typeof window !== "undefined" && !document.querySelector(`script[src*="adsbygoogle.js?client=${client}"]`)) {
-      const script = document.createElement("script");
-      script.id = "adsense-init-manual";
-      script.src = `https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${client}`;
-      script.async = true;
-      script.crossOrigin = "anonymous";
-      document.head.appendChild(script);
+  if (!client) {
+    return null;
+  }
 
-      // Clean up on component unmount (though for head scripts, this is less critical)
-      return () => {
-        const existingScript = document.getElementById("adsense-init-manual");
-        if (existingScript) {
-          existingScript.remove();
-        }
-      };
-    }
-  }, [client]);
-
-  return null; // This component doesn't render any visible UI
+  return (
+    <Script
+      id="adsense-init"
+      strategy="beforeInteractive"
+      src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${client}`}
+      crossOrigin="anonymous"
+    />
+  );
 }

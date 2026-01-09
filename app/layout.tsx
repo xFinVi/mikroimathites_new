@@ -47,8 +47,9 @@ export default function RootLayout({
 
   return (
     <html lang="el" suppressHydrationWarning>
-      <AdSenseHeadScript client={adsenseClient} />
       <body className={`${inter.variable} ${poppins.variable} font-sans antialiased`}>
+        {/* AdSense script - beforeInteractive strategy moves it to <head> automatically */}
+        {adsenseClient && <AdSenseHeadScript client={adsenseClient} />}
         <Providers>
           {/* Conditional Analytics - respects cookie consent */}
           <ConditionalAnalytics gaId={gaId} />
