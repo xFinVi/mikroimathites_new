@@ -3,40 +3,37 @@
 import { useEffect } from "react";
 
 interface AdSenseHeadScriptProps {
-  client: string;
+  client?: string;
 }
 
 /**
- * AdSense Head Script Component
- * 
- * Injects the AdSense script directly into the document head without
- * Next.js Script component attributes (like data-nscript) that AdSense
- * doesn't support for verification.
- * 
- * This script is required for AdSense site verification and must be
- * loaded before ad units can be initialized.
+ * Injects the Google AdSense script directly into the document head.
+ * This is necessary for AdSense verification and to avoid issues with
+ * Next.js Script component adding `data-nscript` attributes, which AdSense
+ * does not support.
+ *
+ * The script is always loaded for verification, but ad initialization
+ * still respects user consent via the ConditionalAnalytics component.
  */
 export function AdSenseHeadScript({ client }: AdSenseHeadScriptProps) {
   useEffect(() => {
-    // Check if script already exists
-    if (document.querySelector(`script[src*="adsbygoogle.js?client=${client}"]`)) {
-      return;
+    if (client && typeof window !== "undefined" && !document.querySelector(`script[src*="adsbygoogle.js?client=${client}"]`)) {
+      const script = document.createElement("script");
+      script.id = "adsense-init-manual";
+      script.src = `https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${client}`;
+      script.async = true;
+      script.crossOrigin = "anonymous";
+      document.head.appendChild(script);
+
+      // Clean up on component unmount (though for head scripts, this is less critical)
+      return () => {
+        const existingScript = document.getElementById("adsense-init-manual");
+        if (existingScript) {
+          existingScript.remove();
+        }
+      };
     }
-
-    // Create and inject script into head
-    const script = document.createElement("script");
-    script.async = true;
-    script.src = `https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${client}`;
-    script.crossOrigin = "anonymous";
-    script.setAttribute("data-checked-head", "true"); // AdSense verification attribute
-    
-    document.head.appendChild(script);
-
-    // Cleanup function (though script should persist)
-    return () => {
-      // Don't remove on unmount - AdSense needs it to persist
-    };
   }, [client]);
 
-  return null; // This component doesn't render anything
+  return null; // This component doesn't render any visible UI
 }

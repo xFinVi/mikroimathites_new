@@ -47,12 +47,11 @@ export default function RootLayout({
 
   return (
     <html lang="el" suppressHydrationWarning>
+      <AdSenseHeadScript client={adsenseClient} />
       <body className={`${inter.variable} ${poppins.variable} font-sans antialiased`}>
         <Providers>
-          {/* AdSense script - injected into head for verification (no data-nscript) */}
-          {adsenseClient && <AdSenseHeadScript client={adsenseClient} />}
           {/* Conditional Analytics - respects cookie consent */}
-          <ConditionalAnalytics gaId={gaId} adsenseClient={undefined} />
+          <ConditionalAnalytics gaId={gaId} />
           <CookieConsentModal />
           <Toaster position="top-right" richColors />
           {children}
