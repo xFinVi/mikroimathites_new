@@ -20,6 +20,8 @@ export function LoginForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
 
+  const passwordReset = searchParams.get("passwordReset") === "true";
+
   useEffect(() => {
     if (registered) {
       setShowSuccess(true);
@@ -28,6 +30,16 @@ export function LoginForm() {
       return () => clearTimeout(timer);
     }
   }, [registered]);
+
+  useEffect(() => {
+    if (passwordReset) {
+      setShowSuccess(true);
+      setError(null);
+      // Clear the success message after 5 seconds
+      const timer = setTimeout(() => setShowSuccess(false), 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [passwordReset]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -71,7 +83,9 @@ export function LoginForm() {
         {showSuccess && (
           <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
             <p className="text-green-800 text-sm">
-              ✓ Επιτυχής εγγραφή! Μπορείτε τώρα να συνδεθείτε.
+              {passwordReset
+                ? "✓ Το password άλλαξε επιτυχώς! Μπορείτε τώρα να συνδεθείτε."
+                : "✓ Επιτυχής εγγραφή! Μπορείτε τώρα να συνδεθείτε."}
             </p>
           </div>
         )}
@@ -97,7 +111,15 @@ export function LoginForm() {
           </div>
 
           <div>
-            <Label htmlFor="password">Password</Label>
+            <div className="flex items-center justify-between mb-1">
+              <Label htmlFor="password">Password</Label>
+              <Link
+                href="/auth/forgot-password"
+                className="text-sm text-primary-pink hover:underline font-medium"
+              >
+                Ξεχάσατε το password;
+              </Link>
+            </div>
             <Input
               id="password"
               type="password"

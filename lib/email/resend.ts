@@ -2,7 +2,11 @@ import { Resend } from "resend";
 import { logger } from "@/lib/utils/logger";
 import { escapeHtmlWithLineBreaks } from "@/lib/utils/forms";
 
-function wrapEmail(params: {
+/**
+ * Wraps email content in a styled HTML template
+ * Exported for use in password reset emails
+ */
+export function wrapEmail(params: {
   preheader: string;
   title: string;
   intro?: string;
