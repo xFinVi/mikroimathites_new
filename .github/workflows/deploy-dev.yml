@@ -21,13 +21,54 @@ jobs:
         with:
           ref: develop
 
+      - name: Validate secrets
+        run: |
+          if [ -z "${{ secrets.VPS_SSH_PRIVATE_KEY }}" ]; then
+            echo "❌ Error: VPS_SSH_PRIVATE_KEY secret is not set"
+            exit 1
+          fi
+          if [ -z "${{ secrets.VPS_HOST }}" ]; then
+            echo "❌ Error: VPS_HOST secret is not set"
+            exit 1
+          fi
+          if [ -z "${{ secrets.VPS_USER }}" ]; then
+            echo "❌ Error: VPS_USER secret is not set"
+            exit 1
+          fi
+          if [ -z "${{ secrets.VPS_APP_PATH }}" ]; then
+            echo "❌ Error: VPS_APP_PATH secret is not set"
+            exit 1
+          fi
+          echo "✅ All required secrets are present"
+
       - name: Setup SSH key
         run: |
+          set -e
+          echo "🔐 Setting up SSH connection..."
+          
           mkdir -p ~/.ssh
           chmod 700 ~/.ssh
+          
+          if [ -z "$SSH_PRIVATE_KEY" ]; then
+            echo "❌ SSH_PRIVATE_KEY is empty"
+            exit 1
+          fi
+          
           echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
-          ssh-keyscan -H "$SSH_HOST" >> ~/.ssh/known_hosts
+          
+          if [ -z "$SSH_HOST" ]; then
+            echo "❌ SSH_HOST is empty"
+            exit 1
+          fi
+          
+          echo "🔍 Scanning SSH host: $SSH_HOST"
+          ssh-keyscan -H "$SSH_HOST" >> ~/.ssh/known_hosts || {
+            echo "❌ Failed to scan SSH host"
+            exit 1
+          }
+          
+          echo "✅ SSH setup completed"
         env:
           SSH_PRIVATE_KEY: ${{ secrets.VPS_SSH_PRIVATE_KEY }}
           SSH_HOST: ${{ secrets.VPS_HOST }}
