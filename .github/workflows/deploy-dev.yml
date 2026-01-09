@@ -36,24 +36,53 @@ jobs:
         run: |
           ssh -o StrictHostKeyChecking=accept-new "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}" << 'ENDSSH'
             set -e
-            cd "${{ secrets.VPS_APP_PATH }}"
+            cd "${{ secrets.VPS_APP_PATH }}" || { echo "❌ Failed to cd to app directory"; exit 1; }
             echo "🔄 Starting auto-redeployment from GitHub Actions..."
-            git fetch origin
-            git checkout develop
-            git pull origin develop
+            echo "📦 Current directory: $(pwd)"
+            echo "🌿 Current branch: $(git branch --show-current)"
+            
+            git fetch origin || { echo "❌ Failed to fetch from origin"; exit 1; }
+            git checkout develop || { echo "❌ Failed to checkout develop"; exit 1; }
+            git pull origin develop || { echo "❌ Failed to pull from develop"; exit 1; }
+            
             echo "🔨 Building and starting containers..."
-            docker compose up -d --build
+            docker compose up -d --build || {
+              echo "❌ Docker compose failed"
+              echo "📋 Showing logs for debugging:"
+              docker compose logs --tail=50
+              exit 1
+            }
+            
+            echo "✅ Containers started successfully"
           ENDSSH
 
       - name: Verify deployment
         run: |
-          sleep 10
+          sleep 15
           ssh -o StrictHostKeyChecking=accept-new "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}" << 'ENDSSH'
-            cd "${{ secrets.VPS_APP_PATH }}"
+            cd "${{ secrets.VPS_APP_PATH }}" || { echo "❌ Failed to cd to app directory"; exit 1; }
+            
+            echo "🏥 Checking container status..."
+            docker compose ps
+            
             if docker compose ps | grep -q "Up"; then
               echo "✅ Deployment verified - containers are running"
+              
+              # Check if app is responding
+              echo "🌐 Checking application health..."
+              if curl -f http://localhost:3000/api/health > /dev/null 2>&1; then
+                echo "✅ Application is healthy and responding"
+              else
+                echo "⚠️ Application may not be fully ready yet"
+                echo "📋 Recent logs:"
+                docker compose logs --tail=30 app
+              fi
             else
               echo "❌ Deployment failed - containers are not running"
+              echo "📋 Container status:"
+              docker compose ps
+              echo "📋 Recent logs:"
+              docker compose logs --tail=50
               exit 1
             fi
           ENDSSH
