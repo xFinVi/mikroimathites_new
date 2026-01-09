@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, Poppins } from "next/font/google";
 import { ConditionalAnalytics } from "@/components/analytics/conditional-analytics";
+import { AdSenseHeadScript } from "@/components/analytics/adsense-head-script";
 import { CookieConsentModal } from "@/components/cookies/cookie-consent-modal";
 import { Providers } from "@/components/providers";
 import { Toaster } from "@/components/ui/sonner";
@@ -48,8 +49,10 @@ export default function RootLayout({
     <html lang="el" suppressHydrationWarning>
       <body className={`${inter.variable} ${poppins.variable} font-sans antialiased`}>
         <Providers>
+          {/* AdSense script - injected into head for verification (no data-nscript) */}
+          {adsenseClient && <AdSenseHeadScript client={adsenseClient} />}
           {/* Conditional Analytics - respects cookie consent */}
-          <ConditionalAnalytics gaId={gaId} adsenseClient={adsenseClient} />
+          <ConditionalAnalytics gaId={gaId} adsenseClient={undefined} />
           <CookieConsentModal />
           <Toaster position="top-right" richColors />
           {children}

@@ -32,8 +32,8 @@ export function ConditionalAnalytics({ gaId, adsenseClient }: ConditionalAnalyti
     }
   }, [isLoading, isCategoryAllowed]);
 
-  // Don't render anything if still loading or if no IDs provided
-  if (isLoading || (!gaId && !adsenseClient)) {
+  // Don't render anything if no IDs provided
+  if (!gaId && !adsenseClient) {
     return null;
   }
 
@@ -57,16 +57,8 @@ export function ConditionalAnalytics({ gaId, adsenseClient }: ConditionalAnalyti
         </>
       )}
       
-      {/* Google AdSense - Global script (required for all ad units) */}
-      {/* Always load script for AdSense verification, but only initialize ads when consent is given */}
-      {adsenseClient && (
-        <Script
-          id="adsense-init"
-          strategy="afterInteractive"
-          src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${adsenseClient}`}
-          crossOrigin="anonymous"
-        />
-      )}
+      {/* Google AdSense script is loaded in layout.tsx head for verification */}
+      {/* Ad initialization is handled in AdUnit components, which respect cookie consent */}
     </>
   );
 }
