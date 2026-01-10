@@ -8,7 +8,8 @@ export const metadata = generateMetadataFor("support");
 
 export default async function SupportPage() {
   return (
-    <PageWrapper>
+    <div className="mb-16">
+      <PageWrapper>
       {/* Hero with Happy Background */}
       <div className="relative min-h-[85vh] flex items-start overflow-hidden">
         {/* Background Image */}
@@ -43,5 +44,6 @@ export default async function SupportPage() {
         </Container>
       </div>
     </PageWrapper>
+    </div>
   );
 }
