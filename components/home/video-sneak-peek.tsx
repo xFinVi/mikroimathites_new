@@ -124,6 +124,18 @@ export function VideoSneakPeek({
             />
           )}
 
+          {/* Logo Overlay - Center with opacity (Watermark) */}
+          <div className="absolute inset-0 flex items-center justify-center z-5 pointer-events-none">
+            <Image
+              src="/images/logo.png"
+              alt="Μικροί Μαθητές"
+              width={800}
+              height={280}
+              className="w-[70%] h-auto min-w-[400px] opacity-20"
+              priority={false}
+            />
+          </div>
+
           {/* Enhanced Overlay Controls - Bing Bunny Style */}
           <div 
             className={`absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent transition-all duration-500 z-10 ${
@@ -139,7 +151,7 @@ export function VideoSneakPeek({
                         <button
                           onClick={togglePlayPause}
                           className="group p-3 bg-white/20 hover:bg-white/30 backdrop-blur-md rounded-full transition-all hover:scale-110 border border-white/30 shadow-lg"
-                          aria-label={isPlaying ? "Pause" : "Play"}
+                          aria-label={isPlaying ? "Παύση βίντεο" : "Αναπαραγωγή βίντεο"}
                         >
                           {isPlaying ? (
                             <Pause className="w-6 h-6 text-white group-hover:text-primary-pink transition-colors" fill="currentColor" />
@@ -150,7 +162,7 @@ export function VideoSneakPeek({
                         <button
                           onClick={toggleMute}
                           className="group p-3 bg-white/20 hover:bg-white/30 backdrop-blur-md rounded-full transition-all hover:scale-110 border border-white/30 shadow-lg"
-                          aria-label={isMuted ? "Unmute" : "Mute"}
+                          aria-label={isMuted ? "Ενεργοποίηση ήχου" : "Σίγαση ήχου"}
                         >
                           {isMuted ? (
                             <VolumeX className="w-6 h-6 text-white group-hover:text-primary-pink transition-colors" />
@@ -177,6 +189,7 @@ export function VideoSneakPeek({
                             target="_blank"
                             rel="noopener noreferrer"
                             className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-primary-pink to-secondary-blue hover:from-primary-pink/90 hover:to-secondary-blue/90 text-white rounded-lg font-semibold transition-all hover:scale-105 shadow-lg"
+                            aria-label="Δείτε το βίντεο στο YouTube (ανοίγει σε νέο παράθυρο)"
                           >
                             <span>Δείτε στο YouTube</span>
                             <ExternalLink className="w-4 h-4" />
@@ -199,6 +212,7 @@ export function VideoSneakPeek({
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-primary-pink to-secondary-blue hover:from-primary-pink/90 hover:to-secondary-blue/90 text-white rounded-lg font-semibold transition-all shadow-lg hover:shadow-xl hover:scale-105"
+              aria-label="Επισκεφτείτε το κανάλι μας στο YouTube (ανοίγει σε νέο παράθυρο)"
             >
               <span>Επισκεφτείτε το κανάλι μας</span>
               <ExternalLink className="w-5 h-5" />

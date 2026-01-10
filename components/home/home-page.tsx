@@ -11,6 +11,8 @@ import { ActivityCard } from "@/components/activities/activity-card";
 import { NewsletterSection } from "@/components/newsletter/newsletter-section";
 import { VideoSneakPeek } from "@/components/home/video-sneak-peek";
 import { SponsorsSection, type Sponsor } from "@/components/sponsors";
+import { TestimonialsSection } from "@/components/home/testimonials-section";
+import type { Testimonial } from "@/lib/content";
 import { User, ChevronDown } from "lucide-react";
 import { generateImageUrl } from "@/lib/sanity/image-url";
 import { HOME_PAGE_LIMITS, YOUTUBE_VIDEO_IDS } from "@/lib/constants";
@@ -72,6 +74,7 @@ interface HomePageProps {
     items?: Array<(Activity | Printable) & { imageUrl?: string | null; _contentType?: 'activity' | 'printable' }>;
   };
   sponsors?: Sponsor[];
+  testimonials?: Testimonial[];
 }
 
 // Featured Content Section Component
@@ -284,6 +287,7 @@ export function HomePage({
   forParentsSection,
   activitiesPrintablesSection,
   sponsors = [],
+  testimonials = [],
 }: HomePageProps) {
   return (
     <PageWrapper mainClassName="bg-[#0d1330]">
@@ -529,14 +533,17 @@ export function HomePage({
         </Container>
       </section>
 
-      {/* Section 7: Sponsors */}
+      {/* Section 7: Testimonials */}
+      <TestimonialsSection testimonials={testimonials} />
+
+      {/* Section 8: Sponsors */}
       <SponsorsSection
         sponsors={sponsors || []}
         headerColor="purple"
         showBecomeSponsor={true}
       />
 
-      {/* Section 8: Community CTA */}
+      {/* Section 9: Community CTA */}
       <section className="relative bg-[#0d1330] py-16 md:py-20 overflow-hidden">
         <Container className="relative z-10">
           <div className="max-w-3xl mx-auto">

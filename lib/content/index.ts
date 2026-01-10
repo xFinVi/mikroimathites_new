@@ -30,6 +30,7 @@ import {
   activitiesHubContentQuery,
   activitiesHubContentCountQuery,
   sponsorsQuery,
+  testimonialsQuery,
 } from "@/lib/sanity/queries";
 
 // Common types
@@ -437,6 +438,35 @@ export async function getQAItems(): Promise<QAItem[]> {
 export async function getCuratedCollections(): Promise<CuratedCollection[]> {
   if (!safeClient) return [];
   return safeClient.fetch<CuratedCollection[]>(curatedCollectionsQuery);
+}
+
+// Testimonial type
+export interface Testimonial {
+  _id: string;
+  quote: string;
+  authorName: string;
+  childAge?: string;
+  rating?: number;
+  featured?: boolean;
+  order?: number;
+  publishedAt?: string;
+}
+
+// Testimonial functions
+export async function getTestimonials(limit = 4): Promise<Testimonial[]> {
+  if (!safeClient) {
+    logger.warn("Sanity client not available for fetching testimonials");
+    return [];
+  }
+  try {
+    const testimonials = await safeClient.fetch<Testimonial[]>(testimonialsQuery);
+    logger.info(`Fetched ${testimonials.length} testimonials from Sanity`);
+    // Limit results
+    return testimonials.slice(0, limit);
+  } catch (error) {
+    logger.error("Failed to fetch testimonials from Sanity", error);
+    return [];
+  }
 }
 
 // Sponsor functions

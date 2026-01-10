@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/lib/auth/config";
+import { requireAdmin } from "@/lib/auth/middleware";
 import { supabaseAdmin } from "@/lib/supabase/server";
 import { logger } from "@/lib/utils/logger";
 
@@ -9,14 +9,8 @@ import { logger } from "@/lib/utils/logger";
  */
 export async function GET(request: NextRequest) {
   try {
-    const session = await auth();
-
-    if (!session || !session.user || session.user.role !== "admin") {
-      return NextResponse.json(
-        { error: "Unauthorized" },
-        { status: 401 }
-      );
-    }
+    const authCheck = await requireAdmin(request);
+    if (authCheck) return authCheck;
 
     if (!supabaseAdmin) {
       logger.error("Supabase admin client not configured");

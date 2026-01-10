@@ -12,6 +12,7 @@ import {
   getForParentsSection,
   getActivitiesPrintablesSection,
   getSponsors,
+  getTestimonials,
 } from "@/lib/content";
 import { generateImageUrl } from "@/lib/sanity/image-url";
 import { HOME_PAGE_LIMITS, HOME_PAGE_IMAGE_SIZES } from "@/lib/constants";
@@ -251,6 +252,15 @@ export default async function Home() {
     // Continue with empty array - section will just not show sponsors
   }
 
+  // Fetch testimonials
+  let testimonials: Awaited<ReturnType<typeof getTestimonials>> = [];
+  try {
+    testimonials = await getTestimonials(4);
+  } catch (error) {
+    logger.error('Failed to fetch testimonials for home page:', error);
+    // Continue with empty array - section will just not show testimonials
+  }
+
   return (
     <HomePage
       homeHeroImage={homeHeroImageUrl}
@@ -274,6 +284,7 @@ export default async function Home() {
         items: activitiesPrintablesItems,
       } : undefined}
       sponsors={sponsors}
+      testimonials={testimonials}
     />
   );
 }

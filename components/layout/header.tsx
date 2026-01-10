@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { Search, LayoutDashboard } from "lucide-react";
+import { LayoutDashboard } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { Navigation } from "./navigation";
 import { MobileMenu } from "./mobile-menu";
@@ -51,6 +51,7 @@ export function Header() {
           <Link
             href="/"
             className="flex items-center space-x-2 hover:opacity-80 transition-opacity z-10"
+            aria-label="Μικροί Μαθητές - Αρχική σελίδα"
           >
             <Image
               src="/images/logo.png"
@@ -67,27 +68,19 @@ export function Header() {
             <Navigation />
           </div>
 
-          {/* Right Side - Search, Dashboard (Admin), & Mobile Menu */}
+          {/* Right Side - Dashboard (Admin) & Mobile Menu */}
           <div className="flex items-center gap-4">
             {/* Dashboard Link - Admin Only */}
             {isAdmin && (
               <Link
                 href="/admin/submissions?status=not_answered"
                 className="hidden md:flex items-center justify-center w-10 h-10 rounded-full hover:bg-white/10 transition-colors group"
-                aria-label="Admin Dashboard"
-                title="Admin Dashboard"
+                aria-label="Πίνακας ελέγχου διαχειριστή"
+                title="Πίνακας ελέγχου διαχειριστή"
               >
                 <LayoutDashboard className="h-5 w-5 text-white group-hover:text-primary-pink transition-colors" />
               </Link>
             )}
-
-            {/* Search Icon - Desktop */}
-            <button
-              className="hidden md:flex items-center justify-center w-10 h-10 rounded-full hover:bg-white/10 transition-colors"
-              aria-label="Search"
-            >
-              <Search className="h-5 w-5 text-white" />
-            </button>
 
             {/* Mobile Menu */}
             <MobileMenu />

@@ -17,7 +17,7 @@ export function Navigation() {
   const pathname = usePathname();
 
   return (
-    <nav className="flex items-center space-x-4 sm:space-x-6 lg:space-x-8">
+    <nav className="flex items-center space-x-4 sm:space-x-6 lg:space-x-8" aria-label="Κύρια πλοήγηση">
       {navItems.map((item) => {
         const isActive = pathname === item.href;
         return (
@@ -29,10 +29,11 @@ export function Navigation() {
               "text-white hover:text-accent-yellow",
               isActive && "text-accent-yellow"
             )}
+            aria-current={isActive ? "page" : undefined}
           >
             {item.label}
             {isActive && (
-              <span className="absolute -bottom-1 left-0 right-0 h-0.5 bg-accent-yellow rounded-full" />
+              <span className="absolute -bottom-1 left-0 right-0 h-0.5 bg-accent-yellow rounded-full" aria-hidden="true" />
             )}
           </Link>
         );

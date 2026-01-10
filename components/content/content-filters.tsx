@@ -71,7 +71,7 @@ export function ContentFilters({
         {ageGroups.length > 0 && (
           <div className="space-y-2">
             <Select value={ageFilter || "all"} onValueChange={(value) => updateFilter("age", value)}>
-              <SelectTrigger className="w-[180px]">
+              <SelectTrigger className="w-[180px]" aria-label="Φίλτρο ηλικίας">
                 <SelectValue placeholder="Όλες οι ηλικίες" />
               </SelectTrigger>
               <SelectContent>
@@ -93,7 +93,7 @@ export function ContentFilters({
               value={categoryFilter || "all"}
               onValueChange={(value) => updateFilter("category", value)}
             >
-              <SelectTrigger className="w-[180px]">
+              <SelectTrigger className="w-[180px]" aria-label="Φίλτρο κατηγορίας">
                 <SelectValue placeholder="Όλες οι κατηγορίες" />
               </SelectTrigger>
               <SelectContent>
@@ -112,7 +112,7 @@ export function ContentFilters({
         {showTypeFilter && (
           <div className="space-y-2">
             <Select value={typeFilter || "all"} onValueChange={(value) => updateFilter("type", value)}>
-              <SelectTrigger className="w-[180px]">
+              <SelectTrigger className="w-[180px]" aria-label="Φίλτρο τύπου περιεχομένου">
                 <SelectValue placeholder="Όλοι οι τύποι" />
               </SelectTrigger>
               <SelectContent>
@@ -131,6 +131,7 @@ export function ContentFilters({
             size="sm"
             onClick={clearFilters}
             className="flex items-center gap-2"
+            aria-label="Καθαρισμός όλων των φίλτρων"
           >
             <X className="w-4 h-4" />
             Καθαρισμός
