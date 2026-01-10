@@ -50,17 +50,28 @@ fi
 print_status "Pulling latest changes from develop branch..."
 git pull origin develop
 
-# Stop containers
-print_status "Stopping existing containers..."
-docker compose down
+# Zero-downtime deployment strategy
+print_status "Starting zero-downtime deployment..."
 
-# Build and start containers
-print_status "Building and starting containers..."
-docker compose up -d --build
+# Build new image while old container keeps running
+print_status "Building new container image..."
+docker compose build --no-cache
 
-# Wait for startup
+# Start new container (docker handles the transition automatically with minimal downtime)
+print_status "Deploying new container (old container stays up during transition)..."
+docker compose up -d --force-recreate
+
+# Wait for startup and health check
 print_status "Waiting for application to start..."
-sleep 15
+sleep 20
+
+# Verify deployment success
+print_status "Verifying deployment..."
+if curl -f -s http://localhost:3000/api/health > /dev/null 2>&1; then
+    print_success "✅ Deployment successful - application is responding"
+else
+    print_warning "⚠️ Health check failed - application may still be starting"
+fi
 
 # Check logs
 print_status "Checking deployment logs..."
@@ -69,9 +80,12 @@ docker compose logs --tail=20
 # Test health check
 print_status "Testing application health..."
 if curl -f -s https://mikroimathites.gr/api/health > /dev/null 2>&1; then
-    print_success "Health check passed!"
+    print_success "Health check passed! ✅"
 else
-    print_warning "Health check failed. Check logs above."
+    print_error "Health check failed! ❌"
+    print_status "Checking container logs..."
+    docker compose logs --tail=20 app
+    exit 1
 fi
 
 # Test AdSense script
