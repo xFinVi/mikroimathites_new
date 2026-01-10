@@ -76,7 +76,7 @@ jobs:
       - name: Deploy to VPS
         run: |
           echo "🔄 Starting auto-redeployment from GitHub Actions..."
-          ssh -i ~/.ssh/id_ed25519 -o StrictHostKeyChecking=accept-new "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}" "./scripts/redeploy.sh"
+          ssh -i ~/.ssh/id_ed25519 -o StrictHostKeyChecking=accept-new "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}" "cd ${{ secrets.VPS_APP_PATH }} && ./scripts/redeploy.sh"
 
       - name: Verify deployment
         run: |
