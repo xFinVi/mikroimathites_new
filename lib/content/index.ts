@@ -1,6 +1,7 @@
 import { sanityClient } from "@/lib/sanity/client";
 import { type Sponsor } from "@/components/sponsors";
 import { logger } from "@/lib/utils/logger";
+import { getContentViewCounts, getDownloadCounts } from "@/lib/analytics/queries";
 import {
   articlesQuery,
   articleBySlugQuery,
@@ -32,6 +33,12 @@ import {
   sponsorsQuery,
   testimonialsQuery,
 } from "@/lib/sanity/queries";
+import {
+  parentsHubContentQueryAlphabetical,
+  activitiesHubContentQueryAlphabetical,
+  parentsHubContentAllQuery,
+  activitiesHubContentAllQuery,
+} from "@/lib/sanity/queries-sorting";
 
 // Common types
 export interface Tag {
@@ -77,6 +84,7 @@ export interface RelatedContentItem {
 // Content type interfaces
 export interface Article {
   _id: string;
+  _type: "article";
   title: string;
   slug: string;
   excerpt?: string;
@@ -101,6 +109,7 @@ export interface Article {
 
 export interface Recipe {
   _id: string;
+  _type: "recipe";
   title: string;
   slug: string;
   summary?: string;
@@ -144,6 +153,7 @@ export interface ActivityStep {
  */
 export interface Activity {
   _id: string;
+  _type: "activity";
   title: string;
   slug: string;
   summary?: string;
@@ -171,6 +181,7 @@ export interface Activity {
 
 export interface Printable {
   _id: string;
+  _type: "printable";
   title: string;
   slug: string;
   summary?: string;
@@ -847,6 +858,7 @@ export interface ParentsHubContentOptions {
   tag?: string;
   page: number;
   pageSize: number;
+  sortBy?: "latest" | "popular" | "alphabetical";
 }
 
 export interface ParentsHubContentResult {
@@ -861,8 +873,7 @@ export async function getParentsHubContent(
 
   const page = Math.max(1, opts.page || 1);
   const pageSize = Math.max(1, Math.min(50, opts.pageSize || 18));
-  const start = (page - 1) * pageSize;
-  const end = start + pageSize;
+  const sortBy = opts.sortBy || "latest";
 
   // Normalize search - GROQ requires all referenced params to be provided
   // Use null for undefined values so GROQ can check !defined()
@@ -876,21 +887,75 @@ export async function getParentsHubContent(
   const tag = opts.tag?.trim() ? opts.tag.trim() : null;
 
   try {
+    // For "popular" sorting, we need to fetch all items, get counts, sort, then paginate
+    if (sortBy === "popular") {
+      // Fetch all matching items (limit to 200 for performance)
+      // Use type assertion to handle null values (GROQ accepts null)
+      const allItems = await safeClient.fetch<(Article | Recipe | Activity)[]>(
+        parentsHubContentAllQuery,
+        { search, age, categories, tag } as any
+      );
+
+      if (!allItems || allItems.length === 0) {
+        return { items: [], total: 0 };
+      }
+
+      // Limit to 200 items for performance
+      const limitedItems = allItems.slice(0, 200);
+
+      // Get view counts for all items
+      const viewCounts = await getContentViewCounts(
+        limitedItems.map((item) => ({
+          content_type: item._type as "article" | "activity" | "recipe",
+          content_slug: item.slug,
+        }))
+      );
+
+      // Sort by view count (descending)
+      const sortedItems = limitedItems.sort((a, b) => {
+        const aKey = `${a._type}:${a.slug}`;
+        const bKey = `${b._type}:${b.slug}`;
+        const aViews = viewCounts.get(aKey) || 0;
+        const bViews = viewCounts.get(bKey) || 0;
+        return bViews - aViews; // Descending order
+      });
+
+      // Apply pagination
+      const start = (page - 1) * pageSize;
+      const end = start + pageSize;
+      const paginatedItems = sortedItems.slice(start, end);
+
+      return {
+        items: paginatedItems,
+        total: sortedItems.length,
+      };
+    }
+
+    // For "latest" and "alphabetical", use GROQ sorting
+    const start = (page - 1) * pageSize;
+    const end = start + pageSize;
+
+    // Choose query based on sort type
+    const query = sortBy === "alphabetical" 
+      ? parentsHubContentQueryAlphabetical 
+      : parentsHubContentQuery;
+
+    // Use type assertion to handle null values (GROQ accepts null, TypeScript types are strict)
     const [items, total] = await Promise.all([
-      safeClient.fetch<(Article | Recipe | Activity)[]>(parentsHubContentQuery, {
+      safeClient.fetch<(Article | Recipe | Activity)[]>(query, {
         start,
         end,
         search,
         age,
         categories,
         tag,
-      }),
+      } as any),
       safeClient.fetch<number>(parentsHubContentCountQuery, {
         search,
         age,
         categories,
         tag,
-      }),
+      } as any),
     ]);
 
     return {
@@ -898,6 +963,7 @@ export async function getParentsHubContent(
       total: total ?? 0,
     };
   } catch (error) {
+    logger.error("Error in getParentsHubContent:", error);
     // Silently fail - return empty results
     return { items: [], total: 0 };
   }
@@ -910,6 +976,7 @@ export interface ActivitiesHubContentOptions {
   type?: string; // "activity" | "printable" | null
   page: number;
   pageSize: number;
+  sortBy?: "latest" | "popular" | "alphabetical";
 }
 
 export interface ActivitiesHubContentResult {
@@ -924,10 +991,10 @@ export async function getActivitiesHubContent(
 
   const page = Math.max(1, opts.page || 1);
   const pageSize = Math.max(1, Math.min(50, opts.pageSize || 18));
-  const start = (page - 1) * pageSize;
-  const end = start + pageSize;
+  const sortBy = opts.sortBy || "latest";
 
   // Normalize search - GROQ requires all referenced params to be provided
+  // Use null for undefined values so GROQ can check !defined()
   // Sanitize: remove wildcards from user input, cap length, use Greek locale for lowercase
   const raw = opts.search?.trim() ?? "";
   const cleaned = raw.replace(/\*/g, "").slice(0, 80); // Remove wildcards, cap at 80 chars
@@ -936,19 +1003,99 @@ export async function getActivitiesHubContent(
   const type = opts.type?.trim() ? opts.type.trim() : null;
 
   try {
+    // For "popular" sorting, we need to fetch all items, get counts, sort, then paginate
+    if (sortBy === "popular") {
+      // Fetch all matching items (limit to 200 for performance)
+      // Use type assertion to handle null values (GROQ accepts null)
+      const allItems = await safeClient.fetch<(Activity | Printable)[]>(
+        activitiesHubContentAllQuery,
+        { search, age, type } as any
+      );
+
+      if (!allItems || allItems.length === 0) {
+        return { items: [], total: 0 };
+      }
+
+      // Limit to 200 items for performance
+      const limitedItems = allItems.slice(0, 200);
+
+      // Separate activities and printables
+      const activities = limitedItems.filter((item) => item._type === "activity");
+      const printables = limitedItems.filter((item) => item._type === "printable");
+
+      // Get view counts for activities
+      const activityViewCounts = activities.length > 0
+        ? await getContentViewCounts(
+            activities.map((item) => ({
+              content_type: "activity" as const,
+              content_slug: item.slug,
+            }))
+          )
+        : new Map<string, number>();
+
+      // Get download counts for printables
+      const printableDownloadCounts = printables.length > 0
+        ? await getDownloadCounts(printables.map((item) => item.slug).filter((slug): slug is string => slug != null))
+        : new Map<string, number>();
+
+      // Combine and sort
+      const sortedItems = limitedItems.sort((a, b) => {
+        let aCount = 0;
+        let bCount = 0;
+
+        if (a._type === "activity") {
+          const key = `activity:${a.slug}`;
+          aCount = activityViewCounts.get(key) || 0;
+        } else if (a._type === "printable") {
+          const key = `printable:${a.slug}`;
+          aCount = printableDownloadCounts.get(key) || 0;
+        }
+
+        if (b._type === "activity") {
+          const key = `activity:${b.slug}`;
+          bCount = activityViewCounts.get(key) || 0;
+        } else if (b._type === "printable") {
+          const key = `printable:${b.slug}`;
+          bCount = printableDownloadCounts.get(key) || 0;
+        }
+
+        return bCount - aCount; // Descending order
+      });
+
+      // Apply pagination
+      const start = (page - 1) * pageSize;
+      const end = start + pageSize;
+      const paginatedItems = sortedItems.slice(start, end);
+
+      return {
+        items: paginatedItems,
+        total: sortedItems.length,
+      };
+    }
+
+    // For "latest" and "alphabetical", use GROQ sorting
+    const start = (page - 1) * pageSize;
+    const end = start + pageSize;
+
+    // Choose query based on sort type
+    const query = sortBy === "alphabetical"
+      ? activitiesHubContentQueryAlphabetical
+      : activitiesHubContentQuery;
+
+    // Use type assertion to handle null values (GROQ accepts null, TypeScript types are strict)
     const [items, total] = await Promise.all([
-      safeClient.fetch<(Activity | Printable)[]>(activitiesHubContentQuery, {
+      safeClient.fetch<(Activity | Printable)[]>(query, {
         start,
         end,
         search,
         age,
         type,
-      }),
+      } as any),
       safeClient.fetch<number>(activitiesHubContentCountQuery, {
         search,
         age,
         type,
-      }),
+      } as any),
     ]);
 
     return {
@@ -956,6 +1103,7 @@ export async function getActivitiesHubContent(
       total: total ?? 0,
     };
   } catch (error) {
+    logger.error("Error in getActivitiesHubContent:", error);
     // Silently fail - return empty results
     return { items: [], total: 0 };
   }

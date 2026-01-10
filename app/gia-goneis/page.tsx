@@ -91,7 +91,7 @@ export async function generateMetadata({
 export const revalidate = 600;
 
 interface PageProps {
-  searchParams?: Promise<{ age?: string; category?: string; search?: string; tag?: string; page?: string }>;
+  searchParams?: Promise<{ age?: string; category?: string; search?: string; tag?: string; page?: string; sort?: string }>;
 }
 
 
@@ -130,6 +130,7 @@ export default async function GiaGoneisPage({ searchParams }: PageProps) {
       tag: params.tag,
       page: 1, // Always start with page 1
       pageSize: INITIAL_PAGE_SIZE, // Show only 9 items initially
+      sortBy: (params.sort as "latest" | "popular" | "alphabetical") || "latest",
     }),
   ]);
 

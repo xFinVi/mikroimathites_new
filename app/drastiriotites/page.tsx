@@ -22,7 +22,7 @@ import { redirect } from "next/navigation";
 export async function generateMetadata({
   searchParams,
 }: {
-  searchParams?: Promise<{ age?: string; type?: string; search?: string; page?: string }>;
+  searchParams?: Promise<{ age?: string; type?: string; search?: string; page?: string; sort?: string }>;
 }): Promise<Metadata> {
   const resolvedSearchParams = await searchParams;
   const params = (resolvedSearchParams ?? {}) as {
@@ -30,6 +30,7 @@ export async function generateMetadata({
     type?: string;
     search?: string;
     page?: string;
+    sort?: string;
   };
   const base = generateMetadataFor("drastiriotites");
 
@@ -107,6 +108,7 @@ export default async function DrastiriotitesPage({ searchParams }: PageProps) {
       type: params.type,
       page: currentPage,
       pageSize: DRASTIRIOTITES_CONSTANTS.PAGE_SIZE,
+      sortBy: (params.sort as "latest" | "popular" | "alphabetical") || "latest",
     }),
   ]);
 

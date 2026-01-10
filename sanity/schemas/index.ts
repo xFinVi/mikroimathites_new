@@ -40,7 +40,6 @@ const schemas = [
   forParentsSection,
   activitiesPrintablesSection,
   sponsor,
-  testimonial,
   // Objects
   seo,
   hero,

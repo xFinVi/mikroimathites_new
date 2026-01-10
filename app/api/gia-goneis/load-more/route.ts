@@ -16,6 +16,7 @@ export async function GET(request: NextRequest) {
     const age = searchParams.get("age") || undefined;
     const category = searchParams.get("category") || undefined;
     const tag = searchParams.get("tag") || undefined;
+    const sort = searchParams.get("sort") || "latest";
 
     // Get mapped categories if category filter is active
     const mappedCategories = category ? getMappedCategories(category) : undefined;
@@ -28,6 +29,7 @@ export async function GET(request: NextRequest) {
       tag,
       page,
       pageSize: GIA_GONEIS_CONSTANTS.LOAD_MORE_SIZE,
+      sortBy: (sort as "latest" | "popular" | "alphabetical") || "latest",
     });
 
     // Helper to determine content type

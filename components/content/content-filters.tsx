@@ -17,6 +17,7 @@ interface ContentFiltersProps {
   categories?: Array<{ _id: string; title: string; slug: string }>;
   showTypeFilter?: boolean; // For activities page (activity vs printable)
   showCategoryFilter?: boolean; // Whether to show category filter (default: true)
+  showSortFilter?: boolean; // Whether to show sort filter (default: true)
 }
 
 export function ContentFilters({
@@ -24,6 +25,7 @@ export function ContentFilters({
   categories = [],
   showTypeFilter = false,
   showCategoryFilter = true,
+  showSortFilter = true,
 }: ContentFiltersProps) {
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -32,6 +34,7 @@ export function ContentFilters({
   const ageFilter = searchParams.get("age") || undefined;
   const categoryFilter = searchParams.get("category") || undefined;
   const typeFilter = searchParams.get("type") || undefined;
+  const sortFilter = searchParams.get("sort") || "latest";
 
   // Map categories - use CMS titles with special display name overrides
   // Hide categories that are merged into others
@@ -60,7 +63,7 @@ export function ContentFilters({
     router.replace(pathname);
   };
 
-  const hasActiveFilters = ageFilter || (showCategoryFilter && categoryFilter) || typeFilter;
+  const hasActiveFilters = ageFilter || (showCategoryFilter && categoryFilter) || typeFilter || (sortFilter !== "latest");
 
   return (
     <div className="bg-background-white rounded-card p-6 shadow-subtle border border-border/50 space-y-4">
@@ -119,6 +122,22 @@ export function ContentFilters({
                 <SelectItem value="all">Όλοι οι τύποι</SelectItem>
                 <SelectItem value="activity">Δραστηριότητες</SelectItem>
                 <SelectItem value="printable">Εκτυπώσιμα</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        )}
+
+        {/* Sort Filter */}
+        {showSortFilter && (
+          <div className="space-y-2">
+            <Select value={sortFilter} onValueChange={(value) => updateFilter("sort", value)}>
+              <SelectTrigger className="w-[180px]" aria-label="Ταξινόμηση">
+                <SelectValue placeholder="Ταξινόμηση" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="latest">Πιο Πρόσφατα</SelectItem>
+                <SelectItem value="popular">Πιο Δημοφιλή</SelectItem>
+                <SelectItem value="alphabetical">A-Z</SelectItem>
               </SelectContent>
             </Select>
           </div>
