@@ -63,9 +63,8 @@ jobs:
           fi
           
           echo "🔍 Scanning SSH host: $SSH_HOST"
-          ssh-keyscan -H "$SSH_HOST" >> ~/.ssh/known_hosts || {
-            echo "❌ Failed to scan SSH host"
-            exit 1
+          ssh-keyscan -H "$SSH_HOST" >> ~/.ssh/known_hosts 2>/dev/null || {
+            echo "⚠️ Could not scan SSH host (will use StrictHostKeyChecking=accept-new)"
           }
           
           echo "✅ SSH setup completed"
