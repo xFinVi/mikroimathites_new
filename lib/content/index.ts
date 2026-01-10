@@ -1,5 +1,5 @@
 import { sanityClient } from "@/lib/sanity/client";
-import { type Sponsor } from "@/components/sponsors";
+import { type Sponsor } from "@/components/sponsors/sponsor-card";
 import { logger } from "@/lib/utils/logger";
 import { getContentViewCounts, getDownloadCounts } from "@/lib/analytics/queries";
 import {

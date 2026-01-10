@@ -16,7 +16,7 @@ import {
 import { generateImageUrl } from "@/lib/sanity/image-url";
 import { HOME_PAGE_LIMITS, HOME_PAGE_IMAGE_SIZES } from "@/lib/constants";
 import { logger } from "@/lib/utils/logger";
-import { type Sponsor } from "@/components/sponsors";
+import { type Sponsor } from "@/components/sponsors/sponsor-card";
 
 export const metadata = generateMetadataFor("home");
 
