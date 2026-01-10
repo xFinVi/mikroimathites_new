@@ -87,12 +87,20 @@ jobs:
             git checkout develop || { echo "❌ Failed to checkout develop"; exit 1; }
             git pull origin develop || { echo "❌ Failed to pull from develop"; exit 1; }
             
+            # Stop and remove old containers if they exist
+            echo "🛑 Stopping existing containers..."
+            docker compose down || true
+            
+            # Build and start containers
             echo "🔨 Building and starting containers..."
+            echo "⏱️ Build started at $(date +'%H:%M:%S')"
             docker compose build || {
               echo "❌ Docker build failed"
+              echo "⏱️ Build failed at $(date +'%H:%M:%S')"
               docker compose logs --tail=50
               exit 1
             }
+            echo "⏱️ Build finished at $(date +'%H:%M:%S')"
             docker compose up -d || {
               echo "❌ Docker compose up failed"
               echo "📋 Showing logs for debugging:"
@@ -100,36 +108,44 @@ jobs:
               exit 1
             }
             
-            echo "✅ Containers started successfully"
+            # Wait for application to be ready
+            echo "⏳ Waiting for application to be ready..."
+            sleep 10
+            
+            # Health check
+            echo "🏥 Checking application health..."
+            for i in {1..30}; do
+              if curl -f -s http://localhost:3000/api/health > /dev/null 2>&1; then
+                echo "✅ Deployment successful - application is healthy!"
+                exit 0
+              fi
+              if [ $i -eq 30 ]; then
+                echo "❌ Application failed health check after 60 seconds"
+                echo "📋 Container status:"
+                docker compose ps
+                echo "📋 Recent logs:"
+                docker compose logs --tail=50
+                exit 1
+              fi
+              sleep 2
+            done
           ENDSSH
 
       - name: Verify deployment
         run: |
-          sleep 15
-          ssh -o StrictHostKeyChecking=accept-new "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}" << 'ENDSSH'
+          # Health check is now done in the deployment step above
+          # This step is kept for final verification
+          ssh -i ~/.ssh/id_ed25519 -o StrictHostKeyChecking=accept-new -o ServerAliveInterval=60 "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}" << 'ENDSSH'
             cd "${{ secrets.VPS_APP_PATH }}" || { echo "❌ Failed to cd to app directory"; exit 1; }
             
-            echo "🏥 Checking container status..."
+            echo "🔍 Final verification..."
             docker compose ps
             
-            if docker compose ps | grep -q "Up"; then
-              echo "✅ Deployment verified - containers are running"
-              
-              # Check if app is responding
-              echo "🌐 Checking application health..."
-              if curl -f http://localhost:3000/api/health > /dev/null 2>&1; then
-                echo "✅ Application is healthy and responding"
-              else
-                echo "⚠️ Application may not be fully ready yet"
-                echo "📋 Recent logs:"
-                docker compose logs --tail=30 app
-              fi
+            if curl -f http://localhost:3000/api/health > /dev/null 2>&1; then
+              echo "✅ Final verification passed - application is healthy"
             else
-              echo "❌ Deployment failed - containers are not running"
-              echo "📋 Container status:"
-              docker compose ps
-              echo "📋 Recent logs:"
-              docker compose logs --tail=50
+              echo "⚠️ Health check failed in verification step"
+              docker compose logs --tail=30 app
               exit 1
             fi
           ENDSSH
