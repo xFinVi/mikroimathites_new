@@ -14,7 +14,6 @@ import { featuredContentSection } from "./documents/featuredContentSection";
 import { forParentsSection } from "./documents/forParentsSection";
 import { activitiesPrintablesSection } from "./documents/activitiesPrintablesSection";
 import { sponsor } from "./documents/sponsor";
-import { testimonial } from "./documents/testimonial";
 import { seo } from "./objects/seo";
 import { hero } from "./objects/hero";
 import { ingredient } from "./objects/ingredient";

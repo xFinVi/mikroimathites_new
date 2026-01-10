@@ -232,18 +232,6 @@ export const sponsorFields = `
 export const sponsorsQuery = groq`*[_type == "sponsor" && (isActive == true || isActive == null) && !(_id in path("drafts.**"))]|order(isFeatured desc, tier asc, companyName asc){${sponsorFields}}`;
 export const curatedCollectionsByPlacementQuery = groq`*[_type == "curatedCollection" && placement == $placement]|order(order asc, publishedAt desc){${curatedCollectionFields}}`;
 
-// Testimonials
-export const testimonialsQuery = groq`*[_type == "testimonial" && featured == true && !(_id in path("drafts.**"))]|order(order asc, publishedAt desc){
-  _id,
-  quote,
-  authorName,
-  childAge,
-  rating,
-  featured,
-  order,
-  publishedAt
-}`;
-
 // Page Settings query (singleton)
 export const pageSettingsFields = `
   forParents {

@@ -196,9 +196,9 @@ export default async function PrintablePage({ params }: PageProps) {
               </div>
             </div>
 
-            {/* Download Section - Prominent Button */}
+            {/* Download Section - Prominent Button (Desktop Only - Mobile has it in PrintableContent) */}
             {printable.file && (
-              <div className="flex justify-center mb-8 mt-6">
+              <div className="hidden lg:flex justify-center mb-8 mt-6">
                 <PrintableDownloadButton slug={printable.slug} variant="bright-green" />
               </div>
             )}
