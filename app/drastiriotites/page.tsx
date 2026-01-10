@@ -233,9 +233,6 @@ export default async function DrastiriotitesPage({ searchParams }: PageProps) {
           <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
             <div>
               <h3 className="text-xl font-bold text-text-dark">Στείλτε μας ιδέα ή ερώτηση</h3>
-              <p className="text-text-medium">
-                Όλα θα συνδεθούν με την υποβολή στο CMS/Supabase.
-              </p>
             </div>
             <Link
               href="/epikoinonia"
