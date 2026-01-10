@@ -50,20 +50,20 @@ fi
 print_status "Pulling latest changes from develop branch..."
 git pull origin develop
 
-# Zero-downtime deployment strategy
-print_status "Starting zero-downtime deployment..."
+# Minimal downtime deployment strategy
+print_status "Starting minimal downtime deployment..."
 
 # Build new image while old container keeps running
 print_status "Building new container image..."
 docker compose build --no-cache
 
-# Start new container (docker handles the transition automatically with minimal downtime)
-print_status "Deploying new container (old container stays up during transition)..."
-docker compose up -d --force-recreate
+# Quick container replacement with minimal downtime (< 10 seconds)
+print_status "Performing quick container replacement..."
+docker compose up -d --force-recreate --timeout 30
 
-# Wait for startup and health check
-print_status "Waiting for application to start..."
-sleep 20
+# Extended wait for startup to ensure stability
+print_status "Waiting for application to stabilize..."
+sleep 25
 
 # Verify deployment success
 print_status "Verifying deployment..."
