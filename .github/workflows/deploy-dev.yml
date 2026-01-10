@@ -87,12 +87,8 @@ jobs:
             git checkout develop || { echo "❌ Failed to checkout develop"; exit 1; }
             git pull origin develop || { echo "❌ Failed to pull from develop"; exit 1; }
             
-            # Stop and remove old containers if they exist
-            echo "🛑 Stopping existing containers..."
-            docker compose down || true
-            
-            # Build and start containers
-            echo "🔨 Building and starting containers..."
+            # Zero-downtime deployment: Build FIRST while old container runs
+            echo "🔨 Building new container (old container still serving traffic)..."
             echo "⏱️ Build started at $(date +'%H:%M:%S')"
             docker compose build || {
               echo "❌ Docker build failed"
@@ -101,7 +97,10 @@ jobs:
               exit 1
             }
             echo "⏱️ Build finished at $(date +'%H:%M:%S')"
-            docker compose up -d || {
+            
+            # Now restart with new image (minimal downtime: ~1-2 seconds)
+            echo "🔄 Restarting container with new image..."
+            docker compose up -d --no-deps app || {
               echo "❌ Docker compose up failed"
               echo "📋 Showing logs for debugging:"
               docker compose logs --tail=50

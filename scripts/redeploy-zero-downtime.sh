@@ -24,16 +24,15 @@ git fetch origin || { print_error "Failed to fetch from origin"; exit 1; }
 git checkout develop || { print_error "Failed to checkout develop"; exit 1; }
 git pull origin develop || { print_error "Failed to pull from develop"; exit 1; }
 
-# Stop and remove old containers if they exist
-print_status "Stopping existing containers..."
-docker compose down || true
-
-# Build and start containers
-print_status "Building and starting containers..."
+# Zero-downtime deployment: Build FIRST while old container runs
+print_status "Building new container (old container still serving traffic)..."
 echo "⏱️ Build started at $(date +'%H:%M:%S')"
 docker compose build || { print_error "Docker build failed"; exit 1; }
 echo "⏱️ Build finished at $(date +'%H:%M:%S')"
-docker compose up -d || { 
+
+# Now restart with new image (minimal downtime: ~1-2 seconds)
+print_status "Restarting container with new image..."
+docker compose up -d --no-deps app || {
     print_error "Docker compose up failed"
     echo "📋 Showing logs for debugging:"
     docker compose logs --tail=50
