@@ -21,8 +21,9 @@ interface PageProps {
 }
 
 export async function generateStaticParams() {
+  // Limit to first 30 printables for faster builds (remaining generated on-demand)
   const printables = await getPrintables();
-  return printables.map((printable) => ({
+  return printables.slice(0, 30).map((printable) => ({
     slug: printable.slug,
   }));
 }

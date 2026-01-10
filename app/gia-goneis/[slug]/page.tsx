@@ -21,8 +21,9 @@ interface PageProps {
 }
 
 export async function generateStaticParams() {
+  // Limit to first 30 articles for faster builds (remaining generated on-demand)
   const articles = await getArticles();
-  return articles.map((article) => ({
+  return articles.slice(0, 30).map((article) => ({
     slug: article.slug,
   }));
 }

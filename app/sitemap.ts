@@ -39,6 +39,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   ];
 
   // Dynamic routes from CMS
+  // Note: Sitemap includes all items for SEO, but pages are generated on-demand
   const [articles, activities, printables] = await Promise.all([
     getArticles(),
     getActivities(),

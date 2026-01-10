@@ -18,8 +18,9 @@ interface PageProps {
 }
 
 export async function generateStaticParams() {
+  // Limit to first 30 activities for faster builds (remaining generated on-demand)
   const activities = await getActivities();
-  return activities.map((activity) => ({
+  return activities.slice(0, 30).map((activity) => ({
     slug: activity.slug,
   }));
 }
