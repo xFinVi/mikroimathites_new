@@ -96,11 +96,13 @@ jobs:
             # Start heartbeat in background to keep GitHub Actions connection alive
             (while true; do sleep 30; echo "⏳ Build still running... $(date +'%H:%M:%S')" >&2; done) &
             HEARTBEAT_PID=$!
-            # Use --progress=plain to show real-time output, redirect stderr to stdout for visibility
-            docker compose build --progress=plain 2>&1 || {
+            # Disable BuildKit to ensure output streams properly over SSH
+            # BuildKit can suppress logs and cause GitHub Actions to appear stuck
+            echo "📦 Starting Docker build (BuildKit disabled for better log visibility)..." >&2
+            DOCKER_BUILDKIT=0 docker compose build 2>&1 || {
               kill $HEARTBEAT_PID 2>/dev/null || true
-              echo "❌ Docker build failed" >&2
-              echo "⏱️ Build failed at $(date +'%H:%M:%S')" >&2
+              echo "❌ Docker build failed at $(date +'%H:%M:%S')" >&2
+              echo "📋 Build logs:" >&2
               docker compose logs --tail=50 >&2
               exit 1
             }
