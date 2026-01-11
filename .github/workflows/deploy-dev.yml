@@ -89,14 +89,19 @@ jobs:
             # Zero-downtime deployment: Build FIRST while old container runs
             echo "🔨 Building new container (old container still serving traffic)..."
             echo "⏱️ Build started at $(date +'%H:%M:%S')"
-            # Use --progress=plain to show real-time output (prevents GitHub Actions timeout)
-            # No while loop needed - Docker outputs directly, SSH keepalive handles connection
+            # Start heartbeat in background to keep GitHub Actions connection alive
+            (while true; do sleep 30; echo "⏳ Build still running... $(date +'%H:%M:%S')"; done) &
+            HEARTBEAT_PID=$!
+            # Use --progress=plain to show real-time output
             docker compose build --progress=plain || {
+              kill $HEARTBEAT_PID 2>/dev/null || true
               echo "❌ Docker build failed"
               echo "⏱️ Build failed at $(date +'%H:%M:%S')"
               docker compose logs --tail=50
               exit 1
             }
+            # Stop heartbeat
+            kill $HEARTBEAT_PID 2>/dev/null || true
             echo "⏱️ Build finished at $(date +'%H:%M:%S')"
             
             # Now restart with new image (minimal downtime: ~1-2 seconds)
