@@ -390,24 +390,25 @@ export function HomePage({
       <section 
         className="relative w-full h-[70vh] flex items-center justify-center overflow-hidden"
       >
-        {homeHeroImage ? (
-          <div className="absolute inset-0 z-0 w-full h-full">
-            <Image
-              src={homeHeroImage}
-              alt="Home Hero"
-              fill
-              className="object-cover object-center"
-              priority={false}
-              loading="lazy"
-              sizes="100vw"
-              placeholder="blur"
-              blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAIAAoDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGRkqGx0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyJckliyjqTzSlT54b6bk+h0R//2Q=="
-            />
-            <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/10 to-black/30" />
-          </div>
-        ) : (
-          <div className="absolute inset-0 z-0 w-full h-full bg-gradient-to-br from-primary-pink/10 via-secondary-blue/10 to-accent-yellow/10" />
-        )}
+        <div className="absolute inset-0 z-0 w-full h-full">
+          {homeHeroImage ? (
+            <>
+              <Image
+                src={homeHeroImage}
+                alt="Home Hero"
+                fill
+                className="object-cover object-center"
+                priority={false}
+                sizes="100vw"
+                placeholder="blur"
+                blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAIAAoDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGRkqGx0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyJckliyjqTzSlT54b6bk+h0R//2Q=="
+              />
+              <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/10 to-black/30" />
+            </>
+          ) : (
+            <div className="w-full h-full bg-gradient-to-br from-primary-pink/10 via-secondary-blue/10 to-accent-yellow/10" />
+          )}
+        </div>
       </section>
 
       {/* Section 3: Featured Content Grid - Standalone Section */}
