@@ -15,8 +15,8 @@ const nextConfig: NextConfig = {
   // Compress responses for better performance
   compress: true,
   
-  // Optimize production builds
-  swcMinify: true,
+  // Note: swcMinify is enabled by default in Next.js 16+ and the option is deprecated
+  // SWC minification is automatically used - no need to specify it
   
   // Experimental features for better performance
   experimental: {
