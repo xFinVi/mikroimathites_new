@@ -75,67 +75,69 @@ jobs:
       - name: Deploy to VPS
         run: |
           echo "🔄 Starting deployment from GitHub Actions..."
-          ssh -i ~/.ssh/id_ed25519 -o StrictHostKeyChecking=accept-new -o ServerAliveInterval=60 -o ServerAliveCountMax=10 -o LogLevel=ERROR -T "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}" << 'ENDSSH'
+          ssh -i ~/.ssh/id_ed25519 -o StrictHostKeyChecking=accept-new -o ServerAliveInterval=60 -o ServerAliveCountMax=10 -o LogLevel=ERROR -o RequestTTY=no -T "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}" bash -s << 'ENDSSH'
             set -e
-            # Ensure output is unbuffered
+            set -x  # Enable command tracing for visibility
+            # Force unbuffered output
             export PYTHONUNBUFFERED=1
             # Immediately output to confirm SSH connection works
-            echo "✅ SSH connection established" >&2
-            cd "${{ secrets.VPS_APP_PATH }}" || { echo "❌ Failed to cd to app directory" >&2; exit 1; }
-            echo "🔄 Starting deployment..." >&2
-            echo "📦 Current directory: $(pwd)" >&2
-            echo "🌿 Current branch: $(git branch --show-current)" >&2
+            echo "✅ SSH connection established" 1>&2
+            exec 1>&2  # Redirect all stdout to stderr so GitHub Actions sees it
+            cd "${{ secrets.VPS_APP_PATH }}" || { echo "❌ Failed to cd to app directory"; exit 1; }
+            echo "🔄 Starting deployment..."
+            echo "📦 Current directory: $(pwd)"
+            echo "🌿 Current branch: $(git branch --show-current)"
             
             git fetch origin || { echo "❌ Failed to fetch from origin"; exit 1; }
             git checkout develop || { echo "❌ Failed to checkout develop"; exit 1; }
             git pull origin develop || { echo "❌ Failed to pull from develop"; exit 1; }
             
             # Zero-downtime deployment: Build FIRST while old container runs
-            echo "🔨 Building new container (old container still serving traffic)..." >&2
-            echo "⏱️ Build started at $(date +'%H:%M:%S')" >&2
+            echo "🔨 Building new container (old container still serving traffic)..."
+            echo "⏱️ Build started at $(date +'%H:%M:%S')"
             # Start heartbeat in background to keep GitHub Actions connection alive
-            (while true; do sleep 30; echo "⏳ Build still running... $(date +'%H:%M:%S')" >&2; done) &
+            (while true; do sleep 30; echo "⏳ Build still running... $(date +'%H:%M:%S')"; done) &
             HEARTBEAT_PID=$!
             # Disable BuildKit to ensure output streams properly over SSH
             # BuildKit can suppress logs and cause GitHub Actions to appear stuck
-            echo "📦 Starting Docker build (BuildKit disabled for better log visibility)..." >&2
-            DOCKER_BUILDKIT=0 docker compose build 2>&1 || {
+            echo "📦 Starting Docker build (BuildKit disabled for better log visibility)..."
+            DOCKER_BUILDKIT=0 docker compose build || {
               kill $HEARTBEAT_PID 2>/dev/null || true
-              echo "❌ Docker build failed at $(date +'%H:%M:%S')" >&2
-              echo "📋 Build logs:" >&2
-              docker compose logs --tail=50 >&2
+              echo "❌ Docker build failed at $(date +'%H:%M:%S')"
+              echo "📋 Build logs:"
+              docker compose logs --tail=50
               exit 1
             }
             # Stop heartbeat
             kill $HEARTBEAT_PID 2>/dev/null || true
-            echo "⏱️ Build finished at $(date +'%H:%M:%S')" >&2
+            echo "⏱️ Build finished at $(date +'%H:%M:%S')"
             
             # Now restart with new image (minimal downtime: ~1-2 seconds)
-            echo "🔄 Restarting container with new image..." >&2
+            echo "🔄 Restarting container with new image..."
             docker compose up -d --no-deps app || {
-              echo "❌ Docker compose up failed" >&2
-              echo "📋 Showing logs for debugging:" >&2
-              docker compose logs --tail=50 >&2
+              echo "❌ Docker compose up failed"
+              echo "📋 Showing logs for debugging:"
+              docker compose logs --tail=50
               exit 1
             }
             
             # Wait for application to be ready
-            echo "⏳ Waiting for application to be ready..." >&2
+            echo "⏳ Waiting for application to be ready..."
             sleep 10
             
             # Health check
-            echo "🏥 Checking application health..." >&2
+            echo "🏥 Checking application health..."
             for i in {1..30}; do
               if curl -f -s http://localhost:3000/api/health > /dev/null 2>&1; then
-                echo "✅ Deployment successful - application is healthy!" >&2
+                echo "✅ Deployment successful - application is healthy!"
                 exit 0
               fi
               if [ $i -eq 30 ]; then
-                echo "❌ Application failed health check after 60 seconds" >&2
-                echo "📋 Container status:" >&2
-                docker compose ps >&2
-                echo "📋 Recent logs:" >&2
-                docker compose logs --tail=50 >&2
+                echo "❌ Application failed health check after 60 seconds"
+                echo "📋 Container status:"
+                docker compose ps
+                echo "📋 Recent logs:"
+                docker compose logs --tail=50
                 exit 1
               fi
               sleep 2
