@@ -89,7 +89,9 @@ jobs:
             # Zero-downtime deployment: Build FIRST while old container runs
             echo "🔨 Building new container (old container still serving traffic)..."
             echo "⏱️ Build started at $(date +'%H:%M:%S')"
-            docker compose build || {
+            # Use --progress=plain to show real-time output (prevents GitHub Actions timeout)
+            # No while loop needed - Docker outputs directly, SSH keepalive handles connection
+            docker compose build --progress=plain || {
               echo "❌ Docker build failed"
               echo "⏱️ Build failed at $(date +'%H:%M:%S')"
               docker compose logs --tail=50
