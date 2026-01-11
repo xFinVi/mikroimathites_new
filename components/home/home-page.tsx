@@ -11,19 +11,33 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
+import dynamic from "next/dynamic";
 import { Container } from "@/components/ui/container";
 import { PageWrapper } from "@/components/pages/page-wrapper";
 import { Article, Activity, Printable } from "@/lib/content";
 import { ArticleCard } from "@/components/articles/article-card";
 import { ActivityCard } from "@/components/activities/activity-card";
-import { NewsletterSection } from "@/components/newsletter/newsletter-section";
-import { VideoSneakPeek } from "@/components/home/video-sneak-peek";
-import { SponsorsSection } from "@/components/sponsors/sponsors-section";
 import { type Sponsor } from "@/components/sponsors/sponsor-card";
 import { User, ChevronDown } from "lucide-react";
 import { generateImageUrl } from "@/lib/sanity/image-url";
 import { HOME_PAGE_LIMITS, YOUTUBE_VIDEO_IDS } from "@/lib/constants";
 import { Button } from "@/components/ui/button";
+
+// Lazy load non-critical components for better initial page load
+const NewsletterSection = dynamic(
+  () => import("@/components/newsletter/newsletter-section").then(mod => ({ default: mod.NewsletterSection })),
+  { ssr: false }
+);
+
+const VideoSneakPeek = dynamic(
+  () => import("@/components/home/video-sneak-peek").then(mod => ({ default: mod.VideoSneakPeek })),
+  { ssr: false }
+);
+
+const SponsorsSection = dynamic(
+  () => import("@/components/sponsors/sponsors-section").then(mod => ({ default: mod.SponsorsSection })),
+  { ssr: false }
+);
 
 // Type guards for content items
 function isActivity(item: Activity | Printable): item is Activity {

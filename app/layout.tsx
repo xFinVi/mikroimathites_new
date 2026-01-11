@@ -54,6 +54,14 @@ export default function RootLayout({
 
   return (
     <html lang="el" suppressHydrationWarning>
+      <head>
+        {/* DNS prefetch for external resources */}
+        <link rel="dns-prefetch" href="https://cdn.sanity.io" />
+        <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
+        <link rel="dns-prefetch" href="https://www.google-analytics.com" />
+        {/* Preconnect to critical domains */}
+        <link rel="preconnect" href="https://cdn.sanity.io" crossOrigin="anonymous" />
+      </head>
       <body className={`${inter.variable} ${poppins.variable} font-sans antialiased`}>
         {/* AdSense script - beforeInteractive strategy moves it to <head> automatically */}
         {adsenseClient && <AdSenseHeadScript client={adsenseClient} />}
