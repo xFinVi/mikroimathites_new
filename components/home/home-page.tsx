@@ -36,25 +36,9 @@ const NewsletterSection = dynamic(
   }
 );
 
-// Lazy load VideoSneakPeek - component uses browser-only APIs (IntersectionObserver, window)
-// Use ssr: false to prevent hydration errors from browser API access
-const VideoSneakPeek = dynamic(
-  () => import("@/components/home/video-sneak-peek").then(mod => ({ default: mod.VideoSneakPeek })),
-  {
-    ssr: false,
-    loading: () => (
-      <section 
-        className="relative w-screen h-[600px] overflow-hidden mt-[8rem] mb-8 bg-black" 
-        style={{ width: '100vw', marginLeft: 'calc(50% - 50vw)', marginRight: 'calc(50% - 50vw)' }}
-        aria-label="Loading video section"
-      >
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div className="text-white/60">Φόρτωση βίντεο...</div>
-        </div>
-      </section>
-    )
-  }
-);
+// Import VideoSneakPeek directly - component handles YouTube iframe lazy loading internally
+// No need for dynamic() import since component uses IntersectionObserver for lazy loading
+import { VideoSneakPeek } from "@/components/home/video-sneak-peek";
 
 const SponsorsSection = dynamic(
   () => import("@/components/sponsors/sponsors-section").then(mod => ({ default: mod.SponsorsSection })),
@@ -372,7 +356,20 @@ export function HomePage({
 }: HomePageProps) {
   return (
     <PageWrapper mainClassName="bg-[#0d1330]">
-      {/* Section 1: Home Hero Image (from Sanity) - First to prevent Suspense boundary issues */}
+      {/* Section 1: Video Sneak Peek - Primary landing component (swapped back) */}
+      <VideoSneakPeek
+        videos={YOUTUBE_VIDEO_IDS.map((video) => ({
+          type: "youtube" as const,
+          url: video.id,
+          title: video.title,
+          startTime: video.startTime,
+        }))}
+        title="Sneak Peek από το κανάλι μας"
+        subtitle="Δείτε τι μπορείτε να δείτε στο YouTube μας - 3 σύντομα βίντεο που δείχνουν το περιεχόμενο μας"
+        youtubeChannelUrl="https://www.youtube.com/@MikroiMathites"
+      />
+
+      {/* Section 2: Home Hero Image (from Sanity) - Below video */}
       {/* Reduced height from 90vh to 70vh for faster LCP and better above-the-fold performance */}
       <section 
         className="relative w-full h-[70vh] flex items-center justify-center overflow-hidden"
@@ -385,6 +382,7 @@ export function HomePage({
                 alt="Home Hero"
                 fill
                 className="object-cover object-center"
+                priority={false}
                 sizes="100vw"
                 placeholder="blur"
                 blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAIAAoDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGRkqGx0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyJckliyjqTzSlT54b6bk+h0R//2Q=="
@@ -396,19 +394,6 @@ export function HomePage({
           )}
         </div>
       </section>
-
-      {/* Section 2: Video Sneak Peek - Below hero (dynamic import with ssr: false) */}
-      <VideoSneakPeek
-        videos={YOUTUBE_VIDEO_IDS.map((video) => ({
-          type: "youtube" as const,
-          url: video.id,
-          title: video.title,
-          startTime: video.startTime,
-        }))}
-        title="Sneak Peek από το κανάλι μας"
-        subtitle="Δείτε τι μπορείτε να δείτε στο YouTube μας - 3 σύντομα βίντεο που δείχνουν το περιεχόμενο μας"
-        youtubeChannelUrl="https://www.youtube.com/@MikroiMathites"
-      />
 
       {/* Section 3: Featured Content Grid - Standalone Section */}
       {featuredContent.length > 0 ? (
