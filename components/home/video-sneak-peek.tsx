@@ -77,7 +77,7 @@ export function VideoSneakPeek({
 
 
   return (
-    <section className="relative w-screen h-screen min-h-[600px] overflow-hidden mt-[8rem] mb-8" style={{ width: '100vw', marginLeft: 'calc(50% - 50vw)', marginRight: 'calc(50% - 50vw)' }}>
+    <section className="relative w-screen h-[600px] overflow-hidden mt-[8rem] mb-8" style={{ width: '100vw', marginLeft: 'calc(50% - 50vw)', marginRight: 'calc(50% - 50vw)' }}>
       {/* Video Container - Full Section */}
       <div 
         className="absolute inset-0 w-full h-full"

@@ -335,11 +335,11 @@ export function HomePage({
         youtubeChannelUrl="https://www.youtube.com/@MikroiMathites"
       />
 
-      {/* Section 2: Home Hero Image (from Sanity) */}
-      {homeHeroImage && (
-        <section 
-          className="relative w-full h-[90vh] flex items-center justify-center overflow-hidden"
-        >
+      {/* Section 2: Home Hero Image (from Sanity) - Always reserve space to prevent CLS */}
+      <section 
+        className="relative w-full h-[90vh] flex items-center justify-center overflow-hidden"
+      >
+        {homeHeroImage ? (
           <div className="absolute inset-0 z-0 w-full h-full">
             <Image
               src={homeHeroImage}
@@ -354,8 +354,10 @@ export function HomePage({
             />
             <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/10 to-black/30" />
           </div>
-        </section>
-      )}
+        ) : (
+          <div className="absolute inset-0 z-0 w-full h-full bg-gradient-to-br from-primary-pink/10 via-secondary-blue/10 to-accent-yellow/10" />
+        )}
+      </section>
 
       {/* Section 3: Featured Content Grid - Standalone Section */}
       {featuredContent.length > 0 ? (
@@ -424,19 +426,19 @@ export function HomePage({
           </Container>
         </div>
         <Container className="relative z-10">
-          {forParentsSection?.articles && forParentsSection.articles.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10 md:gap-12">
-              {forParentsSection.articles.slice(0, HOME_PAGE_LIMITS.FEATURED_ARTICLES).map((article) => (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10 md:gap-12 min-h-[400px]">
+            {forParentsSection?.articles && forParentsSection.articles.length > 0 ? (
+              forParentsSection.articles.slice(0, HOME_PAGE_LIMITS.FEATURED_ARTICLES).map((article) => (
                 <ArticleCard key={article._id} article={article} compact={true} />
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-12">
-              <p className="text-text-medium text-lg">
-                Δεν υπάρχουν διαθέσιμα άρθρα αυτή τη στιγμή. Ελέγξτε σύντομα!
-              </p>
-            </div>
-          )}
+              ))
+            ) : (
+              <div className="col-span-full text-center py-12">
+                <p className="text-text-medium text-lg">
+                  Δεν υπάρχουν διαθέσιμα άρθρα αυτή τη στιγμή. Ελέγξτε σύντομα!
+                </p>
+              </div>
+            )}
+          </div>
         </Container>
       </section>
 
@@ -475,9 +477,9 @@ export function HomePage({
           </Container>
         </div>
         <Container>
-          {activitiesPrintablesSection?.items && activitiesPrintablesSection.items.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10 md:gap-12">
-              {activitiesPrintablesSection.items.slice(0, HOME_PAGE_LIMITS.FEATURED_PRINTABLES).map((item) => {
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10 md:gap-12 min-h-[400px]">
+            {activitiesPrintablesSection?.items && activitiesPrintablesSection.items.length > 0 ? (
+              activitiesPrintablesSection.items.slice(0, HOME_PAGE_LIMITS.FEATURED_PRINTABLES).map((item) => {
                 const imageUrl = item.imageUrl || null;
                 const href = getContentUrl(item._contentType || (isActivity(item) ? 'activity' : 'printable'), item.slug);
                 
@@ -487,7 +489,7 @@ export function HomePage({
                     href={href}
                     className="bg-background-white rounded-[20px] overflow-hidden border-2 border-white hover:shadow-lg transition-all duration-300 cursor-pointer group flex flex-col h-full block"
                   >
-                    <div className="relative w-full h-64 bg-background-light overflow-hidden flex-shrink-0">
+                    <div className="relative w-full h-64 bg-background-light overflow-hidden flex-shrink-0 aspect-[4/3]">
                       {imageUrl ? (
                         <Image
                           src={imageUrl}
@@ -495,6 +497,7 @@ export function HomePage({
                           fill
                           className="object-contain group-hover:scale-105 transition-transform duration-300"
                           sizes="(max-width: 1200px) 50vw, 33vw"
+                          loading="lazy"
                         />
                       ) : (
                         <div className="absolute inset-0 bg-gradient-to-br from-primary-pink/20 via-secondary-blue/20 to-accent-yellow/20 flex items-center justify-center">
