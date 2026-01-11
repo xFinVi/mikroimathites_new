@@ -75,7 +75,7 @@ jobs:
       - name: Deploy to VPS
         run: |
           echo "🔄 Starting deployment from GitHub Actions..."
-          ssh -i ~/.ssh/id_ed25519 -o StrictHostKeyChecking=accept-new -o ServerAliveInterval=60 -o ServerAliveCountMax=10 "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}" << 'ENDSSH'
+          ssh -i ~/.ssh/id_ed25519 -o StrictHostKeyChecking=accept-new -o ServerAliveInterval=60 -o ServerAliveCountMax=10 -T "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}" << 'ENDSSH'
             set -e
             cd "${{ secrets.VPS_APP_PATH }}" || { echo "❌ Failed to cd to app directory"; exit 1; }
             echo "🔄 Starting deployment..."
@@ -133,7 +133,7 @@ jobs:
         run: |
           # Health check is now done in the deployment step above
           # This step is kept for final verification
-          ssh -i ~/.ssh/id_ed25519 -o StrictHostKeyChecking=accept-new -o ServerAliveInterval=60 "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}" << 'ENDSSH'
+          ssh -i ~/.ssh/id_ed25519 -o StrictHostKeyChecking=accept-new -o ServerAliveInterval=60 -T "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}" << 'ENDSSH'
             cd "${{ secrets.VPS_APP_PATH }}" || { echo "❌ Failed to cd to app directory"; exit 1; }
             
             echo "🔍 Final verification..."
