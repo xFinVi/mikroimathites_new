@@ -1,3 +1,11 @@
+/**
+ * Revalidation API Route - Invalidates Next.js cache when Sanity content changes
+ * 
+ * Called by Sanity webhook when content is published. Validates secret and revalidates
+ * cached pages so fresh content appears immediately. Falls back to time-based revalidation
+ * (10 minutes) if webhook is not configured.
+ */
+
 import { NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 import { logger } from "@/lib/utils/logger";

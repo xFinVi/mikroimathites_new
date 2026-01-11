@@ -1,3 +1,11 @@
+/**
+ * ContentTracker Component - Automatically tracks content views for analytics
+ * 
+ * Client component that calls the analytics API when mounted on a content page.
+ * Used on article, activity, recipe, and printable detail pages to track views
+ * in Supabase for analytics purposes.
+ */
+
 "use client";
 
 import { useContentTracking } from "@/hooks/use-content-tracking";

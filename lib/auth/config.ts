@@ -1,3 +1,11 @@
+/**
+ * NextAuth Configuration - Authentication setup for admin access
+ * 
+ * Configures NextAuth.js v5 with credentials provider. Validates admin users
+ * against Supabase database and creates secure sessions. Used to protect
+ * /admin/* routes via middleware.
+ */
+
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import { supabaseAdmin } from "@/lib/supabase/server";

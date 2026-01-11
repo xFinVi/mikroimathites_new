@@ -1,3 +1,11 @@
+/**
+ * Homepage Route - Main landing page
+ * 
+ * Fetches featured content from Sanity CMS (articles, activities, printables, hero section)
+ * and renders the HomePage component with curated content sections.
+ * Uses ISR (Incremental Static Regeneration) with 10-minute revalidation.
+ */
+
 import { generateMetadataFor } from "@/lib/seo/generate-metadata";
 import { HomePage } from "@/components/home/home-page";
 import { 

@@ -1,3 +1,10 @@
+/**
+ * PrintableDownloadButton Component - Download button for printables with analytics tracking
+ * 
+ * Client component that handles printable PDF downloads. Tracks downloads in Supabase
+ * analytics when user clicks download. Shows loading state and handles errors gracefully.
+ */
+
 "use client";
 
 import { Button } from "@/components/ui/button";

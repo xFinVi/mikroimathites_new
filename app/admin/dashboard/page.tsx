@@ -1,3 +1,11 @@
+/**
+ * Admin Dashboard Page - Main admin control panel
+ * 
+ * Protected route (requires admin authentication). Displays overview statistics
+ * and provides access to submission management, sponsor management, and other
+ * admin functions.
+ */
+
 import { Container } from "@/components/ui/container";
 import { DashboardStats } from "@/components/admin/dashboard-stats";
 

@@ -1,3 +1,11 @@
+/**
+ * Sanity GROQ Queries - Defines all queries for fetching content from Sanity CMS
+ * 
+ * Contains GROQ (Graph-Relational Object Queries) definitions for articles, recipes,
+ * activities, printables, and other content types. These queries are used by
+ * lib/content/index.ts to fetch data from Sanity.
+ */
+
 import { groq } from "next-sanity";
 
 // Standardized fields for all content types

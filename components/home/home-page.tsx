@@ -1,3 +1,11 @@
+/**
+ * HomePage Component - Main homepage layout with featured content sections
+ * 
+ * Renders the homepage with hero section, featured content carousel, "For Parents"
+ * section, activities/printables section, newsletter signup, and sponsors.
+ * Client component for interactivity (carousel, expandable sections).
+ */
+
 "use client";
 
 import Image from "next/image";

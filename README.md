@@ -37,20 +37,20 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ### Environment Variables
 
-Create a `.env.local` file (see `.env.example` for template):
+1. Copy the example file:
+   ```bash
+   cp .env.example .env.local
+   ```
+
+2. Fill in your values (see [CONTRIBUTING.md](CONTRIBUTING.md) for detailed setup instructions)
 
 **Required:**
-- `SANITY_PROJECT_ID` - Your Sanity project ID
-- `SANITY_DATASET` - Dataset name (usually "production")
-- `SANITY_API_VERSION` - API version (default: "2024-03-01")
-- `SANITY_REVALIDATE_SECRET` - Secret for webhook revalidation
-- `NEXT_PUBLIC_SUPABASE_URL` - Your Supabase project URL
-- `SUPABASE_SERVICE_ROLE_KEY` - Supabase service role key
+- Sanity CMS credentials (`NEXT_PUBLIC_SANITY_PROJECT_ID`, `SANITY_TOKEN`)
+- Supabase credentials (`NEXT_PUBLIC_SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`)
+- NextAuth (`NEXTAUTH_SECRET`, `NEXTAUTH_URL`)
+- Resend email (`RESEND_API_KEY`, `ADMIN_EMAIL`)
 
-**Optional:**
-- `SANITY_TOKEN` - Read token for drafts
-- `NEXT_PUBLIC_GA_ID` - Google Analytics ID
-- `NEXT_PUBLIC_SITE_URL` - Production site URL
+See `.env.example` for complete list with descriptions.
 
 ## 🗄️ Database Setup
 
@@ -58,8 +58,14 @@ Create a `.env.local` file (see `.env.example` for template):
 
 Before deploying, run these migrations in Supabase Dashboard → SQL Editor:
 
-1. `supabase/migrations/create-newsletter-subscriptions.sql`
-2. `supabase/migrations/create-content-views.sql` (if using analytics)
+1. `supabase/migrations/create-users-table.sql`
+2. `supabase/migrations/create-content-views.sql`
+3. `supabase/migrations/create-content-downloads.sql`
+4. `supabase/migrations/create-newsletter-subscriptions.sql`
+5. `supabase/migrations/create-submissions-table.sql`
+6. `supabase/migrations/fix-submission-status-enum.sql`
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed setup instructions.
 
 ## 🏗️ Build & Deploy
 
@@ -164,8 +170,19 @@ Visit `http://localhost:3000/studio` to manage content.
 
 ## 📚 Documentation
 
-- **[PROJECT_SUMMARY.md](PROJECT_SUMMARY.md)** - Complete project overview and summary
-- [Developer Guide](DEVELOPER_GUIDE.md) - Detailed development guide and best practices
+### Getting Started
+- **[CONTRIBUTING.md](CONTRIBUTING.md)** - Setup guide and contribution guidelines
+- **[.env.example](.env.example)** - Environment variables template
+
+### Architecture & Development
+- **[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)** - Complete system architecture (Sanity, Supabase, data flow)
+- **[DEVELOPER_GUIDE.md](DEVELOPER_GUIDE.md)** - Detailed development guide and best practices
+- **[PROJECT_SUMMARY.md](PROJECT_SUMMARY.md)** - Project overview and summary
+
+### Deployment & Setup
+- **[docs/DEPLOYMENT_HOSTINGER_VPS.md](docs/DEPLOYMENT_HOSTINGER_VPS.md)** - VPS deployment instructions
+- **[docs/setup/sanity-webhook.md](docs/setup/sanity-webhook.md)** - Sanity webhook configuration
+- **[docs/sanity-write-token-setup.md](docs/sanity-write-token-setup.md)** - Sanity write token setup
 
 ## 🚀 Production Checklist
 

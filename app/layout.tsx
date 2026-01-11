@@ -1,3 +1,10 @@
+/**
+ * Root Layout - Wraps all pages with global providers and scripts
+ * 
+ * Sets up fonts (Inter, Poppins), analytics (GA, AdSense), cookie consent,
+ * theme provider, and toast notifications. This is the top-level layout for the entire app.
+ */
+
 import type { Metadata } from "next";
 import { Inter, Poppins } from "next/font/google";
 import { ConditionalAnalytics } from "@/components/analytics/conditional-analytics";

@@ -1,3 +1,11 @@
+/**
+ * "For Parents" Hub Page - Lists articles and recipes for parents
+ * 
+ * Displays filtered and searchable content from Sanity (articles, recipes).
+ * Supports filtering by age group, category, and search queries.
+ * Includes pagination and sorting options (latest, A-Z, views).
+ */
+
 import { Container } from "@/components/ui/container";
 import { PageWrapper } from "@/components/pages/page-wrapper";
 import { PageHeader } from "@/components/pages/page-header";

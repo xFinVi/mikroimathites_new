@@ -1,3 +1,10 @@
+/**
+ * SEO Metadata Generator - Generates Next.js metadata for pages
+ * 
+ * Provides functions to generate SEO metadata (title, description, Open Graph, Twitter)
+ * for different routes. Used by page components to set metadata for better SEO.
+ */
+
 import type { Metadata } from "next";
 import { seoConfig, type SeoRouteKey } from "./config";
 

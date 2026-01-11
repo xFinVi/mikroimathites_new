@@ -1,3 +1,11 @@
+/**
+ * Header Component - Main site navigation header
+ * 
+ * Client component that renders the site header with logo, navigation menu, mobile menu,
+ * and admin dashboard link (if user is authenticated as admin). Handles scroll state
+ * and responsive behavior.
+ */
+
 "use client";
 
 import { useState, useEffect } from "react";

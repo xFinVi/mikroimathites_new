@@ -1,3 +1,11 @@
+/**
+ * Article Detail Page - Displays individual article content
+ * 
+ * Fetches article by slug from Sanity, displays full content with PortableText,
+ * tracks view analytics, and shows related articles. Uses static generation with
+ * on-demand generation for less popular articles.
+ */
+
 import { notFound } from "next/navigation";
 import { Container } from "@/components/ui/container";
 import { PageWrapper } from "@/components/pages/page-wrapper";

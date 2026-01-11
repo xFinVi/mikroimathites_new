@@ -1,3 +1,11 @@
+/**
+ * Content Library - Centralized content fetching from Sanity CMS
+ * 
+ * Provides functions to fetch all content types (articles, recipes, activities, printables)
+ * from Sanity and enrich them with analytics data (view counts, download counts) from Supabase.
+ * This is the primary data access layer for the application.
+ */
+
 import { sanityClient } from "@/lib/sanity/client";
 import { type Sponsor } from "@/components/sponsors/sponsor-card";
 import { logger } from "@/lib/utils/logger";

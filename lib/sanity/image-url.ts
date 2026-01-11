@@ -1,3 +1,10 @@
+/**
+ * Sanity Image URL Utilities - Generates optimized image URLs from Sanity CDN
+ * 
+ * Provides functions to generate image URLs with specific dimensions for Sanity images.
+ * Used throughout the app to display optimized images from Sanity's CDN.
+ */
+
 import { createImageUrlBuilder } from "@sanity/image-url";
 import { sanityClient } from "./client";
 import { SanityImageSource } from "@sanity/image-url/lib/types/types";

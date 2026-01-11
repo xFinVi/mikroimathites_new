@@ -1,3 +1,11 @@
+/**
+ * Activities Hub Page - Lists activities and printables for kids
+ * 
+ * Displays filtered and searchable content from Sanity (activities, printables).
+ * Supports filtering by age group, content type, and search queries.
+ * Includes pagination and sorting options (latest, A-Z, downloads).
+ */
+
 import { Container } from "@/components/ui/container";
 import { PageWrapper } from "@/components/pages/page-wrapper";
 import { PageHeader } from "@/components/pages/page-header";

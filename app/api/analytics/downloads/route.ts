@@ -1,3 +1,12 @@
+/**
+ * Analytics Downloads API Route - Tracks and retrieves printable download analytics
+ * 
+ * POST: Tracks a printable download (called by PrintableDownloadButton component)
+ * GET: Retrieves download counts for printables (used by admin dashboard)
+ * 
+ * Stores download data in Supabase content_downloads table with bot detection.
+ */
+
 import { NextRequest, NextResponse } from "next/server";
 import { getDownloadCount, getDownloadCounts } from "@/lib/analytics/queries";
 import { supabaseAdmin } from "@/lib/supabase/server";
