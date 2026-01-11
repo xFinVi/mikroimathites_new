@@ -372,20 +372,7 @@ export function HomePage({
 }: HomePageProps) {
   return (
     <PageWrapper mainClassName="bg-[#0d1330]">
-      {/* Section 1: Video Sneak Peek - Primary landing component (swapped back) */}
-      <VideoSneakPeek
-        videos={YOUTUBE_VIDEO_IDS.map((video) => ({
-          type: "youtube" as const,
-          url: video.id,
-          title: video.title,
-          startTime: video.startTime,
-        }))}
-        title="Sneak Peek από το κανάλι μας"
-        subtitle="Δείτε τι μπορείτε να δείτε στο YouTube μας - 3 σύντομα βίντεο που δείχνουν το περιεχόμενο μας"
-        youtubeChannelUrl="https://www.youtube.com/@MikroiMathites"
-      />
-
-      {/* Section 2: Home Hero Image (from Sanity) - Below video */}
+      {/* Section 1: Home Hero Image (from Sanity) - First to prevent Suspense boundary issues */}
       {/* Reduced height from 90vh to 70vh for faster LCP and better above-the-fold performance */}
       <section 
         className="relative w-full h-[70vh] flex items-center justify-center overflow-hidden"
@@ -410,6 +397,19 @@ export function HomePage({
           )}
         </div>
       </section>
+
+      {/* Section 2: Video Sneak Peek - Below hero (dynamic import with ssr: false) */}
+      <VideoSneakPeek
+        videos={YOUTUBE_VIDEO_IDS.map((video) => ({
+          type: "youtube" as const,
+          url: video.id,
+          title: video.title,
+          startTime: video.startTime,
+        }))}
+        title="Sneak Peek από το κανάλι μας"
+        subtitle="Δείτε τι μπορείτε να δείτε στο YouTube μας - 3 σύντομα βίντεο που δείχνουν το περιεχόμενο μας"
+        youtubeChannelUrl="https://www.youtube.com/@MikroiMathites"
+      />
 
       {/* Section 3: Featured Content Grid - Standalone Section */}
       {featuredContent.length > 0 ? (
