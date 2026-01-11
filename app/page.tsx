@@ -79,7 +79,8 @@ function getFeaturedContentWithFallback(
           imageUrl: generateImageUrl(
             content.coverImage,
             HOME_PAGE_IMAGE_SIZES.FEATURED_CONTENT.width,
-            HOME_PAGE_IMAGE_SIZES.FEATURED_CONTENT.height
+            HOME_PAGE_IMAGE_SIZES.FEATURED_CONTENT.height,
+            { format: 'auto', quality: 75 }
           ),
         };
       })
@@ -94,7 +95,8 @@ function getFeaturedContentWithFallback(
     imageUrl: generateImageUrl(
       article.coverImage,
       HOME_PAGE_IMAGE_SIZES.FEATURED_CONTENT.width,
-      HOME_PAGE_IMAGE_SIZES.FEATURED_CONTENT.height
+      HOME_PAGE_IMAGE_SIZES.FEATURED_CONTENT.height,
+      { format: 'auto', quality: 75 }
     ),
   }));
 }
@@ -236,7 +238,8 @@ export default async function Home() {
         imageUrl: generateImageUrl(
           content.coverImage,
           HOME_PAGE_IMAGE_SIZES.CARD.width,
-          HOME_PAGE_IMAGE_SIZES.CARD.height
+          HOME_PAGE_IMAGE_SIZES.CARD.height,
+          { format: 'auto', quality: 75 }
         ),
       };
     })
@@ -244,10 +247,12 @@ export default async function Home() {
     .slice(0, HOME_PAGE_LIMITS.FEATURED_PRINTABLES) || [];
 
   // Pre-generate image URL for home hero to avoid hydration mismatches
+  // Optimize with auto=format (WebP/AVIF) and q=75 for faster LCP
   const homeHeroImageUrl = generateImageUrl(
     homeHero?.image,
     HOME_PAGE_IMAGE_SIZES.HERO.width,
-    HOME_PAGE_IMAGE_SIZES.HERO.height
+    HOME_PAGE_IMAGE_SIZES.HERO.height,
+    { format: 'auto', quality: 75 }
   );
 
   // Fetch real sponsors from Sanity (only active, synced sponsors)

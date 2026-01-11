@@ -34,16 +34,36 @@ export function urlFor(source: SanityImageSource) {
  * @param image - Sanity image source (from a field like `coverImage`)
  * @param width - Image width in pixels
  * @param height - Image height in pixels
+ * @param options - Optional optimization settings
  * @returns Image URL string or null if image is missing or invalid
  */
 export function generateImageUrl(
   image: unknown,
   width: number,
-  height: number
+  height: number,
+  options?: {
+    quality?: number;
+    format?: 'auto' | 'webp' | 'avif' | 'jpg' | 'png';
+  }
 ): string | null {
   if (!image) return null;
   try {
-    return urlFor(image as SanityImageSource).width(width).height(height).url();
+    const builder = urlFor(image as SanityImageSource)
+      .width(width)
+      .height(height);
+    
+    // Apply format optimization (default: auto for modern formats)
+    if (options?.format === 'auto' || !options?.format) {
+      builder.auto('format');
+    } else {
+      builder.format(options.format);
+    }
+    
+    // Apply quality (default: 75 for good balance of quality/size)
+    const quality = options?.quality ?? 75;
+    builder.quality(quality);
+    
+    return builder.url();
   } catch {
     return null;
   }

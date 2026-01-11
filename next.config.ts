@@ -1,5 +1,12 @@
 import type { NextConfig } from "next";
 
+// Bundle analyzer configuration (only when ANALYZE=true)
+const withBundleAnalyzer = process.env.ANALYZE === 'true'
+  ? require('@next/bundle-analyzer')({
+      enabled: true,
+    })
+  : (config: NextConfig) => config;
+
 const nextConfig: NextConfig = {
   // Standalone output for Docker builds
   // This creates a minimal production build with only necessary files
@@ -47,8 +54,8 @@ const nextConfig: NextConfig = {
     ],
     // Allow unoptimized images as fallback (for development/debugging)
     unoptimized: false,
-    // Optimize images for better LCP
-    minimumCacheTTL: 60,
+    // Optimize images for better LCP - increased cache TTL for better performance
+    minimumCacheTTL: 31536000, // 1 year (images don't change often)
   },
   
   // Headers for security and performance
@@ -71,9 +78,49 @@ const nextConfig: NextConfig = {
           },
         ],
       },
+      // Cache static assets aggressively (JS, CSS, fonts)
+      {
+        source: "/_next/static/:path*",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=31536000, immutable",
+          },
+        ],
+      },
+      // Cache images with long TTL
+      {
+        source: "/_next/image/:path*",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=31536000, immutable",
+          },
+        ],
+      },
+      // Cache fonts
+      {
+        source: "/fonts/:path*",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=31536000, immutable",
+          },
+        ],
+      },
+      // Cache public assets (images, etc.)
+      {
+        source: "/images/:path*",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=31536000, immutable",
+          },
+        ],
+      },
     ];
   },
 };
 
-export default nextConfig;
+export default withBundleAnalyzer(nextConfig);
 
