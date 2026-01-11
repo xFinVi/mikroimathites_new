@@ -38,10 +38,11 @@ const NewsletterSection = dynamic(
 
 // Lazy load VideoSneakPeek - heavy YouTube iframe, load only when visible
 // Reserve space to prevent CLS (600px height matches component)
+// Note: ssr: true to prevent hydration errors - component handles iframe lazy loading internally
 const VideoSneakPeek = dynamic(
   () => import("@/components/home/video-sneak-peek").then(mod => ({ default: mod.VideoSneakPeek })),
   { 
-    ssr: false,
+    ssr: true,
     loading: () => (
       <section 
         className="relative w-screen h-[600px] overflow-hidden mt-[8rem] mb-8 bg-black" 
