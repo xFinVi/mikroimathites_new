@@ -75,14 +75,20 @@ jobs:
       - name: Deploy to VPS
         run: |
           echo "🔄 Starting deployment from GitHub Actions..."
-          ssh -i ~/.ssh/id_ed25519 -o StrictHostKeyChecking=accept-new -o ServerAliveInterval=60 -o ServerAliveCountMax=10 -o LogLevel=ERROR -o RequestTTY=no -T "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}" bash -s << 'ENDSSH'
+          # Test SSH connection first
+          echo "🔍 Testing SSH connection..."
+          ssh -i ~/.ssh/id_ed25519 -o StrictHostKeyChecking=accept-new -o ServerAliveInterval=60 -o ServerAliveCountMax=10 -o ConnectTimeout=10 -T "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}" "echo '✅ SSH connection test successful'" || {
+            echo "❌ SSH connection test failed"
+            exit 1
+          }
+          
+          echo "🚀 Executing deployment commands..."
+          ssh -i ~/.ssh/id_ed25519 -o StrictHostKeyChecking=accept-new -o ServerAliveInterval=60 -o ServerAliveCountMax=10 -o ConnectTimeout=30 -T "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}" << 'ENDSSH'
             set -e
-            set -x  # Enable command tracing for visibility
-            # Force unbuffered output
-            export PYTHONUNBUFFERED=1
-            # Immediately output to confirm SSH connection works
-            echo "✅ SSH connection established" 1>&2
-            exec 1>&2  # Redirect all stdout to stderr so GitHub Actions sees it
+            set -x
+            exec >&2  # Redirect all output to stderr for GitHub Actions visibility
+            
+            echo "✅ SSH connection established"
             cd "${{ secrets.VPS_APP_PATH }}" || { echo "❌ Failed to cd to app directory"; exit 1; }
             echo "🔄 Starting deployment..."
             echo "📦 Current directory: $(pwd)"
