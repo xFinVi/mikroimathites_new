@@ -75,61 +75,65 @@ jobs:
       - name: Deploy to VPS
         run: |
           echo "🔄 Starting deployment from GitHub Actions..."
-          ssh -i ~/.ssh/id_ed25519 -o StrictHostKeyChecking=accept-new -o ServerAliveInterval=60 -o ServerAliveCountMax=10 -T "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}" << 'ENDSSH'
+          ssh -i ~/.ssh/id_ed25519 -o StrictHostKeyChecking=accept-new -o ServerAliveInterval=60 -o ServerAliveCountMax=10 -o LogLevel=ERROR -T "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}" << 'ENDSSH'
             set -e
-            cd "${{ secrets.VPS_APP_PATH }}" || { echo "❌ Failed to cd to app directory"; exit 1; }
-            echo "🔄 Starting deployment..."
-            echo "📦 Current directory: $(pwd)"
-            echo "🌿 Current branch: $(git branch --show-current)"
+            # Ensure output is unbuffered
+            export PYTHONUNBUFFERED=1
+            # Immediately output to confirm SSH connection works
+            echo "✅ SSH connection established" >&2
+            cd "${{ secrets.VPS_APP_PATH }}" || { echo "❌ Failed to cd to app directory" >&2; exit 1; }
+            echo "🔄 Starting deployment..." >&2
+            echo "📦 Current directory: $(pwd)" >&2
+            echo "🌿 Current branch: $(git branch --show-current)" >&2
             
             git fetch origin || { echo "❌ Failed to fetch from origin"; exit 1; }
             git checkout develop || { echo "❌ Failed to checkout develop"; exit 1; }
             git pull origin develop || { echo "❌ Failed to pull from develop"; exit 1; }
             
             # Zero-downtime deployment: Build FIRST while old container runs
-            echo "🔨 Building new container (old container still serving traffic)..."
-            echo "⏱️ Build started at $(date +'%H:%M:%S')"
+            echo "🔨 Building new container (old container still serving traffic)..." >&2
+            echo "⏱️ Build started at $(date +'%H:%M:%S')" >&2
             # Start heartbeat in background to keep GitHub Actions connection alive
-            (while true; do sleep 30; echo "⏳ Build still running... $(date +'%H:%M:%S')"; done) &
+            (while true; do sleep 30; echo "⏳ Build still running... $(date +'%H:%M:%S')" >&2; done) &
             HEARTBEAT_PID=$!
-            # Use --progress=plain to show real-time output
-            docker compose build --progress=plain || {
+            # Use --progress=plain to show real-time output, redirect stderr to stdout for visibility
+            docker compose build --progress=plain 2>&1 || {
               kill $HEARTBEAT_PID 2>/dev/null || true
-              echo "❌ Docker build failed"
-              echo "⏱️ Build failed at $(date +'%H:%M:%S')"
-              docker compose logs --tail=50
+              echo "❌ Docker build failed" >&2
+              echo "⏱️ Build failed at $(date +'%H:%M:%S')" >&2
+              docker compose logs --tail=50 >&2
               exit 1
             }
             # Stop heartbeat
             kill $HEARTBEAT_PID 2>/dev/null || true
-            echo "⏱️ Build finished at $(date +'%H:%M:%S')"
+            echo "⏱️ Build finished at $(date +'%H:%M:%S')" >&2
             
             # Now restart with new image (minimal downtime: ~1-2 seconds)
-            echo "🔄 Restarting container with new image..."
+            echo "🔄 Restarting container with new image..." >&2
             docker compose up -d --no-deps app || {
-              echo "❌ Docker compose up failed"
-              echo "📋 Showing logs for debugging:"
-              docker compose logs --tail=50
+              echo "❌ Docker compose up failed" >&2
+              echo "📋 Showing logs for debugging:" >&2
+              docker compose logs --tail=50 >&2
               exit 1
             }
             
             # Wait for application to be ready
-            echo "⏳ Waiting for application to be ready..."
+            echo "⏳ Waiting for application to be ready..." >&2
             sleep 10
             
             # Health check
-            echo "🏥 Checking application health..."
+            echo "🏥 Checking application health..." >&2
             for i in {1..30}; do
               if curl -f -s http://localhost:3000/api/health > /dev/null 2>&1; then
-                echo "✅ Deployment successful - application is healthy!"
+                echo "✅ Deployment successful - application is healthy!" >&2
                 exit 0
               fi
               if [ $i -eq 30 ]; then
-                echo "❌ Application failed health check after 60 seconds"
-                echo "📋 Container status:"
-                docker compose ps
-                echo "📋 Recent logs:"
-                docker compose logs --tail=50
+                echo "❌ Application failed health check after 60 seconds" >&2
+                echo "📋 Container status:" >&2
+                docker compose ps >&2
+                echo "📋 Recent logs:" >&2
+                docker compose logs --tail=50 >&2
                 exit 1
               fi
               sleep 2
