@@ -549,15 +549,15 @@ export function HomePage({
                     </div>
                   </Link>
                 );
-              })}
-            </div>
-          ) : (
-            <div className="text-center py-12">
-              <p className="text-text-medium text-lg">
-                Δεν υπάρχουν διαθέσιμες δραστηριότητες ή εκτυπώσιμα αυτή τη στιγμή. Ελέγξτε σύντομα!
-              </p>
-            </div>
-          )}
+              })
+            ) : (
+              <div className="col-span-full text-center py-12">
+                <p className="text-text-medium text-lg">
+                  Δεν υπάρχουν διαθέσιμες δραστηριότητες ή εκτυπώσιμα αυτή τη στιγμή. Ελέγξτε σύντομα!
+                </p>
+              </div>
+            )}
+          </div>
         </Container>
       </section>
 
