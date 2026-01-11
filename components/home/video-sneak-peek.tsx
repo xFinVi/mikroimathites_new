@@ -76,8 +76,44 @@ export function VideoSneakPeek({
 
 
 
+  // Lazy load YouTube iframe only when component is visible (Intersection Observer)
+  const [shouldLoadIframe, setShouldLoadIframe] = useState(false);
+  const sectionRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    if (currentVideo.type !== "youtube") {
+      setShouldLoadIframe(true);
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting) {
+          setShouldLoadIframe(true);
+          observer.disconnect();
+        }
+      },
+      { rootMargin: "200px" } // Start loading 200px before visible
+    );
+
+    const currentRef = sectionRef.current;
+    if (currentRef) {
+      observer.observe(currentRef);
+    }
+
+    return () => {
+      if (currentRef) {
+        observer.unobserve(currentRef);
+      }
+    };
+  }, [currentVideo.type]);
+
   return (
-    <section className="relative w-screen h-[600px] overflow-hidden mt-[8rem] mb-8" style={{ width: '100vw', marginLeft: 'calc(50% - 50vw)', marginRight: 'calc(50% - 50vw)' }}>
+    <section 
+      ref={sectionRef}
+      className="relative w-screen h-[600px] overflow-hidden mt-[8rem] mb-8" 
+      style={{ width: '100vw', marginLeft: 'calc(50% - 50vw)', marginRight: 'calc(50% - 50vw)' }}
+    >
       {/* Video Container - Full Section */}
       <div 
         className="absolute inset-0 w-full h-full"
@@ -87,16 +123,24 @@ export function VideoSneakPeek({
         {/* Video Player - Full Screen */}
         <div className="absolute inset-0 w-full h-full bg-black overflow-hidden">
           {currentVideo.type === "youtube" ? (
-            <iframe
-              src={`https://www.youtube.com/embed/${currentVideo.url}?autoplay=1&mute=${isMuted ? 1 : 0}&loop=1&playlist=${currentVideo.url}&controls=1&modestbranding=1&rel=0&showinfo=0&enablejsapi=1&start=${currentVideo.startTime || 0}`}
-              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[177.77777778vh] h-[100vh] min-w-full min-h-[56.25vw]"
-              style={{
-                pointerEvents: "auto",
-              }}
-              allow="autoplay; encrypted-media; picture-in-picture"
-              allowFullScreen
-              title={currentVideo.title || "YouTube video"}
-            />
+            shouldLoadIframe ? (
+              <iframe
+                src={`https://www.youtube.com/embed/${currentVideo.url}?autoplay=1&mute=${isMuted ? 1 : 0}&loop=1&playlist=${currentVideo.url}&controls=1&modestbranding=1&rel=0&showinfo=0&enablejsapi=1&start=${currentVideo.startTime || 0}`}
+                className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[177.77777778vh] h-[100vh] min-w-full min-h-[56.25vw]"
+                style={{
+                  pointerEvents: "auto",
+                }}
+                allow="autoplay; encrypted-media; picture-in-picture"
+                allowFullScreen
+                title={currentVideo.title || "YouTube video"}
+                loading="lazy"
+              />
+            ) : (
+              // Placeholder while iframe loads
+              <div className="absolute inset-0 flex items-center justify-center bg-black">
+                <div className="text-white/60">Φόρτωση βίντεο...</div>
+              </div>
+            )
           ) : (
             <video
               ref={(el) => {

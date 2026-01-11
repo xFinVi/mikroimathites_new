@@ -33,11 +33,23 @@ const NewsletterSection = dynamic(
   }
 );
 
+// Lazy load VideoSneakPeek - heavy YouTube iframe, load only when visible
+// Reserve space to prevent CLS (600px height matches component)
 const VideoSneakPeek = dynamic(
   () => import("@/components/home/video-sneak-peek").then(mod => ({ default: mod.VideoSneakPeek })),
   { 
     ssr: false,
-    loading: () => <div className="min-h-[300px]" aria-label="Loading video section" />
+    loading: () => (
+      <section 
+        className="relative w-screen h-[600px] overflow-hidden mt-[8rem] mb-8 bg-black" 
+        style={{ width: '100vw', marginLeft: 'calc(50% - 50vw)', marginRight: 'calc(50% - 50vw)' }}
+        aria-label="Loading video section"
+      >
+        <div className="absolute inset-0 flex items-center justify-center">
+          <div className="text-white/60">Φόρτωση βίντεο...</div>
+        </div>
+      </section>
+    )
   }
 );
 
@@ -322,20 +334,7 @@ export function HomePage({
 }: HomePageProps) {
   return (
     <PageWrapper mainClassName="bg-[#0d1330]">
-      {/* Section 1: Video Sneak Peek (Landing Section) */}
-      <VideoSneakPeek
-        videos={YOUTUBE_VIDEO_IDS.map((video) => ({
-          type: "youtube" as const,
-          url: video.id,
-          title: video.title,
-          startTime: video.startTime,
-        }))}
-        title="Sneak Peek από το κανάλι μας"
-        subtitle="Δείτε τι μπορείτε να δείτε στο YouTube μας - 3 σύντομα βίντεο που δείχνουν το περιεχόμενο μας"
-        youtubeChannelUrl="https://www.youtube.com/@MikroiMathites"
-      />
-
-      {/* Section 2: Home Hero Image (from Sanity) - Always reserve space to prevent CLS */}
+      {/* Section 1: Home Hero Image (from Sanity) - Primary landing component */}
       <section 
         className="relative w-full h-[90vh] flex items-center justify-center overflow-hidden"
       >
@@ -358,6 +357,19 @@ export function HomePage({
           <div className="absolute inset-0 z-0 w-full h-full bg-gradient-to-br from-primary-pink/10 via-secondary-blue/10 to-accent-yellow/10" />
         )}
       </section>
+
+      {/* Section 2: Video Sneak Peek - Lazy loaded below the fold */}
+      <VideoSneakPeek
+        videos={YOUTUBE_VIDEO_IDS.map((video) => ({
+          type: "youtube" as const,
+          url: video.id,
+          title: video.title,
+          startTime: video.startTime,
+        }))}
+        title="Sneak Peek από το κανάλι μας"
+        subtitle="Δείτε τι μπορείτε να δείτε στο YouTube μας - 3 σύντομα βίντεο που δείχνουν το περιεχόμενο μας"
+        youtubeChannelUrl="https://www.youtube.com/@MikroiMathites"
+      />
 
       {/* Section 3: Featured Content Grid - Standalone Section */}
       {featuredContent.length > 0 ? (
