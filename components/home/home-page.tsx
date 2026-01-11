@@ -24,7 +24,6 @@ import { User, ChevronDown } from "lucide-react";
 import { generateImageUrl } from "@/lib/sanity/image-url";
 import { HOME_PAGE_LIMITS, YOUTUBE_VIDEO_IDS } from "@/lib/constants";
 import { Button } from "@/components/ui/button";
-import { LazyWrapper } from "@/components/ui/lazy-wrapper";
 
 // Lazy load non-critical components for better initial page load
 // Use loading placeholder to prevent layout shift
@@ -494,53 +493,25 @@ export function HomePage({
         </Container>
       </section>
 
-      {/* Section 5: Activities & Printables - Lazy loaded (below the fold) - Deferred until visible */}
-      <LazyWrapper
-        fallback={
-          <section className="relative bg-[#E8F4F8] py-16 md:py-20 overflow-hidden">
-            <div className="bg-yellow-400 py-12 md:py-16 mb-12">
-              <Container>
-                <div className="text-center">
-                  <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-3">
-                    Δραστηριότητες & Εκτυπώσιμα
-                  </h2>
-                </div>
-              </Container>
-            </div>
-            <Container>
-              <div className="min-h-[400px] flex items-center justify-center">
-                <p className="text-text-medium">Φόρτωση...</p>
-              </div>
-            </Container>
-          </section>
-        }
-      >
-        <ActivitiesPrintablesSection activitiesPrintablesSection={activitiesPrintablesSection} />
-      </LazyWrapper>
+      {/* Section 5: Activities & Printables - Lazy loaded (below the fold) */}
+      {/* Note: Already lazy-loaded via dynamic() import, no need for LazyWrapper */}
+      <ActivitiesPrintablesSection activitiesPrintablesSection={activitiesPrintablesSection} />
 
-      {/* Section 6: Newsletter - Separate Section - Deferred until visible */}
-      <LazyWrapper
-        fallback={<section id="newsletter" className="relative py-20 md:py-24 overflow-hidden"><Container className="relative z-10"><div className="max-w-5xl mx-auto"><div className="min-h-[400px]" aria-label="Loading newsletter section" /></div></Container></section>}
-      >
-        <section id="newsletter" className="relative py-20 md:py-24 overflow-hidden">
-          <Container className="relative z-10">
-            <div className="max-w-5xl mx-auto">
-              <NewsletterSection />
-            </div>
-          </Container>
-        </section>
-      </LazyWrapper>
+      {/* Section 6: Newsletter - Separate Section - Already lazy-loaded via dynamic() */}
+      <section id="newsletter" className="relative py-20 md:py-24 overflow-hidden">
+        <Container className="relative z-10">
+          <div className="max-w-5xl mx-auto">
+            <NewsletterSection />
+          </div>
+        </Container>
+      </section>
 
-      {/* Section 7: Sponsors - Deferred until visible */}
-      <LazyWrapper
-        fallback={<div className="min-h-[200px]" aria-label="Loading sponsors section" />}
-      >
-        <SponsorsSection
-          sponsors={sponsors || []}
-          headerColor="purple"
-          showBecomeSponsor={true}
-        />
-      </LazyWrapper>
+      {/* Section 7: Sponsors - Already lazy-loaded via dynamic() */}
+      <SponsorsSection
+        sponsors={sponsors || []}
+        headerColor="purple"
+        showBecomeSponsor={true}
+      />
 
       {/* Section 8: Community CTA */}
       <section className="relative bg-[#0d1330] py-16 md:py-20 overflow-hidden">
