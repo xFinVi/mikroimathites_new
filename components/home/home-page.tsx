@@ -24,19 +24,29 @@ import { HOME_PAGE_LIMITS, YOUTUBE_VIDEO_IDS } from "@/lib/constants";
 import { Button } from "@/components/ui/button";
 
 // Lazy load non-critical components for better initial page load
+// Use loading placeholder to prevent layout shift
 const NewsletterSection = dynamic(
   () => import("@/components/newsletter/newsletter-section").then(mod => ({ default: mod.NewsletterSection })),
-  { ssr: false }
+  { 
+    ssr: false,
+    loading: () => <div className="min-h-[400px]" aria-label="Loading newsletter section" />
+  }
 );
 
 const VideoSneakPeek = dynamic(
   () => import("@/components/home/video-sneak-peek").then(mod => ({ default: mod.VideoSneakPeek })),
-  { ssr: false }
+  { 
+    ssr: false,
+    loading: () => <div className="min-h-[300px]" aria-label="Loading video section" />
+  }
 );
 
 const SponsorsSection = dynamic(
   () => import("@/components/sponsors/sponsors-section").then(mod => ({ default: mod.SponsorsSection })),
-  { ssr: false }
+  { 
+    ssr: false,
+    loading: () => <div className="min-h-[200px]" aria-label="Loading sponsors section" />
+  }
 );
 
 // Type guards for content items
@@ -147,7 +157,7 @@ function FeaturedContentSection({
                   href={href}
                   className="bg-background-white rounded-[20px] overflow-hidden border-2 border-white hover:shadow-lg transition-all duration-300 cursor-pointer group flex flex-col h-full block"
                 >
-                  <div className="relative w-full h-64 bg-background-light overflow-hidden flex-shrink-0">
+                  <div className="relative w-full h-64 bg-background-light overflow-hidden flex-shrink-0 aspect-[4/3]">
                     {imageUrl ? (
                       <Image
                         src={imageUrl}
@@ -155,6 +165,7 @@ function FeaturedContentSection({
                         fill
                         className="object-contain group-hover:scale-105 transition-transform duration-300"
                         sizes="100vw"
+                        loading="lazy"
                       />
                     ) : (
                       <div className="absolute inset-0 bg-gradient-to-br from-primary-pink/20 via-secondary-blue/20 to-accent-yellow/20 flex items-center justify-center">
@@ -234,7 +245,7 @@ function FeaturedContentSection({
                 href={href}
                 className="bg-background-white rounded-[20px] overflow-hidden border-2 border-white hover:shadow-lg transition-all duration-300 cursor-pointer group flex flex-col h-full block"
               >
-                <div className="relative w-full h-64 bg-background-light overflow-hidden flex-shrink-0">
+                <div className="relative w-full h-64 bg-background-light overflow-hidden flex-shrink-0 aspect-[4/3]">
                   {imageUrl ? (
                     <Image
                       src={imageUrl}
@@ -242,6 +253,7 @@ function FeaturedContentSection({
                       fill
                       className="object-contain group-hover:scale-105 transition-transform duration-300"
                       sizes="(max-width: 1200px) 50vw, 33vw"
+                      loading="lazy"
                     />
                   ) : (
                     <div className="absolute inset-0 bg-gradient-to-br from-primary-pink/20 via-secondary-blue/20 to-accent-yellow/20 flex items-center justify-center">
@@ -326,16 +338,19 @@ export function HomePage({
       {/* Section 2: Home Hero Image (from Sanity) */}
       {homeHeroImage && (
         <section 
-          className="relative w-full min-h-[90vh] flex items-center justify-center overflow-hidden"
+          className="relative w-full h-[90vh] flex items-center justify-center overflow-hidden"
         >
-          <div className="absolute inset-0 z-0">
+          <div className="absolute inset-0 z-0 w-full h-full">
             <Image
               src={homeHeroImage}
               alt="Home Hero"
               fill
               className="object-cover object-center"
               priority
+              fetchPriority="high"
               sizes="100vw"
+              placeholder="blur"
+              blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAIAAoDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGRkqGx0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyJckliyjqTzSlT54b6bk+h0R//2Q=="
             />
             <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/10 to-black/30" />
           </div>

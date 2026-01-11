@@ -10,9 +10,13 @@ import dynamic from "next/dynamic";
 import { logger } from "@/lib/utils/logger";
 
 // Lazy load carousel component (heavy, only needed when carousel is enabled)
+// Use loading placeholder to prevent layout shift
 const LazyActivityCarousel = dynamic(
   () => import("./activity-carousel").then(mod => ({ default: mod.ActivityCarousel })),
-  { ssr: false }
+  { 
+    ssr: false,
+    loading: () => <div className="min-h-[400px] w-full bg-background-light rounded-lg" aria-label="Loading image carousel" />
+  }
 );
 
 interface ActivityContentProps {
