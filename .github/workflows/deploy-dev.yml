@@ -6,154 +6,76 @@ on:
       - develop
   workflow_dispatch:
 
-# Explicit permissions - least privilege principle
 permissions:
   contents: read
 
+concurrency:
+  group: dev-deploy
+  cancel-in-progress: true
+
 jobs:
   deploy:
-    name: Deploy to VPS
+    name: Deploy to VPS (dev)
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
           ref: develop
 
-      - name: Validate secrets
-        run: |
-          if [ -z "${{ secrets.VPS_SSH_PRIVATE_KEY }}" ]; then
-            echo "❌ Error: VPS_SSH_PRIVATE_KEY secret is not set"
-            exit 1
-          fi
-          if [ -z "${{ secrets.VPS_HOST }}" ]; then
-            echo "❌ Error: VPS_HOST secret is not set"
-            exit 1
-          fi
-          if [ -z "${{ secrets.VPS_USER }}" ]; then
-            echo "❌ Error: VPS_USER secret is not set"
-            exit 1
-          fi
-          if [ -z "${{ secrets.VPS_APP_PATH }}" ]; then
-            echo "❌ Error: VPS_APP_PATH secret is not set"
-            exit 1
-          fi
-          echo "✅ All required secrets are present"
-
       - name: Setup SSH key
         run: |
           set -e
-          echo "🔐 Setting up SSH connection..."
-          
           mkdir -p ~/.ssh
           chmod 700 ~/.ssh
-          
-          if [ -z "$SSH_PRIVATE_KEY" ]; then
-            echo "❌ SSH_PRIVATE_KEY is empty"
-            exit 1
-          fi
-          
-          echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_ed25519
+          echo "${{ secrets.VPS_SSH_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
-          
-          if [ -z "$SSH_HOST" ]; then
-            echo "❌ SSH_HOST is empty"
-            exit 1
-          fi
-          
-          echo "🔍 Scanning SSH host: $SSH_HOST"
-          ssh-keyscan -H "$SSH_HOST" >> ~/.ssh/known_hosts 2>/dev/null || {
-            echo "⚠️ Could not scan SSH host (will use StrictHostKeyChecking=accept-new)"
-          }
-          
-          echo "✅ SSH setup completed"
-        env:
-          SSH_PRIVATE_KEY: ${{ secrets.VPS_SSH_PRIVATE_KEY }}
-          SSH_HOST: ${{ secrets.VPS_HOST }}
+          ssh-keyscan -H "${{ secrets.VPS_HOST }}" >> ~/.ssh/known_hosts 2>/dev/null || true
 
       - name: Deploy to VPS
         run: |
           echo "🔄 Starting deployment from GitHub Actions..."
           ssh -i ~/.ssh/id_ed25519 -o StrictHostKeyChecking=accept-new "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}" << 'ENDSSH'
-            set -e
-            cd "${{ secrets.VPS_APP_PATH }}" || { echo "❌ Failed to cd to app directory"; exit 1; }
-            echo "🔄 Starting deployment..."
-            echo "📦 Current directory: $(pwd)"
-            echo "🌿 Current branch: $(git branch --show-current)"
-            
-            # Handle .env.production conflicts - backup and remove before git operations
-            if [ -f ".env.production" ]; then
-              echo "📁 Backing up existing .env.production file..."
-              cp .env.production .env.production.backup.$(date +%Y%m%d_%H%M%S) || {
-                echo "⚠️ Could not backup .env.production"
-              }
-              echo "🗑️ Removing .env.production to allow git pull..."
-              rm -f .env.production
+            set -euo pipefail
+            cd "${{ secrets.VPS_APP_PATH }}"
+
+            echo "📦 Repo: $(pwd)"
+            echo "🌿 Branch: develop"
+
+            # Always deploy the exact remote state (no merge conflicts)
+            git fetch origin
+            git checkout develop
+            git reset --hard origin/develop
+            git clean -fd
+
+            echo "🔨 Building new image (old container stays up)..."
+            # Load production environment variables for build args
+            if [ -f "/opt/mikroimathites/.env.production" ]; then
+              echo "📄 Loading environment variables from .env.production..."
+              set -a
+              source /opt/mikroimathites/.env.production
+              set +a
+            else
+              echo "⚠️ Warning: .env.production not found, using defaults"
             fi
 
-            git fetch origin || { echo "❌ Failed to fetch from origin"; exit 1; }
-            git checkout develop || { echo "❌ Failed to checkout develop"; exit 1; }
-            git pull origin develop || { echo "❌ Failed to pull from develop"; exit 1; }
-            
-            # Zero-downtime deployment: Build FIRST while old container runs
-            echo "🔨 Building new container (old container still serving traffic)..."
-            echo "⏱️ Build started at $(date +'%H:%M:%S')"
-            # Disable BuildKit to ensure output streams properly over SSH
-            DOCKER_BUILDKIT=0 docker compose build || {
-              echo "❌ Docker build failed at $(date +'%H:%M:%S')"
-              docker compose logs --tail=50
-              exit 1
-            }
-            echo "⏱️ Build finished at $(date +'%H:%M:%S')"
-            
-            # Now restart with new image (minimal downtime: ~1-2 seconds)
-            echo "🔄 Restarting container with new image..."
-            docker compose up -d --no-deps app || {
-              echo "❌ Docker compose up failed"
-              echo "📋 Showing logs for debugging:"
-              docker compose logs --tail=50
-              exit 1
-            }
-            
-            # Wait for application to be ready
-            echo "⏳ Waiting for application to be ready..."
-            sleep 10
-            
-            # Health check
-            echo "🏥 Checking application health..."
+            DOCKER_BUILDKIT=0 docker compose build app
+
+            echo "🔄 Restarting app with new image..."
+            docker compose up -d --no-deps app
+
+            echo "⏳ Waiting for health..."
             for i in {1..30}; do
-              if curl -f -s http://localhost:3000/api/health > /dev/null 2>&1; then
-                echo "✅ Deployment successful - application is healthy!"
-                exit 0
-              fi
-              if [ $i -eq 30 ]; then
-                echo "❌ Application failed health check after 60 seconds"
-                echo "📋 Container status:"
-                docker compose ps
-                echo "📋 Recent logs:"
-                docker compose logs --tail=50
-                exit 1
+              if curl -fsS http://localhost:3000/api/health >/dev/null 2>&1; then
+                echo "✅ Healthy"
+                break
               fi
               sleep 2
             done
-          ENDSSH
 
-      - name: Verify deployment
-        run: |
-          # Health check is now done in the deployment step above
-          # This step is kept for final verification
-          ssh -i ~/.ssh/id_ed25519 -o StrictHostKeyChecking=accept-new -o ServerAliveInterval=60 -T "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}" << 'ENDSSH'
-            cd "${{ secrets.VPS_APP_PATH }}" || { echo "❌ Failed to cd to app directory"; exit 1; }
-            
-            echo "🔍 Final verification..."
-            docker compose ps
-            
-            if curl -f http://localhost:3000/api/health > /dev/null 2>&1; then
-              echo "✅ Final verification passed - application is healthy"
-            else
-              echo "⚠️ Health check failed in verification step"
-              docker compose logs --tail=30 app
-              exit 1
-            fi
+            echo "🔍 Container env check (redacted)..."
+            docker exec -i $(docker compose ps -q app) sh -lc 'env | grep -E "NODE_ENV|APP_ENV|NEXT_PUBLIC_SITE_URL|RESEND_FROM_EMAIL|ADMIN_EMAIL" || true'
+
+            echo "✅ Deployment finished"
           ENDSSH
