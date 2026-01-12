@@ -56,8 +56,19 @@ jobs:
               set -a
               source /opt/mikroimathites/.env.production
               set +a
+              # Export required build args explicitly
+              export NEXT_PUBLIC_ADSENSE_CLIENT="${NEXT_PUBLIC_ADSENSE_CLIENT:-}"
+              export NEXT_PUBLIC_GA_ID="${NEXT_PUBLIC_GA_ID:-}"
+              export NEXT_PUBLIC_SANITY_PROJECT_ID="${NEXT_PUBLIC_SANITY_PROJECT_ID:-}"
+              export NEXT_PUBLIC_SANITY_DATASET="${NEXT_PUBLIC_SANITY_DATASET:-}"
+              export NEXT_PUBLIC_SUPABASE_URL="${NEXT_PUBLIC_SUPABASE_URL:-}"
+              export NEXT_PUBLIC_SITE_URL="${NEXT_PUBLIC_SITE_URL:-}"
             else
               echo "⚠️ Warning: .env.production not found, using defaults"
+              export NEXT_PUBLIC_SANITY_PROJECT_ID="dummy"
+              export NEXT_PUBLIC_SANITY_DATASET="production"
+              export NEXT_PUBLIC_SUPABASE_URL="https://dummy.supabase.co"
+              export NEXT_PUBLIC_SITE_URL="http://localhost:3000"
             fi
 
             DOCKER_BUILDKIT=0 docker compose build app
