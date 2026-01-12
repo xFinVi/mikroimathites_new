@@ -216,7 +216,24 @@ export async function sendAnswerNotificationToUser(data: {
   published?: boolean;
   submissionType?: string; // question, feedback, video_idea, review
 }): Promise<boolean> {
+  logger.info("sendAnswerNotificationToUser called with data", {
+    email: data.email,
+    name: data.name,
+    answerLength: data.answer?.length || 0,
+    published: data.published,
+    submissionType: data.submissionType,
+  });
+
   const cfg = getRuntimeEmailConfig();
+  logger.info("Runtime email config", {
+    isDevelopment: cfg.isDevelopment,
+    siteUrl: cfg.siteUrl,
+    hasApiKey: !!cfg.resendApiKey,
+    resendAccountEmail: cfg.resendAccountEmail,
+    adminEmail: cfg.adminEmail,
+    fromEmail: cfg.fromEmail,
+  });
+
   const resend = getResendClient(cfg.resendApiKey);
 
   if (!resend) {
@@ -226,8 +243,19 @@ export async function sendAnswerNotificationToUser(data: {
 
   // Dev: Resend test domain can only email your account owner
   const toEmail = cfg.isDevelopment ? cfg.resendAccountEmail : data.email;
+  logger.info("Email recipient determination", {
+    originalEmail: data.email,
+    isDevelopment: cfg.isDevelopment,
+    resendAccountEmail: cfg.resendAccountEmail,
+    toEmail,
+    reason: cfg.isDevelopment ? "Using account owner email for dev" : "Using user's email for prod",
+  });
+
   if (!toEmail) {
-    logger.error("Cannot send user answer: missing recipient email (data.email or RESEND_ACCOUNT_EMAIL)");
+    logger.error("Cannot send user answer: missing recipient email (data.email or RESEND_ACCOUNT_EMAIL)", {
+      dataEmail: data.email,
+      resendAccountEmail: cfg.resendAccountEmail,
+    });
     return false;
   }
 

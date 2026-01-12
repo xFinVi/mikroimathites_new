@@ -58,6 +58,21 @@ export async function POST(
       );
     }
 
+    // Debug logging - log all submission data
+    logger.info("Submission data for reply", {
+      id: submission.id,
+      type: submission.type,
+      name: submission.name,
+      email: submission.email,
+      message: submission.message?.substring(0, 100) + "...", // Truncate message for logging
+      child_age_group: submission.child_age_group,
+      topic: submission.topic,
+      is_approved: submission.is_approved,
+      created_at: submission.created_at,
+      allKeys: Object.keys(submission),
+      fullSubmission: submission, // Log full object to see all fields
+    });
+
     if (!submission.email) {
       return NextResponse.json(
         { error: "No email address for this submission" },
