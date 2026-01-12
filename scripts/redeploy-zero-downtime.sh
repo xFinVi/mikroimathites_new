@@ -27,6 +27,26 @@ git pull origin develop || { print_error "Failed to pull from develop"; exit 1; 
 # Zero-downtime deployment: Build FIRST while old container runs
 print_status "Building new container (old container still serving traffic)..."
 echo "⏱️ Build started at $(date +'%H:%M:%S')"
+
+# Load production environment variables for build args
+if [ -f "/opt/mikroimathites/.env.production" ]; then
+  print_status "Loading environment variables from .env.production..."
+  set -a
+  source /opt/mikroimathites/.env.production
+  set +a
+  # Export required build args explicitly
+  export NEXT_PUBLIC_ADSENSE_CLIENT="${NEXT_PUBLIC_ADSENSE_CLIENT:-}"
+  export NEXT_PUBLIC_GA_ID="${NEXT_PUBLIC_GA_ID:-}"
+  export NEXT_PUBLIC_SANITY_PROJECT_ID="${NEXT_PUBLIC_SANITY_PROJECT_ID:-}"
+  export NEXT_PUBLIC_SANITY_DATASET="${NEXT_PUBLIC_SANITY_DATASET:-}"
+  export NEXT_PUBLIC_SUPABASE_URL="${NEXT_PUBLIC_SUPABASE_URL:-}"
+  export NEXT_PUBLIC_SITE_URL="${NEXT_PUBLIC_SITE_URL:-}"
+  echo "✅ Environment variables loaded"
+else
+  print_error ".env.production not found at /opt/mikroimathites/.env.production"
+  exit 1
+fi
+
 docker compose build || { print_error "Docker build failed"; exit 1; }
 echo "⏱️ Build finished at $(date +'%H:%M:%S')"
 
