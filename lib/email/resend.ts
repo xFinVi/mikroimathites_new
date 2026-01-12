@@ -276,3 +276,7 @@ export async function sendAnswerNotificationToUser(data: {
     return false;
   }
 }
+
+// Legacy exports for backward compatibility
+export { wrapEmail };
+export const resend = getResendClient(getRuntimeEmailConfig().resendApiKey);
