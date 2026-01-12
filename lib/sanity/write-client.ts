@@ -22,11 +22,17 @@ export function getSanityWriteClient() {
 
   const config = getSanityServerConfig();
   
+  // Don't throw during build - return null instead
+  // This allows Next.js to analyze routes without failing
   if (!config.writeToken) {
-    throw new Error(
-      "Sanity write client requires a token. " +
-      "Set SANITY_TOKEN in .env.local"
-    );
+    // Only log error in production runtime, not during build
+    if (process.env.NODE_ENV === "production" && typeof window === "undefined") {
+      logger.error(
+        "Sanity write client requires a token. " +
+        "Set SANITY_TOKEN in .env.local"
+      );
+    }
+    return null;
   }
 
   _writeClient = createClient({
@@ -40,8 +46,8 @@ export function getSanityWriteClient() {
   return _writeClient;
 }
 
-// Convenience export for existing code
-export const sanityWriteClient = getSanityWriteClient();
+// Removed eager export - use getSanityWriteClient() function instead
+// This prevents build-time errors when env vars aren't available
 
 /**
  * Helper function to create a DRAFT qaItem in Sanity from a submission
@@ -62,7 +68,8 @@ export async function createQADraftInSanity(
   },
   existingDraftId?: string | null
 ): Promise<string | null> {
-  if (!sanityWriteClient) {
+  const client = getSanityWriteClient();
+  if (!client) {
     const missing = [];
     const hasProjectId =
       !!process.env.SANITY_PROJECT_ID ||
@@ -99,7 +106,7 @@ export async function createQADraftInSanity(
   // If existing draft ID is provided, verify it still exists in Sanity
   if (existingDraftId) {
     try {
-      const existing = await sanityWriteClient.fetch<{ _id: string } | null>(
+      const existing = await client.fetch<{ _id: string } | null>(
         `*[_id == $id][0]`,
         { id: existingDraftId }
       );
@@ -119,7 +126,7 @@ export async function createQADraftInSanity(
     // Validate category reference if provided
     if (data.categoryId) {
       try {
-        const categoryExists = await sanityWriteClient.fetch<{ _id: string } | null>(
+        const categoryExists = await client.fetch<{ _id: string } | null>(
           `*[_id == $id][0]`,
           { id: data.categoryId }
         );
@@ -138,7 +145,7 @@ export async function createQADraftInSanity(
       try {
         const validAgeGroupIds: string[] = [];
         for (const ageGroupId of data.ageGroupIds) {
-          const ageGroupExists = await sanityWriteClient.fetch<{ _id: string } | null>(
+          const ageGroupExists = await client.fetch<{ _id: string } | null>(
             `*[_id == $id][0]`,
             { id: ageGroupId }
           );
@@ -186,7 +193,7 @@ export async function createQADraftInSanity(
       ageGroupCount: document.ageGroups?.length || 0,
     });
     
-    const result = await sanityWriteClient.create(document);
+    const result = await client.create(document);
     
     if (!result || !result._id) {
       logger.error("Sanity create() returned invalid result", { result });
@@ -222,7 +229,8 @@ export async function createQADraftInSanity(
 export async function deleteQADocumentFromSanity(
   documentId: string
 ): Promise<boolean> {
-  if (!sanityWriteClient) {
+  const client = getSanityWriteClient();
+  if (!client) {
     logger.error("Sanity write client not configured for deletion");
     return false;
   }
@@ -230,7 +238,7 @@ export async function deleteQADocumentFromSanity(
   try {
     // First, try to delete the published document
     // Sanity delete() will delete both published and draft versions
-    await sanityWriteClient.delete(documentId);
+    await client.delete(documentId);
     
     logger.info("✅ Deleted Q&A document from Sanity", { documentId });
     return true;
