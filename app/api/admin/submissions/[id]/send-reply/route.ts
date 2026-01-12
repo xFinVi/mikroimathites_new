@@ -81,6 +81,16 @@ export async function POST(
     }
 
     // Send email to user
+    logger.info("About to call sendAnswerNotificationToUser", {
+      submissionId: id,
+      email: submission.email,
+      emailType: typeof submission.email,
+      emailLength: submission.email?.length || 0,
+      name: submission.name,
+      replyLength: reply?.length || 0,
+      submissionType: submission.type,
+    });
+
     const emailSent = await sendAnswerNotificationToUser({
       email: submission.email,
       name: submission.name,

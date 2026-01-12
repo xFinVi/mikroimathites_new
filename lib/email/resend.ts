@@ -24,6 +24,15 @@ function getRuntimeEmailConfig(): RuntimeEmailConfig {
   const resendAccountEmail = process.env.RESEND_ACCOUNT_EMAIL?.trim();
   const adminEmail = process.env.ADMIN_EMAIL?.trim();
 
+  logger.info("Raw environment variables", {
+    NODE_ENV: process.env.NODE_ENV,
+    NEXT_PUBLIC_SITE_URL: process.env.NEXT_PUBLIC_SITE_URL,
+    RESEND_API_KEY: resendApiKey ? "[SET]" : "[NOT SET]",
+    RESEND_ACCOUNT_EMAIL: resendAccountEmail || "[NOT SET]",
+    ADMIN_EMAIL: adminEmail || "[NOT SET]",
+    RESEND_FROM_EMAIL: process.env.RESEND_FROM_EMAIL || "[NOT SET]",
+  });
+
   // In dev we MUST use Resend test domain
   const fromEmail = isDevelopment
     ? "Mikroi Mathites <onboarding@resend.dev>"
@@ -230,8 +239,12 @@ export async function sendAnswerNotificationToUser(data: {
     siteUrl: cfg.siteUrl,
     hasApiKey: !!cfg.resendApiKey,
     resendAccountEmail: cfg.resendAccountEmail,
+    resendAccountEmailType: typeof cfg.resendAccountEmail,
+    resendAccountEmailLength: cfg.resendAccountEmail?.length || 0,
     adminEmail: cfg.adminEmail,
     fromEmail: cfg.fromEmail,
+    nodeEnv: process.env.NODE_ENV,
+    nextPublicSiteUrl: process.env.NEXT_PUBLIC_SITE_URL,
   });
 
   const resend = getResendClient(cfg.resendApiKey);
