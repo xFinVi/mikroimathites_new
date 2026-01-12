@@ -21,7 +21,7 @@ function getRuntimeEmailConfig(): RuntimeEmailConfig {
     (isDevelopment ? "http://localhost:3000" : "");
 
   const resendApiKey = process.env.RESEND_API_KEY?.trim();
-  const resendAccountEmail = process.env.RESEND_ACCOUNT_EMAIL?.trim() || "philterzidis@hotmail.com";
+  const resendAccountEmail = process.env.RESEND_ACCOUNT_EMAIL?.trim();
   const adminEmail = process.env.ADMIN_EMAIL?.trim();
 
   logger.info("Raw environment variables", {
@@ -225,19 +225,50 @@ export async function sendAnswerNotificationToUser(data: {
   published?: boolean;
   submissionType?: string; // question, feedback, video_idea, review
 }): Promise<boolean> {
-  const cfg = getRuntimeEmailConfig();
-  const resendClient = getResendClient(cfg.resendApiKey);
+  logger.info("sendAnswerNotificationToUser called with data", {
+    email: data.email,
+    name: data.name,
+    answerLength: data.answer?.length || 0,
+    published: data.published,
+    submissionType: data.submissionType,
+  });
 
-  if (!resendClient) {
+  const cfg = getRuntimeEmailConfig();
+  logger.info("Runtime email config", {
+    isDevelopment: cfg.isDevelopment,
+    siteUrl: cfg.siteUrl,
+    hasApiKey: !!cfg.resendApiKey,
+    resendAccountEmail: cfg.resendAccountEmail,
+    resendAccountEmailType: typeof cfg.resendAccountEmail,
+    resendAccountEmailLength: cfg.resendAccountEmail?.length || 0,
+    adminEmail: cfg.adminEmail,
+    fromEmail: cfg.fromEmail,
+    nodeEnv: process.env.NODE_ENV,
+    nextPublicSiteUrl: process.env.NEXT_PUBLIC_SITE_URL,
+  });
+
+  const resend = getResendClient(cfg.resendApiKey);
+
+  if (!resend) {
     logger.error("Cannot send user answer: missing RESEND_API_KEY");
     return false;
   }
 
-  const simulate = process.env.RESEND_SIMULATE === "true";
-  const toEmail = simulate ? cfg.resendAccountEmail : data.email;
+  // Dev: Resend test domain can only email your account owner
+  const toEmail = cfg.isDevelopment ? cfg.resendAccountEmail : data.email;
+  logger.info("Email recipient determination", {
+    originalEmail: data.email,
+    isDevelopment: cfg.isDevelopment,
+    resendAccountEmail: cfg.resendAccountEmail,
+    toEmail,
+    reason: cfg.isDevelopment ? "Using account owner email for dev" : "Using user's email for prod",
+  });
 
   if (!toEmail) {
-    logger.error("Cannot send user answer: missing recipient email");
+    logger.error("Cannot send user answer: missing recipient email (data.email or RESEND_ACCOUNT_EMAIL)", {
+      dataEmail: data.email,
+      resendAccountEmail: cfg.resendAccountEmail,
+    });
     return false;
   }
 
@@ -248,15 +279,12 @@ export async function sendAnswerNotificationToUser(data: {
     review: "αξιολόγηση",
   };
   const typeLabel = typeLabels[data.submissionType || "question"] || "υποβολή";
+
+  const greeting = data.name ? `Γεια σας, ${escapeHtmlWithLineBreaks(data.name)},` : "Γεια σας,";
   const subject = `Μικροί Μαθητές — Απάντηση στην ${typeLabel} σας`;
 
   try {
-    if (simulate) {
-      logger.info(`EMAIL SIMULATION: Would send to ${data.email} (actually sent to ${toEmail})`);
-      return true;
-    }
-
-    const result = await resendClient.emails.send({
+    const result = await resend.emails.send({
       from: cfg.fromEmail,
       to: toEmail,
       replyTo: cfg.adminEmail || undefined,
@@ -264,7 +292,7 @@ export async function sendAnswerNotificationToUser(data: {
       html: wrapEmail({
         preheader: `Η απάντησή μας στην ${typeLabel} σας είναι έτοιμη.`,
         title: `Απάντηση στην ${typeLabel} σας`,
-        intro: data.name ? `Γεια σας, ${escapeHtmlWithLineBreaks(data.name)},` : "Γεια σας,",
+        intro: greeting,
         contentHtml: `
           <div style="margin:0;">
             <div style="background:#eef2ff;border:1px solid #e5e7eb;border-radius:10px;padding:16px;white-space:pre-wrap;font-size:15px;line-height:1.7;">
@@ -280,14 +308,12 @@ export async function sendAnswerNotificationToUser(data: {
     });
 
     if (result.error) {
-      logger.error(`EMAIL FAILED: ${data.email} - ${result.error.message}`);
+      logger.error("User answer email failed", result.error);
       return false;
     }
-
-    logger.info(`EMAIL SENT: From ${cfg.fromEmail} to ${toEmail} (${data.email})`);
     return true;
   } catch (err) {
-    logger.error(`EMAIL ERROR: ${data.email} - ${err}`);
+    logger.error("User answer email threw", err);
     return false;
   }
 }

@@ -16,6 +16,26 @@ const isValidUrl = (url: string | undefined): boolean => {
   }
 };
 
+// Better error messages (always log config errors)
+if (!supabaseUrl) {
+  logger.error(
+    "❌ NEXT_PUBLIC_SUPABASE_URL is missing or empty in .env.local"
+  );
+}
+
+if (!supabaseServiceKey) {
+  logger.error(
+    "❌ SUPABASE_SERVICE_ROLE_KEY is missing or empty in .env.local"
+  );
+}
+
+if (supabaseUrl && !isValidUrl(supabaseUrl)) {
+  logger.error(
+    `❌ NEXT_PUBLIC_SUPABASE_URL is invalid: "${supabaseUrl}"\n` +
+    `   Expected format: https://your-project.supabase.co`
+  );
+}
+
 /**
  * Server-side Supabase admin client using service_role key.
  * 
@@ -26,47 +46,19 @@ const isValidUrl = (url: string | undefined): boolean => {
  * - For serverless/edge functions: Use Supabase JS client (what we're doing)
  * - For persistent servers: Could use direct connection, but not needed here
  * 
- * The client is created lazily - only when actually used, not at module load time.
- * This prevents build-time errors when env vars aren't available.
+ * The client is created as a singleton for efficiency, but each API route
+ * call gets a fresh HTTP request to Supabase's REST API.
  */
-let _supabaseAdmin: ReturnType<typeof createClient> | null = null;
-
-function getSupabaseAdmin() {
-  if (_supabaseAdmin) return _supabaseAdmin;
-
-  // Lazy validation - only check when actually used
-  if (!supabaseUrl) {
-    logger.error(
-      "❌ NEXT_PUBLIC_SUPABASE_URL is missing or empty in .env.local"
-    );
-    return null;
-  }
-
-  if (!supabaseServiceKey) {
-    logger.error(
-      "❌ SUPABASE_SERVICE_ROLE_KEY is missing or empty in .env.local"
-    );
-    return null;
-  }
-
-  if (!isValidUrl(supabaseUrl)) {
-    logger.error(
-      `❌ NEXT_PUBLIC_SUPABASE_URL is invalid: "${supabaseUrl}"\n` +
-      `   Expected format: https://your-project.supabase.co`
-    );
-    return null;
-  }
-
-  _supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
-    auth: {
-      persistSession: false,      // Don't persist session (server-side only)
-      autoRefreshToken: false,     // Don't auto-refresh (service role doesn't expire)
-      detectSessionInUrl: false,   // Don't detect session in URL (server-side)
-    },
-  });
-
-  return _supabaseAdmin;
-}
-
-export const supabaseAdmin = getSupabaseAdmin();
+export const supabaseAdmin = 
+  supabaseUrl && 
+  supabaseServiceKey && 
+  isValidUrl(supabaseUrl)
+    ? createClient(supabaseUrl, supabaseServiceKey, {
+        auth: {
+          persistSession: false,      // Don't persist session (server-side only)
+          autoRefreshToken: false,     // Don't auto-refresh (service role doesn't expire)
+          detectSessionInUrl: false,   // Don't detect session in URL (server-side)
+        },
+      })
+    : null;
 

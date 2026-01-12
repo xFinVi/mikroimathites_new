@@ -17,8 +17,11 @@ services:
       - "3000:3000"  # Primary port
       - "3001:3000"  # Backup port for zero-downtime deployments
     environment:
-      # Environment variables loaded via docker-compose.override.yml
+      # These will be overridden by .env file or environment variables
+      - NODE_ENV=production
       - NEXT_TELEMETRY_DISABLED=1
+    env_file:
+      - .env.production
     networks:
       - app-network
     healthcheck:

@@ -11,18 +11,11 @@ import Credentials from "next-auth/providers/credentials";
 import { supabaseAdmin } from "@/lib/supabase/server";
 import { logger } from "@/lib/utils/logger";
 
-/**
- * NextAuth.js v5 configuration
- * Uses Supabase for user authentication and storage
- * 
- * Note: NextAuth can be configured without a secret during build time.
- * The secret is only required at runtime when handling auth requests.
- */
+// Validate required environment variables
 const nextAuthSecret = process.env.NEXTAUTH_SECRET;
 const nextAuthUrl = process.env.NEXTAUTH_URL || process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
 
-// Lazy validation - only log warning, don't throw during build
-if (!nextAuthSecret && process.env.NODE_ENV === "production") {
+if (!nextAuthSecret) {
   logger.error(
     "❌ NEXTAUTH_SECRET is missing in .env.local\n" +
     "   Generate a secret by running: openssl rand -base64 32\n" +
@@ -30,6 +23,10 @@ if (!nextAuthSecret && process.env.NODE_ENV === "production") {
   );
 }
 
+/**
+ * NextAuth.js v5 configuration
+ * Uses Supabase for user authentication and storage
+ */
 export const { handlers, auth, signIn, signOut } = NextAuth({
   providers: [
     Credentials({
