@@ -238,23 +238,36 @@ export async function sendAnswerNotificationToUser(data: {
   const runtimeResendApiKey = process.env.RESEND_API_KEY?.trim();
   const runtimeSiteUrl = process.env.NEXT_PUBLIC_SITE_URL?.trim() || "http://localhost:3000";
   const runtimeIsDevelopment = runtimeSiteUrl.includes('localhost') || runtimeSiteUrl.includes('127.0.0.1');
-  const runtimeResendAccountEmail = process.env.RESEND_ACCOUNT_EMAIL?.trim() || "philterzidis@hotmail.com";
+  const runtimeResendAccountEmail = process.env.RESEND_ACCOUNT_EMAIL?.trim() || "mikrimathites@outlook.com";
+
+  // Debug logging for environment variables
+  logger.info("Email environment check", {
+    hasApiKey: !!runtimeResendApiKey,
+    siteUrl: runtimeSiteUrl,
+    isDevelopment: runtimeIsDevelopment,
+    resendAccountEmail: runtimeResendAccountEmail,
+    recipientEmail: data.email,
+  });
   
   // Create Resend client with runtime API key
   const activeResend = runtimeResendApiKey ? new Resend(runtimeResendApiKey) : resend;
-  
+
   if (!activeResend) {
-    logger.warn("Cannot send email: Resend not configured");
+    logger.error("Cannot send email: Resend not configured - missing RESEND_API_KEY");
     return false;
   }
 
   // In development, send to Resend account owner (required for test domain)
   // In production, send directly to user
-  const recipientEmail = data.email.toLowerCase();
-  const resendAccountEmailLower = runtimeResendAccountEmail.toLowerCase();
-  const isSendingToAccountOwner = recipientEmail === resendAccountEmailLower;
-  const shouldSendToAccountOwner = runtimeIsDevelopment && !isSendingToAccountOwner;
-  const actualRecipient = shouldSendToAccountOwner ? runtimeResendAccountEmail : data.email;
+  const actualRecipient = runtimeIsDevelopment ? runtimeResendAccountEmail : data.email;
+
+  logger.info("Email recipient logic", {
+    originalEmail: data.email,
+    actualRecipient,
+    isDevelopment: runtimeIsDevelopment,
+    shouldSendToAccountOwner,
+    resendAccountEmail: runtimeResendAccountEmail,
+  });
   
   const activeEmailFrom = runtimeIsDevelopment 
     ? "Mikroi Mathites <onboarding@resend.dev>"
@@ -288,14 +301,8 @@ export async function sendAnswerNotificationToUser(data: {
         title: `Απάντηση στην ${typeLabel} σας`,
         intro: greeting,
         contentHtml: `
-          <div style="margin:0 0 16px 0;">
-            <div style="font-size:14px;color:#6b7280;margin-bottom:8px;">Η ${typeLabel} σας</div>
-            <div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:10px;padding:14px;white-space:pre-wrap;font-size:15px;line-height:1.7;">${escapeHtmlWithLineBreaks(data.question)}</div>
-          </div>
-
           <div style="margin:0;">
-            <div style="font-size:14px;color:#6b7280;margin-bottom:8px;">Η απάντησή μας</div>
-            <div style="background:#eef2ff;border:1px solid #e5e7eb;border-radius:10px;padding:14px;white-space:pre-wrap;font-size:15px;line-height:1.7;">${escapeHtmlWithLineBreaks(data.answer)}</div>
+            <div style="background:#eef2ff;border:1px solid #e5e7eb;border-radius:10px;padding:16px;white-space:pre-wrap;font-size:15px;line-height:1.7;">${escapeHtmlWithLineBreaks(data.answer)}</div>
           </div>
 
           ${data.published ? `
