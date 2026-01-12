@@ -1,10 +1,52 @@
+// lib/email/resend.ts
 import { Resend } from "resend";
 import { logger } from "@/lib/utils/logger";
 import { escapeHtmlWithLineBreaks } from "@/lib/utils/forms";
 
+type RuntimeEmailConfig = {
+  isDevelopment: boolean;
+  siteUrl: string;
+  resendApiKey?: string;
+  resendAccountEmail?: string;
+  adminEmail?: string;
+  fromEmail: string;
+};
+
+function getRuntimeEmailConfig(): RuntimeEmailConfig {
+  const nodeEnv = (process.env.NODE_ENV || "").toLowerCase();
+  const isDevelopment = nodeEnv !== "production";
+
+  const siteUrl =
+    process.env.NEXT_PUBLIC_SITE_URL?.trim() ||
+    (isDevelopment ? "http://localhost:3000" : "");
+
+  const resendApiKey = process.env.RESEND_API_KEY?.trim();
+  const resendAccountEmail = process.env.RESEND_ACCOUNT_EMAIL?.trim();
+  const adminEmail = process.env.ADMIN_EMAIL?.trim();
+
+  // In dev we MUST use Resend test domain
+  const fromEmail = isDevelopment
+    ? "Mikroi Mathites <onboarding@resend.dev>"
+    : (process.env.RESEND_FROM_EMAIL?.trim() ||
+        "Mikroi Mathites <noreply@mikroimathites.gr>");
+
+  return {
+    isDevelopment,
+    siteUrl,
+    resendApiKey,
+    resendAccountEmail,
+    adminEmail,
+    fromEmail,
+  };
+}
+
+function getResendClient(resendApiKey?: string): Resend | null {
+  if (!resendApiKey) return null;
+  return new Resend(resendApiKey);
+}
+
 /**
  * Wraps email content in a styled HTML template
- * Exported for use in password reset emails
  */
 export function wrapEmail(params: {
   preheader: string;
@@ -16,7 +58,6 @@ export function wrapEmail(params: {
 }): string {
   const { preheader, title, intro, contentHtml, cta, footerNote } = params;
 
-  // Table-based layout for better email client compatibility
   return `
     <!DOCTYPE html>
     <html>
@@ -27,7 +68,6 @@ export function wrapEmail(params: {
         <title>${title}</title>
       </head>
       <body style="margin:0;padding:0;background:#f3f4f6;font-family:Arial, Helvetica, sans-serif;color:#111827;">
-        <!-- Preheader (hidden) -->
         <div style="display:none;max-height:0;overflow:hidden;opacity:0;color:transparent;">
           ${preheader}
         </div>
@@ -36,7 +76,6 @@ export function wrapEmail(params: {
           <tr>
             <td align="center" style="padding:24px 12px;">
               <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="600" style="width:100%;max-width:600px;">
-                <!-- Header -->
                 <tr>
                   <td style="padding:0 8px 12px 8px;">
                     <div style="font-size:14px;color:#6b7280;letter-spacing:0.2px;">Μικροί Μαθητές</div>
@@ -44,7 +83,6 @@ export function wrapEmail(params: {
                   </td>
                 </tr>
 
-                <!-- Card -->
                 <tr>
                   <td style="background:#ffffff;border:1px solid #e5e7eb;border-radius:12px;padding:24px 20px;">
                     ${intro ? `<p style="margin:0 0 16px 0;font-size:16px;line-height:1.6;color:#111827;">${intro}</p>` : ""}
@@ -62,13 +100,12 @@ export function wrapEmail(params: {
                     <hr style="border:none;border-top:1px solid #e5e7eb;margin:24px 0;">
 
                     <p style="margin:0;color:#6b7280;font-size:13px;line-height:1.6;">
-                      Με εκτίμηση,<nobr></nobr><br>
+                      Με εκτίμηση,<br>
                       <strong style="color:#111827;">Η ομάδα Mikroi Mathites</strong>
                     </p>
                   </td>
                 </tr>
 
-                <!-- Footer -->
                 <tr>
                   <td style="padding:14px 8px 0 8px;">
                     <p style="margin:0;text-align:center;color:#9ca3af;font-size:12px;line-height:1.6;">
@@ -86,53 +123,9 @@ export function wrapEmail(params: {
 }
 
 /**
- * Email Service Configuration (Resend)
- * 
- * Setup:
- * 1. Sign up at https://resend.com
- * 2. Get API key from Resend Dashboard → API Keys
- * 3. Add RESEND_API_KEY to .env.local
- * 4. Add ADMIN_EMAIL to .env.local
- * 
- * Domain Setup (Optional - for production):
- * - Currently using Resend's test domain: onboarding@resend.dev
- * - To use your own domain (e.g., noreply@mikroimathites.gr):
- *   1. Go to Resend Dashboard → Domains
- *   2. Add and verify your domain
- *   3. Update "from" addresses in email functions below
- * 
- * Testing:
- * - Test emails work immediately with onboarding@resend.dev
- * - For production, verify your domain for better deliverability
- */
-
-// Environment detection
-const isDevelopment = process.env.NODE_ENV === 'development' || 
-                      process.env.NEXT_PUBLIC_SITE_URL?.includes('localhost');
-
-const resendApiKey = process.env.RESEND_API_KEY?.trim();
-const adminEmail = process.env.ADMIN_EMAIL?.trim();
-// Resend account owner email (for test domain - must match Resend account email)
-const resendAccountEmail = process.env.RESEND_ACCOUNT_EMAIL?.trim() || "mikrimathites@outlook.com";
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL?.trim() || "http://localhost:3000";
-
-// Email "from" address - use test domain in dev, verified domain in production
-const emailFrom = isDevelopment 
-  ? "Mikroi Mathites <onboarding@resend.dev>"  // Test domain for development
-  : process.env.RESEND_FROM_EMAIL || "Mikroi Mathites <noreply@mikroimathites.gr>";  // Production domain
-
-if (!resendApiKey) {
-  logger.warn("Resend API key not configured: missing RESEND_API_KEY");
-}
-
-if (!adminEmail) {
-  logger.warn("Admin email not configured: missing ADMIN_EMAIL");
-}
-
-export const resend = resendApiKey ? new Resend(resendApiKey) : null;
-
-/**
  * Send email notification to admin when a new submission is received
+ * - to: admin
+ * - replyTo: user's email (so admin can reply easily)
  */
 export async function sendSubmissionNotificationToAdmin(data: {
   type: string;
@@ -142,47 +135,33 @@ export async function sendSubmissionNotificationToAdmin(data: {
   topic?: string | null;
   submissionId: string;
 }): Promise<boolean> {
-  // Access env vars at runtime (server-side - no NEXT_PUBLIC_ prefix needed)
-  const runtimeResendApiKey = process.env.RESEND_API_KEY?.trim();
-  const runtimeSiteUrl = process.env.NEXT_PUBLIC_SITE_URL?.trim() || "http://localhost:3000";
-  const runtimeIsDevelopment = runtimeSiteUrl.includes('localhost') || runtimeSiteUrl.includes('127.0.0.1');
-  const runtimeResendAccountEmail = process.env.RESEND_ACCOUNT_EMAIL?.trim() || "philterzidis@hotmail.com";
-  const runtimeAdminEmail = process.env.ADMIN_EMAIL?.trim();
-  
-  // Create Resend client with runtime API key
-  const activeResend = runtimeResendApiKey ? new Resend(runtimeResendApiKey) : resend;
-  
-  if (!activeResend) {
-    logger.warn("Cannot send email: Resend not configured");
+  const cfg = getRuntimeEmailConfig();
+  const resend = getResendClient(cfg.resendApiKey);
+
+  if (!resend) {
+    logger.error("Cannot send admin notification: missing RESEND_API_KEY");
     return false;
   }
 
-  // In development, send to Resend account owner email (required for test domain)
-  // In production, send to admin email
-  const recipientEmail = runtimeIsDevelopment ? runtimeResendAccountEmail : (runtimeAdminEmail || runtimeResendAccountEmail);
-  
-  if (!recipientEmail) {
-    logger.warn("Cannot send email: No recipient email configured");
+  const toEmail = cfg.adminEmail || cfg.resendAccountEmail;
+  if (!toEmail) {
+    logger.error("Cannot send admin notification: missing ADMIN_EMAIL and RESEND_ACCOUNT_EMAIL");
     return false;
   }
 
-  const activeEmailFrom = runtimeIsDevelopment 
-    ? "Mikroi Mathites <onboarding@resend.dev>"
-    : process.env.RESEND_FROM_EMAIL || "Mikroi Mathites <noreply@mikroimathites.gr>";
+  const typeLabels: Record<string, string> = {
+    question: "Ερώτηση (Q&A)",
+    feedback: "Feedback",
+    video_idea: "Ιδέα για βίντεο",
+    review: "Αξιολόγηση",
+  };
+  const typeLabel = typeLabels[data.type] || data.type;
 
   try {
-    const typeLabels: Record<string, string> = {
-      question: "Ερώτηση (Q&A)",
-      feedback: "Feedback",
-      video_idea: "Ιδέα για βίντεο",
-      review: "Αξιολόγηση",
-    };
-
-    const typeLabel = typeLabels[data.type] || data.type;
-
-    await activeResend.emails.send({
-      from: activeEmailFrom,
-      to: recipientEmail,
+    const result = await resend.emails.send({
+      from: cfg.fromEmail,
+      to: toEmail,
+      replyTo: data.email || undefined,
       subject: `Νέα υποβολή: ${typeLabel}`,
       html: wrapEmail({
         preheader: `Νέα υποβολή: ${typeLabel} από ${data.name || "Ανώνυμος"}`,
@@ -207,168 +186,93 @@ export async function sendSubmissionNotificationToAdmin(data: {
             </tr>
           </table>
         `,
-        cta: {
-          label: "Δείτε στο Dashboard",
-          href: `${runtimeSiteUrl}/admin/submissions/${data.submissionId}`,
-        },
+        cta: cfg.siteUrl
+          ? { label: "Δείτε στο Dashboard", href: `${cfg.siteUrl}/admin/submissions/${data.submissionId}` }
+          : undefined,
       }),
     });
+
+    if (result.error) {
+      logger.error("Admin notification email failed", result.error);
+      return false;
+    }
     return true;
-  } catch (error) {
-    logger.error("Failed to send submission notification email", error);
+  } catch (err) {
+    logger.error("Admin notification email threw", err);
     return false;
   }
 }
 
 /**
- * Send email to user when their question is answered
- * 
- * Note: If using Resend's test domain (onboarding@resend.dev), emails can only be sent
- * to the account owner's email. For production, verify your domain at resend.com/domains
- */
-/**
- * Send email to user when their question is answered
- *
- * IMPORTANT: Resend test domain (onboarding@resend.dev) used in development
- * can only send to the account owner's email. When testing emails in development:
- * - If you want to see the actual email, use your Resend account owner email as the submission email
- * - Otherwise, Resend will send the email to your account owner email regardless of the recipient
- * - In production, emails go to the actual user's email address
+ * Send email to user when their submission is answered
+ * - to: user
+ * - replyTo: admin/support inbox
+ * - body: only your answer (professional)
  */
 export async function sendAnswerNotificationToUser(data: {
   email: string;
   name?: string | null;
-  question: string;
   answer: string;
   published?: boolean;
   submissionType?: string; // question, feedback, video_idea, review
 }): Promise<boolean> {
-  // Access env vars at runtime (server-side - no NEXT_PUBLIC_ prefix needed for server vars)
-  const runtimeResendApiKey = process.env.RESEND_API_KEY?.trim();
-  const runtimeSiteUrl = process.env.NEXT_PUBLIC_SITE_URL?.trim() || "http://localhost:3000";
-  const runtimeIsDevelopment = runtimeSiteUrl.includes('localhost') || runtimeSiteUrl.includes('127.0.0.1');
-  const runtimeResendAccountEmail = process.env.RESEND_ACCOUNT_EMAIL?.trim() || "philterzidis@hotmail.com";
+  const cfg = getRuntimeEmailConfig();
+  const resend = getResendClient(cfg.resendApiKey);
 
-  // Debug logging for environment variables
-  logger.info("Email environment check", {
-    hasApiKey: !!runtimeResendApiKey,
-    siteUrl: runtimeSiteUrl,
-    isDevelopment: runtimeIsDevelopment,
-    resendAccountEmail: runtimeResendAccountEmail,
-    recipientEmail: data.email,
-  });
-  
-  // Create Resend client with runtime API key
-  const activeResend = runtimeResendApiKey ? new Resend(runtimeResendApiKey) : resend;
-
-  if (!activeResend) {
-    logger.error("Cannot send email: Resend not configured - missing RESEND_API_KEY");
+  if (!resend) {
+    logger.error("Cannot send user answer: missing RESEND_API_KEY");
     return false;
   }
 
-  // Email recipient logic:
-  // Development: Resend test domain only allows sending to account owner email
-  // Production: Send to user's actual email
-  let actualRecipient: string;
-  let redirectReason: string;
-
-  if (runtimeIsDevelopment) {
-    actualRecipient = runtimeResendAccountEmail;
-    redirectReason = `Development mode - Resend test domain restriction: redirecting from ${data.email} to ${runtimeResendAccountEmail}`;
-  } else {
-    actualRecipient = data.email;
-    redirectReason = "Production mode - sending to user's email";
+  // Dev: Resend test domain can only email your account owner
+  const toEmail = cfg.isDevelopment ? cfg.resendAccountEmail : data.email;
+  if (!toEmail) {
+    logger.error("Cannot send user answer: missing recipient email (data.email or RESEND_ACCOUNT_EMAIL)");
+    return false;
   }
 
-  logger.info("Email recipient logic", {
-    intendedRecipient: data.email,
-    actualRecipient,
-    isDevelopment: runtimeIsDevelopment,
-    redirectReason,
-    note: runtimeIsDevelopment
-      ? "TESTING: Email will appear in your account owner inbox. This is normal for Resend test domain."
-      : "Production: Email sent to actual user",
-  });
-  
-  const activeEmailFrom = runtimeIsDevelopment 
-    ? "Mikroi Mathites <onboarding@resend.dev>"
-    : process.env.RESEND_FROM_EMAIL || "Mikroi Mathites <noreply@mikroimathites.gr>";
-
-  // Get Greek label for submission type
-  const getTypeLabel = (type?: string): string => {
-    const typeLabels: Record<string, string> = {
-      question: "ερώτηση",
-      feedback: "feedback",
-      video_idea: "ιδέα για βίντεο",
-      review: "αξιολόγηση",
-    };
-    return typeLabels[type || "question"] || "υποβολή";
+  const typeLabels: Record<string, string> = {
+    question: "ερώτηση",
+    feedback: "feedback",
+    video_idea: "ιδέα για βίντεο",
+    review: "αξιολόγηση",
   };
+  const typeLabel = typeLabels[data.submissionType || "question"] || "υποβολή";
 
-  const typeLabel = getTypeLabel(data.submissionType);
+  const greeting = data.name ? `Γεια σας, ${escapeHtmlWithLineBreaks(data.name)},` : "Γεια σας,";
+  const subject = `Μικροί Μαθητές — Απάντηση στην ${typeLabel} σας`;
 
   try {
-    const greeting = data.name ? `Γεια σας, ${escapeHtmlWithLineBreaks(data.name)},` : "Γεια σας,";
-
-    // Clean, user-friendly subject line
-  const emailSubject = `Μικροί Μαθητές — Απάντηση στην ${typeLabel} σας`;
-
-  // Add development testing notice
-  const devNotice = runtimeIsDevelopment ? `
-    <div style="margin-bottom:18px;background:#fef3c7;border:1px solid #f59e0b;border-radius:10px;padding:14px;">
-      <div style="font-weight:700;color:#92400e;margin-bottom:4px;">🧪 Αυτό είναι ένα τεστ email</div>
-      <div style="color:#92400e;font-size:14px;line-height:1.6;">
-        Αυτό το email στάλθηκε σε εσάς (διοργανωτή) για λόγους δοκιμής. Στην παραγωγή θα σταλεί στον πραγματικό χρήστη.
-      </div>
-    </div>
-  ` : "";
-
-  const emailResult = await activeResend.emails.send({
-    from: activeEmailFrom,
-    to: actualRecipient,
-    subject: emailSubject,
-    html: wrapEmail({
-      preheader: `Η απάντησή μας στην ${typeLabel} σας είναι έτοιμη.`,
-      title: `Απάντηση στην ${typeLabel} σας`,
-      intro: greeting,
-      contentHtml: `
-        ${devNotice}
-        <div style="margin:0;">
-          <div style="background:#eef2ff;border:1px solid #e5e7eb;border-radius:10px;padding:16px;white-space:pre-wrap;font-size:15px;line-height:1.7;">${escapeHtmlWithLineBreaks(data.answer)}</div>
-        </div>
-
-        ${data.published ? `
-          <div style="margin-top:18px;background:#ecfdf5;border:1px solid #d1fae5;border-radius:10px;padding:14px;">
-            <div style="font-weight:700;color:#065f46;margin-bottom:4px;">✨ Η ${typeLabel} σας δημοσιεύτηκε!</div>
-            <div style="color:#065f46;font-size:14px;line-height:1.6;">Μπορείτε να τη δείτε στη σελίδα Q&A μας.</div>
+    const result = await resend.emails.send({
+      from: cfg.fromEmail,
+      to: toEmail,
+      replyTo: cfg.adminEmail || undefined,
+      subject,
+      html: wrapEmail({
+        preheader: `Η απάντησή μας στην ${typeLabel} σας είναι έτοιμη.`,
+        title: `Απάντηση στην ${typeLabel} σας`,
+        intro: greeting,
+        contentHtml: `
+          <div style="margin:0;">
+            <div style="background:#eef2ff;border:1px solid #e5e7eb;border-radius:10px;padding:16px;white-space:pre-wrap;font-size:15px;line-height:1.7;">
+              ${escapeHtmlWithLineBreaks(data.answer)}
+            </div>
           </div>
-        ` : ""}
-      `,
-      cta: data.published
-        ? { label: "Δείτε τη στη σελίδα Q&A", href: `${runtimeSiteUrl}/epikoinonia` }
-        : undefined,
-    }),
-  });
+        `,
+        cta:
+          data.published && cfg.siteUrl
+            ? { label: "Δείτε τη σελίδα", href: `${cfg.siteUrl}/epikoinonia` }
+            : undefined,
+      }),
+    });
 
-    // Check for errors
-    if (emailResult.error) {
-      // In development, Resend rejecting non-account-owner emails is expected
-      if (runtimeIsDevelopment && emailResult.error.message?.includes('You can only send testing emails to your own email address')) {
-        logger.warn("Development email restriction - this is expected", {
-          error: emailResult.error,
-          note: "Email would be sent to user in production. Reply saved to database.",
-        });
-        // Return true since the reply was saved and this is expected development behavior
-        return true;
-      }
-
-      logger.error("Failed to send email", emailResult.error);
-      throw new Error(`Email send failed: ${JSON.stringify(emailResult.error)}`);
+    if (result.error) {
+      logger.error("User answer email failed", result.error);
+      return false;
     }
-
     return true;
-  } catch (error) {
-    logger.error("Failed to send email", error);
+  } catch (err) {
+    logger.error("User answer email threw", err);
     return false;
   }
 }
