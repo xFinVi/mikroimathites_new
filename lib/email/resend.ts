@@ -226,6 +226,15 @@ export async function sendSubmissionNotificationToAdmin(data: {
  * Note: If using Resend's test domain (onboarding@resend.dev), emails can only be sent
  * to the account owner's email. For production, verify your domain at resend.com/domains
  */
+/**
+ * Send email to user when their question is answered
+ *
+ * IMPORTANT: Resend test domain (onboarding@resend.dev) used in development
+ * can only send to the account owner's email. When testing emails in development:
+ * - If you want to see the actual email, use your Resend account owner email as the submission email
+ * - Otherwise, Resend will send the email to your account owner email regardless of the recipient
+ * - In production, emails go to the actual user's email address
+ */
 export async function sendAnswerNotificationToUser(data: {
   email: string;
   name?: string | null;
@@ -257,15 +266,17 @@ export async function sendAnswerNotificationToUser(data: {
     return false;
   }
 
-  // In development, send to Resend account owner (required for test domain)
-  // In production, send directly to user
-  const actualRecipient = runtimeIsDevelopment ? runtimeResendAccountEmail : data.email;
+  // Email recipient logic:
+  // Development: Send to user's email (Resend will reject non-account-owner emails, but we'll try)
+  // Production: Always send to user's email
+  const actualRecipient = data.email;
 
   logger.info("Email recipient logic", {
-    originalEmail: data.email,
-    actualRecipient,
+    intendedRecipient: data.email,
     isDevelopment: runtimeIsDevelopment,
-    shouldSendToAccountOwner,
+    note: runtimeIsDevelopment
+      ? "Development mode: Attempting to send to user email (may be redirected by Resend test domain)"
+      : "Production mode: Sending to user email",
     resendAccountEmail: runtimeResendAccountEmail,
   });
   
