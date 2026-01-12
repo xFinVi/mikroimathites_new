@@ -14,7 +14,8 @@ import { logger } from "@/lib/utils/logger";
  * Never import in: Client components, shared utilities, lib/content
  */
 
-// Lazy initialization - only create client when config is available
+// Lazy initialization - only create client when explicitly requested
+// This prevents build-time errors when secrets aren't available during Docker build
 let _writeClient: ReturnType<typeof createClient> | null = null;
 
 export function getSanityWriteClient() {
@@ -40,9 +41,6 @@ export function getSanityWriteClient() {
   return _writeClient;
 }
 
-// Convenience export for existing code
-export const sanityWriteClient = getSanityWriteClient();
-
 /**
  * Helper function to create a DRAFT qaItem in Sanity from a submission
  * This creates a draft that admin can review and publish from Sanity Studio
@@ -62,7 +60,11 @@ export async function createQADraftInSanity(
   },
   existingDraftId?: string | null
 ): Promise<string | null> {
-  if (!sanityWriteClient) {
+  let sanityWriteClient;
+  
+  try {
+    sanityWriteClient = getSanityWriteClient();
+  } catch (error) {
     const missing = [];
     const hasProjectId =
       !!process.env.SANITY_PROJECT_ID ||
@@ -222,7 +224,11 @@ export async function createQADraftInSanity(
 export async function deleteQADocumentFromSanity(
   documentId: string
 ): Promise<boolean> {
-  if (!sanityWriteClient) {
+  let sanityWriteClient;
+  
+  try {
+    sanityWriteClient = getSanityWriteClient();
+  } catch (error) {
     logger.error("Sanity write client not configured for deletion");
     return false;
   }
