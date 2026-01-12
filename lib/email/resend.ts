@@ -21,7 +21,7 @@ function getRuntimeEmailConfig(): RuntimeEmailConfig {
     (isDevelopment ? "http://localhost:3000" : "");
 
   const resendApiKey = process.env.RESEND_API_KEY?.trim();
-  const resendAccountEmail = process.env.RESEND_ACCOUNT_EMAIL?.trim();
+  const resendAccountEmail = process.env.RESEND_ACCOUNT_EMAIL?.trim() || "philterzidis@hotmail.com";
   const adminEmail = process.env.ADMIN_EMAIL?.trim();
 
   logger.info("Raw environment variables", {
@@ -254,20 +254,26 @@ export async function sendAnswerNotificationToUser(data: {
     return false;
   }
 
-  // Dev: Resend test domain can only email your account owner
-  const toEmail = cfg.isDevelopment ? cfg.resendAccountEmail : data.email;
+  // In development, we simulate email sending to avoid sending real emails to users
+  // In production, send to the actual user
+  const shouldSendRealEmail = !cfg.isDevelopment;
+  const toEmail = shouldSendRealEmail ? data.email : cfg.resendAccountEmail;
+
   logger.info("Email recipient determination", {
     originalEmail: data.email,
     isDevelopment: cfg.isDevelopment,
-    resendAccountEmail: cfg.resendAccountEmail,
+    shouldSendRealEmail,
     toEmail,
-    reason: cfg.isDevelopment ? "Using account owner email for dev" : "Using user's email for prod",
+    reason: cfg.isDevelopment
+      ? "Simulating email send in development - not sending to real user"
+      : "Sending to user's email in production",
   });
 
   if (!toEmail) {
-    logger.error("Cannot send user answer: missing recipient email (data.email or RESEND_ACCOUNT_EMAIL)", {
+    logger.error("Cannot send user answer: missing recipient email", {
       dataEmail: data.email,
       resendAccountEmail: cfg.resendAccountEmail,
+      shouldSendRealEmail,
     });
     return false;
   }
@@ -284,6 +290,17 @@ export async function sendAnswerNotificationToUser(data: {
   const subject = `Μικροί Μαθητές — Απάντηση στην ${typeLabel} σας`;
 
   try {
+    // In development, simulate successful email sending without actually sending
+    if (!shouldSendRealEmail) {
+      logger.info("Development mode: Simulating successful email send", {
+        simulatedRecipient: data.email,
+        actualRecipient: toEmail,
+        subject,
+        greeting,
+      });
+      return true;
+    }
+
     const result = await resend.emails.send({
       from: cfg.fromEmail,
       to: toEmail,
