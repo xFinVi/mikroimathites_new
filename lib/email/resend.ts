@@ -225,55 +225,24 @@ export async function sendAnswerNotificationToUser(data: {
   published?: boolean;
   submissionType?: string; // question, feedback, video_idea, review
 }): Promise<boolean> {
-  logger.info("sendAnswerNotificationToUser called with data", {
-    email: data.email,
-    name: data.name,
-    answerLength: data.answer?.length || 0,
-    published: data.published,
-    submissionType: data.submissionType,
-  });
-
   const cfg = getRuntimeEmailConfig();
-  logger.info("Runtime email config", {
-    isDevelopment: cfg.isDevelopment,
-    siteUrl: cfg.siteUrl,
-    hasApiKey: !!cfg.resendApiKey,
-    resendAccountEmail: cfg.resendAccountEmail,
-    resendAccountEmailType: typeof cfg.resendAccountEmail,
-    resendAccountEmailLength: cfg.resendAccountEmail?.length || 0,
-    adminEmail: cfg.adminEmail,
-    fromEmail: cfg.fromEmail,
-    nodeEnv: process.env.NODE_ENV,
-    nextPublicSiteUrl: process.env.NEXT_PUBLIC_SITE_URL,
-  });
+  const resendClient = getResendClient(cfg.resendApiKey);
 
-  const resend = getResendClient(cfg.resendApiKey);
-
-  if (!resend) {
+  if (!resendClient) {
     logger.error("Cannot send user answer: missing RESEND_API_KEY");
     return false;
   }
 
-  // In development, we simulate email sending to avoid sending real emails to users
-  // In production, send to the actual user
-  const shouldSendRealEmail = !cfg.isDevelopment;
-  const toEmail = shouldSendRealEmail ? data.email : cfg.resendAccountEmail;
+  const simulate = process.env.RESEND_SIMULATE === "true";
 
-  logger.info("Email recipient determination", {
-    originalEmail: data.email,
-    isDevelopment: cfg.isDevelopment,
-    shouldSendRealEmail,
-    toEmail,
-    reason: cfg.isDevelopment
-      ? "Simulating email send in development - not sending to real user"
-      : "Sending to user's email in production",
-  });
+  // If simulating, we send to the account email (or just skip if you prefer)
+  const toEmail = simulate ? cfg.resendAccountEmail : data.email;
 
   if (!toEmail) {
     logger.error("Cannot send user answer: missing recipient email", {
       dataEmail: data.email,
       resendAccountEmail: cfg.resendAccountEmail,
-      shouldSendRealEmail,
+      simulate,
     });
     return false;
   }
@@ -290,18 +259,14 @@ export async function sendAnswerNotificationToUser(data: {
   const subject = `Μικροί Μαθητές — Απάντηση στην ${typeLabel} σας`;
 
   try {
-    // In development, simulate successful email sending without actually sending
-    if (!shouldSendRealEmail) {
-      logger.info("Development mode: Simulating successful email send", {
-        simulatedRecipient: data.email,
+    if (simulate) {
+      logger.warn("RESEND_SIMULATE=true — not sending to real user", {
+        simulatedUserEmail: data.email,
         actualRecipient: toEmail,
-        subject,
-        greeting,
       });
-      return true;
     }
 
-    const result = await resend.emails.send({
+    const result = await resendClient.emails.send({
       from: cfg.fromEmail,
       to: toEmail,
       replyTo: cfg.adminEmail || undefined,
@@ -328,6 +293,7 @@ export async function sendAnswerNotificationToUser(data: {
       logger.error("User answer email failed", result.error);
       return false;
     }
+
     return true;
   } catch (err) {
     logger.error("User answer email threw", err);
