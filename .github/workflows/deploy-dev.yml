@@ -82,6 +82,15 @@ jobs:
             echo "📦 Current directory: $(pwd)"
             echo "🌿 Current branch: $(git branch --show-current)"
             
+            # Handle .env.production conflicts - backup existing file if it exists
+            if [ -f ".env.production" ]; then
+              echo "📁 Backing up existing .env.production file..."
+              cp .env.production .env.production.backup.$(date +%Y%m%d_%H%M%S) || {
+                echo "⚠️ Could not backup .env.production, removing it..."
+                rm -f .env.production
+              }
+            fi
+
             git fetch origin || { echo "❌ Failed to fetch from origin"; exit 1; }
             git checkout develop || { echo "❌ Failed to checkout develop"; exit 1; }
             git pull origin develop || { echo "❌ Failed to pull from develop"; exit 1; }
