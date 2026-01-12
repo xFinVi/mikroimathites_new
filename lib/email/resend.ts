@@ -234,16 +234,10 @@ export async function sendAnswerNotificationToUser(data: {
   }
 
   const simulate = process.env.RESEND_SIMULATE === "true";
-
-  // If simulating, we send to the account email (or just skip if you prefer)
   const toEmail = simulate ? cfg.resendAccountEmail : data.email;
 
   if (!toEmail) {
-    logger.error("Cannot send user answer: missing recipient email", {
-      dataEmail: data.email,
-      resendAccountEmail: cfg.resendAccountEmail,
-      simulate,
-    });
+    logger.error("Cannot send user answer: missing recipient email");
     return false;
   }
 
@@ -254,16 +248,12 @@ export async function sendAnswerNotificationToUser(data: {
     review: "αξιολόγηση",
   };
   const typeLabel = typeLabels[data.submissionType || "question"] || "υποβολή";
-
-  const greeting = data.name ? `Γεια σας, ${escapeHtmlWithLineBreaks(data.name)},` : "Γεια σας,";
   const subject = `Μικροί Μαθητές — Απάντηση στην ${typeLabel} σας`;
 
   try {
     if (simulate) {
-      logger.warn("RESEND_SIMULATE=true — not sending to real user", {
-        simulatedUserEmail: data.email,
-        actualRecipient: toEmail,
-      });
+      logger.info(`EMAIL SIMULATION: Would send to ${data.email} (actually sent to ${toEmail})`);
+      return true;
     }
 
     const result = await resendClient.emails.send({
@@ -274,7 +264,7 @@ export async function sendAnswerNotificationToUser(data: {
       html: wrapEmail({
         preheader: `Η απάντησή μας στην ${typeLabel} σας είναι έτοιμη.`,
         title: `Απάντηση στην ${typeLabel} σας`,
-        intro: greeting,
+        intro: data.name ? `Γεια σας, ${escapeHtmlWithLineBreaks(data.name)},` : "Γεια σας,",
         contentHtml: `
           <div style="margin:0;">
             <div style="background:#eef2ff;border:1px solid #e5e7eb;border-radius:10px;padding:16px;white-space:pre-wrap;font-size:15px;line-height:1.7;">
@@ -290,13 +280,14 @@ export async function sendAnswerNotificationToUser(data: {
     });
 
     if (result.error) {
-      logger.error("User answer email failed", result.error);
+      logger.error(`EMAIL FAILED: ${data.email} - ${result.error.message}`);
       return false;
     }
 
+    logger.info(`EMAIL SENT: From ${cfg.fromEmail} to ${toEmail} (${data.email})`);
     return true;
   } catch (err) {
-    logger.error("User answer email threw", err);
+    logger.error(`EMAIL ERROR: ${data.email} - ${err}`);
     return false;
   }
 }
