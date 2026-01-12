@@ -267,17 +267,27 @@ export async function sendAnswerNotificationToUser(data: {
   }
 
   // Email recipient logic:
-  // Development: Send to user's email (Resend will reject non-account-owner emails, but we'll try)
-  // Production: Always send to user's email
-  const actualRecipient = data.email;
+  // Development: Resend test domain only allows sending to account owner email
+  // Production: Send to user's actual email
+  let actualRecipient: string;
+  let redirectReason: string;
+
+  if (runtimeIsDevelopment) {
+    actualRecipient = runtimeResendAccountEmail;
+    redirectReason = `Development mode - Resend test domain restriction: redirecting from ${data.email} to ${runtimeResendAccountEmail}`;
+  } else {
+    actualRecipient = data.email;
+    redirectReason = "Production mode - sending to user's email";
+  }
 
   logger.info("Email recipient logic", {
     intendedRecipient: data.email,
+    actualRecipient,
     isDevelopment: runtimeIsDevelopment,
+    redirectReason,
     note: runtimeIsDevelopment
-      ? "Development mode: Attempting to send to user email (may be redirected by Resend test domain)"
-      : "Production mode: Sending to user email",
-    resendAccountEmail: runtimeResendAccountEmail,
+      ? "TESTING: Email will appear in your account owner inbox. This is normal for Resend test domain."
+      : "Production: Email sent to actual user",
   });
   
   const activeEmailFrom = runtimeIsDevelopment 
@@ -301,36 +311,57 @@ export async function sendAnswerNotificationToUser(data: {
     const greeting = data.name ? `Γεια σας, ${escapeHtmlWithLineBreaks(data.name)},` : "Γεια σας,";
 
     // Clean, user-friendly subject line
-    const emailSubject = `Μικροί Μαθητές — Απάντηση στην ${typeLabel} σας`;
+  const emailSubject = `Μικροί Μαθητές — Απάντηση στην ${typeLabel} σας`;
 
-    const emailResult = await activeResend.emails.send({
-      from: activeEmailFrom,
-      to: actualRecipient,
-      subject: emailSubject,
-      html: wrapEmail({
-        preheader: `Η απάντησή μας στην ${typeLabel} σας είναι έτοιμη.`,
-        title: `Απάντηση στην ${typeLabel} σας`,
-        intro: greeting,
-        contentHtml: `
-          <div style="margin:0;">
-            <div style="background:#eef2ff;border:1px solid #e5e7eb;border-radius:10px;padding:16px;white-space:pre-wrap;font-size:15px;line-height:1.7;">${escapeHtmlWithLineBreaks(data.answer)}</div>
+  // Add development testing notice
+  const devNotice = runtimeIsDevelopment ? `
+    <div style="margin-bottom:18px;background:#fef3c7;border:1px solid #f59e0b;border-radius:10px;padding:14px;">
+      <div style="font-weight:700;color:#92400e;margin-bottom:4px;">🧪 Αυτό είναι ένα τεστ email</div>
+      <div style="color:#92400e;font-size:14px;line-height:1.6;">
+        Αυτό το email στάλθηκε σε εσάς (διοργανωτή) για λόγους δοκιμής. Στην παραγωγή θα σταλεί στον πραγματικό χρήστη.
+      </div>
+    </div>
+  ` : "";
+
+  const emailResult = await activeResend.emails.send({
+    from: activeEmailFrom,
+    to: actualRecipient,
+    subject: emailSubject,
+    html: wrapEmail({
+      preheader: `Η απάντησή μας στην ${typeLabel} σας είναι έτοιμη.`,
+      title: `Απάντηση στην ${typeLabel} σας`,
+      intro: greeting,
+      contentHtml: `
+        ${devNotice}
+        <div style="margin:0;">
+          <div style="background:#eef2ff;border:1px solid #e5e7eb;border-radius:10px;padding:16px;white-space:pre-wrap;font-size:15px;line-height:1.7;">${escapeHtmlWithLineBreaks(data.answer)}</div>
+        </div>
+
+        ${data.published ? `
+          <div style="margin-top:18px;background:#ecfdf5;border:1px solid #d1fae5;border-radius:10px;padding:14px;">
+            <div style="font-weight:700;color:#065f46;margin-bottom:4px;">✨ Η ${typeLabel} σας δημοσιεύτηκε!</div>
+            <div style="color:#065f46;font-size:14px;line-height:1.6;">Μπορείτε να τη δείτε στη σελίδα Q&A μας.</div>
           </div>
-
-          ${data.published ? `
-            <div style="margin-top:18px;background:#ecfdf5;border:1px solid #d1fae5;border-radius:10px;padding:14px;">
-              <div style="font-weight:700;color:#065f46;margin-bottom:4px;">✨ Η ${typeLabel} σας δημοσιεύτηκε!</div>
-              <div style="color:#065f46;font-size:14px;line-height:1.6;">Μπορείτε να τη δείτε στη σελίδα Q&A μας.</div>
-            </div>
-          ` : ""}
-        `,
-        cta: data.published
-          ? { label: "Δείτε τη στη σελίδα Q&A", href: `${runtimeSiteUrl}/epikoinonia` }
-          : undefined,
-      }),
-    });
+        ` : ""}
+      `,
+      cta: data.published
+        ? { label: "Δείτε τη στη σελίδα Q&A", href: `${runtimeSiteUrl}/epikoinonia` }
+        : undefined,
+    }),
+  });
 
     // Check for errors
     if (emailResult.error) {
+      // In development, Resend rejecting non-account-owner emails is expected
+      if (runtimeIsDevelopment && emailResult.error.message?.includes('You can only send testing emails to your own email address')) {
+        logger.warn("Development email restriction - this is expected", {
+          error: emailResult.error,
+          note: "Email would be sent to user in production. Reply saved to database.",
+        });
+        // Return true since the reply was saved and this is expected development behavior
+        return true;
+      }
+
       logger.error("Failed to send email", emailResult.error);
       throw new Error(`Email send failed: ${JSON.stringify(emailResult.error)}`);
     }
