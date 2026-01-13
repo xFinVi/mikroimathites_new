@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase/server";
 import { logger } from "@/lib/utils/logger";
-import { resend, wrapEmail } from "@/lib/email/resend";
+import { getResend, wrapEmail } from "@/lib/email/resend";
 import { escapeHtmlWithLineBreaks } from "@/lib/utils/forms";
 import crypto from "crypto";
 
@@ -126,15 +126,8 @@ export async function POST(req: Request) {
       customResetUrl = `${siteUrl}/auth/reset-password?token=${encodeURIComponent(token)}&type=${type || "recovery"}`;
     }
 
-    // Send email via Resend
-    if (!resend) {
-      logger.error("Resend not configured");
-      return NextResponse.json(
-        { error: "Email service not configured" },
-        { status: 500 }
-      );
-    }
-
+    const resend = getResend();
+    
     const runtimeSiteUrl =
       process.env.NEXT_PUBLIC_SITE_URL?.trim() || "http://localhost:3000";
     const runtimeIsDevelopment =

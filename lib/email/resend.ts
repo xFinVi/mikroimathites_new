@@ -394,3 +394,8 @@ export async function sendAnswerNotificationToUser(data: {
     return false;
   }
 }
+
+export function getResend(): Resend {
+  const cfg = getRuntimeEmailConfig();
+  return requireResendClient(cfg);
+}
