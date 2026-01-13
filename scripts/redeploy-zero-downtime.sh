@@ -1,82 +1,46 @@
 #!/bin/bash
-
-# Simple Deployment Script
-# This script deploys new containers with minimal downtime
-
 set -e
 
-echo "🚀 Starting Deployment..."
+ENV_FILE="/opt/mikroimathites/.env.production"
+APP_DIR="/opt/mikroimathites/app"
 
-# Colors
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
+GREEN='\033[0;32m'
+RED='\033[0;31m'
 NC='\033[0m'
 
-print_status() { echo -e "${BLUE}[INFO]${NC} $1"; }
-print_success() { echo -e "${GREEN}[SUCCESS]${NC} $1"; }
-print_error() { echo -e "${RED}[ERROR]${NC} $1"; }
+info() { echo -e "${BLUE}[INFO]${NC} $1"; }
+ok()   { echo -e "${GREEN}[OK]${NC} $1"; }
+err()  { echo -e "${RED}[ERR]${NC} $1"; }
 
-# Pull latest changes
-print_status "Pulling latest changes from develop branch..."
-git fetch origin || { print_error "Failed to fetch from origin"; exit 1; }
-git checkout develop || { print_error "Failed to checkout develop"; exit 1; }
-git pull origin develop || { print_error "Failed to pull from develop"; exit 1; }
+info "Starting deploy..."
+cd "$APP_DIR" || { err "Cannot cd to $APP_DIR"; exit 1; }
 
-# Zero-downtime deployment: Build FIRST while old container runs
-print_status "Building new container (old container still serving traffic)..."
-echo "⏱️ Build started at $(date +'%H:%M:%S')"
-
-# Load production environment variables for build args
-if [ -f "/opt/mikroimathites/.env.production" ]; then
-  print_status "Loading environment variables from .env.production..."
-  set -a
-  source /opt/mikroimathites/.env.production
-  set +a
-  # Export required build args explicitly
-  export NEXT_PUBLIC_ADSENSE_CLIENT="${NEXT_PUBLIC_ADSENSE_CLIENT:-}"
-  export NEXT_PUBLIC_GA_ID="${NEXT_PUBLIC_GA_ID:-}"
-  export NEXT_PUBLIC_SANITY_PROJECT_ID="${NEXT_PUBLIC_SANITY_PROJECT_ID:-}"
-  export NEXT_PUBLIC_SANITY_DATASET="${NEXT_PUBLIC_SANITY_DATASET:-}"
-  export NEXT_PUBLIC_SUPABASE_URL="${NEXT_PUBLIC_SUPABASE_URL:-}"
-  export NEXT_PUBLIC_SITE_URL="${NEXT_PUBLIC_SITE_URL:-}"
-  echo "✅ Environment variables loaded"
-else
-  print_error ".env.production not found at /opt/mikroimathites/.env.production"
+if [ ! -f "$ENV_FILE" ]; then
+  err "Missing env file: $ENV_FILE"
   exit 1
 fi
 
-docker compose build || { print_error "Docker build failed"; exit 1; }
-echo "⏱️ Build finished at $(date +'%H:%M:%S')"
+info "Pulling latest changes..."
+git fetch origin
+git checkout develop
+git pull origin develop
 
-# Now restart with new image (minimal downtime: ~1-2 seconds)
-print_status "Restarting container with new image..."
-docker compose up -d --no-deps app || {
-    print_error "Docker compose up failed"
-    echo "📋 Showing logs for debugging:"
-    docker compose logs --tail=50
-    exit 1
-}
+info "Building container..."
+DOCKER_BUILDKIT=0 docker compose --env-file "$ENV_FILE" build
 
-# Wait for application to be ready
-print_status "Waiting for application to be ready..."
-sleep 10
+info "Restarting app..."
+docker compose --env-file "$ENV_FILE" up -d --no-deps app
 
-# Health check
-print_status "Checking application health..."
+info "Health check..."
 for i in {1..30}; do
-    if curl -f -s http://localhost:3000/api/health > /dev/null 2>&1; then
-        print_success "✅ Deployment successful - application is healthy!"
-        exit 0
-    fi
-    if [ $i -eq 30 ]; then
-        print_error "❌ Application failed health check after 60 seconds"
-        echo "📋 Container status:"
-        docker compose ps
-        echo "📋 Recent logs:"
-        docker compose logs --tail=50
-        exit 1
-    fi
-    sleep 2
+  if curl -f -s http://localhost:3000/api/health > /dev/null 2>&1; then
+    ok "Deployment successful."
+    exit 0
+  fi
+  sleep 2
 done
+
+err "Health check failed."
+docker compose --env-file "$ENV_FILE" logs --tail=120 app || true
+exit 1

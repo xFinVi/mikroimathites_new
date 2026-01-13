@@ -20,8 +20,6 @@ services:
       # These will be overridden by .env file or environment variables
       - NODE_ENV=production
       - NEXT_TELEMETRY_DISABLED=1
-    env_file:
-      - .env.production
     networks:
       - app-network
     healthcheck:
