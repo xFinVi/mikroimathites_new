@@ -7,6 +7,7 @@ import { logger } from "@/lib/utils/logger";
 import { escapeHtmlWithLineBreaks } from "@/lib/utils/forms";
 
 type AppEnv = "development" | "preview" | "production";
+type SubmissionType = "question" | "feedback" | "video_idea" | "review";
 
 type RuntimeEmailConfig = {
   env: AppEnv;
@@ -175,6 +176,7 @@ export function wrapEmail(params: {
 
   const safeTitle = escapeHtml(title);
   const safePreheader = normalizeToSingleLine(escapeHtml(preheader));
+  const safeIntro = intro ? escapeHtml(intro) : undefined;
 
   return `
     <!DOCTYPE html>
@@ -203,7 +205,11 @@ export function wrapEmail(params: {
 
                 <tr>
                   <td style="background:#ffffff;border:1px solid #e5e7eb;border-radius:12px;padding:24px 20px;">
-                    ${intro ? `<p style="margin:0 0 16px 0;font-size:16px;line-height:1.6;color:#111827;">${intro}</p>` : ""}
+                    ${
+                      safeIntro
+                        ? `<p style="margin:0 0 16px 0;font-size:16px;line-height:1.6;color:#111827;">${safeIntro}</p>`
+                        : ""
+                    }
 
                     ${contentHtml}
 
@@ -212,7 +218,7 @@ export function wrapEmail(params: {
                         ? `
                       <div style="margin-top:22px;text-align:center;">
                         <a href="${cta.href}" style="display:inline-block;background:#4f46e5;color:#ffffff;text-decoration:none;padding:12px 18px;border-radius:10px;font-weight:700;font-size:14px;">
-                          ${cta.label}
+                          ${escapeHtml(cta.label)}
                         </a>
                       </div>
                     `
@@ -242,6 +248,35 @@ export function wrapEmail(params: {
       </body>
     </html>
   `;
+}
+
+function normalizeSubmissionType(input?: string): SubmissionType {
+  const v = (input || "question").toLowerCase();
+  if (v === "feedback" || v === "video_idea" || v === "review" || v === "question") return v;
+  return "question";
+}
+
+function copyForUserEmail(t: SubmissionType): { subject: string; title: string; preheader: string } {
+  if (t === "feedback") {
+    return {
+      subject: "Μικροί Μαθητές — Ευχαριστούμε για το μήνυμά σας",
+      title: "Ευχαριστούμε για το μήνυμά σας",
+      preheader: "Διαβάστε την απάντησή μας στο μήνυμά σας.",
+    };
+  }
+
+  const label: Record<SubmissionType, string> = {
+    question: "ερώτηση",
+    video_idea: "ιδέα για βίντεο",
+    review: "αξιολόγηση",
+    feedback: "μήνυμα",
+  };
+
+  return {
+    subject: `Μικροί Μαθητές — Απάντηση στην ${label[t]} σας`,
+    title: `Απάντηση στην ${label[t]} σας`,
+    preheader: `Η απάντησή μας στην ${label[t]} σας είναι έτοιμη.`,
+  };
 }
 
 /**
@@ -300,9 +335,9 @@ export async function sendSubmissionNotificationToAdmin(data: {
               <tr>
                 <td style="padding:0;">
                   <div style="font-size:14px;color:#6b7280;margin-bottom:8px;">Μήνυμα</div>
-                  <div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:10px;padding:14px;white-space:pre-wrap;font-size:15px;line-height:1.7;">${escapeHtmlWithLineBreaks(
-                    data.message
-                  )}</div>
+                  <div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:10px;padding:14px;white-space:pre-wrap;font-size:15px;line-height:1.7;">
+                    ${escapeHtmlWithLineBreaks(data.message)}
+                  </div>
                 </td>
               </tr>
             </table>
@@ -349,16 +384,10 @@ export async function sendAnswerNotificationToUser(data: {
       ? "Mikroi Mathites <onboarding@resend.dev>"
       : requireFromEmail(cfg);
 
-    const typeLabels: Record<string, string> = {
-      question: "ερώτηση",
-      feedback: "feedback",
-      video_idea: "ιδέα για βίντεο",
-      review: "αξιολόγηση",
-    };
+    const submissionType = normalizeSubmissionType(data.submissionType);
+    const copy = copyForUserEmail(submissionType);
 
-    const typeLabel = typeLabels[data.submissionType || "question"] || "υποβολή";
-    const greeting = data.name ? `Γεια σας, ${escapeHtmlWithLineBreaks(data.name)},` : "Γεια σας,";
-    const subject = `Μικροί Μαθητές — Απάντηση στην ${typeLabel} σας`;
+    const greeting = data.name ? `Γεια σας, ${data.name},` : "Γεια σας,";
 
     const out = await sendWithResendLogging({
       resend,
@@ -368,10 +397,10 @@ export async function sendAnswerNotificationToUser(data: {
         from,
         to: toEmail,
         replyTo: cfg.adminEmail || undefined,
-        subject,
+        subject: copy.subject,
         html: wrapEmail({
-          preheader: `Η απάντησή μας στην ${typeLabel} σας είναι έτοιμη.`,
-          title: `Απάντηση στην ${typeLabel} σας`,
+          preheader: copy.preheader,
+          title: copy.title,
           intro: greeting,
           contentHtml: `
             <div style="margin:0;">
@@ -395,6 +424,10 @@ export async function sendAnswerNotificationToUser(data: {
   }
 }
 
+/**
+ * Helper for API routes that need a Resend client.
+ * (Do NOT import a singleton `resend` export; it breaks builds when removed.)
+ */
 export function getResend(): Resend {
   const cfg = getRuntimeEmailConfig();
   return requireResendClient(cfg);
