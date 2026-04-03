@@ -157,12 +157,19 @@ export async function createQADraftInSanity(
       }
     }
 
+    // Generate a unique draft ID with the required "drafts." prefix.
+    // Sanity's Studio only surfaces documents as editable drafts when their
+    // _id starts with "drafts." — without this prefix, client.create() makes
+    // a published document that is invisible in Studio when liveEdit is false.
+    const crypto = await import("crypto");
+    const draftId = `drafts.${crypto.randomUUID()}`;
+
     const document = {
+      _id: draftId,
       _type: "qaItem",
       question: data.question,
       answer: data.answer,
-      // Don't set publishedAt - this keeps it as a draft
-      // Admin will set publishedAt when publishing from Sanity Studio
+      // No publishedAt — admin sets this when publishing from Studio
       // Note: We don't include user names for privacy reasons
       ...(data.categoryId && {
         category: {
@@ -178,20 +185,18 @@ export async function createQADraftInSanity(
       }),
     };
 
-    // Create as draft (Sanity creates drafts by default with create())
-    logger.info("Attempting to create document in Sanity", {
+    logger.info("Attempting to create Q&A draft in Sanity", {
+      draftId,
       documentType: document._type,
       hasCategory: !!document.category,
-      categoryRef: document.category ? { _type: document.category._type, _ref: document.category._ref } : null,
       hasAgeGroups: !!document.ageGroups && document.ageGroups.length > 0,
-      ageGroupRefs: document.ageGroups ? document.ageGroups.map((ag: any) => ({ _type: ag._type, _ref: ag._ref })) : null,
       ageGroupCount: document.ageGroups?.length || 0,
     });
     
-    const result = await sanityWriteClient.create(document);
+    const result = await sanityWriteClient.createIfNotExists(document);
     
     if (!result || !result._id) {
-      logger.error("Sanity create() returned invalid result", { result });
+      logger.error("Sanity createIfNotExists() returned invalid result", { result });
       return null;
     }
     
