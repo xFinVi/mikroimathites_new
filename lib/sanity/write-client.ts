@@ -14,7 +14,8 @@ import { logger } from "@/lib/utils/logger";
  * Never import in: Client components, shared utilities, lib/content
  */
 
-// Lazy initialization - only create client when config is available
+// Lazy initialization - only create client when explicitly requested
+// This prevents build-time errors when secrets aren't available during Docker build
 let _writeClient: ReturnType<typeof createClient> | null = null;
 
 export function getSanityWriteClient() {
@@ -40,9 +41,6 @@ export function getSanityWriteClient() {
   return _writeClient;
 }
 
-// Convenience export for existing code
-export const sanityWriteClient = getSanityWriteClient();
-
 /**
  * Helper function to create a DRAFT qaItem in Sanity from a submission
  * This creates a draft that admin can review and publish from Sanity Studio
@@ -62,7 +60,11 @@ export async function createQADraftInSanity(
   },
   existingDraftId?: string | null
 ): Promise<string | null> {
-  if (!sanityWriteClient) {
+  let sanityWriteClient;
+  
+  try {
+    sanityWriteClient = getSanityWriteClient();
+  } catch (error) {
     const missing = [];
     const hasProjectId =
       !!process.env.SANITY_PROJECT_ID ||
@@ -155,12 +157,19 @@ export async function createQADraftInSanity(
       }
     }
 
+    // Generate a unique draft ID with the required "drafts." prefix.
+    // Sanity's Studio only surfaces documents as editable drafts when their
+    // _id starts with "drafts." — without this prefix, client.create() makes
+    // a published document that is invisible in Studio when liveEdit is false.
+    const crypto = await import("crypto");
+    const draftId = `drafts.${crypto.randomUUID()}`;
+
     const document = {
+      _id: draftId,
       _type: "qaItem",
       question: data.question,
       answer: data.answer,
-      // Don't set publishedAt - this keeps it as a draft
-      // Admin will set publishedAt when publishing from Sanity Studio
+      // No publishedAt — admin sets this when publishing from Studio
       // Note: We don't include user names for privacy reasons
       ...(data.categoryId && {
         category: {
@@ -176,20 +185,18 @@ export async function createQADraftInSanity(
       }),
     };
 
-    // Create as draft (Sanity creates drafts by default with create())
-    logger.info("Attempting to create document in Sanity", {
+    logger.info("Attempting to create Q&A draft in Sanity", {
+      draftId,
       documentType: document._type,
       hasCategory: !!document.category,
-      categoryRef: document.category ? { _type: document.category._type, _ref: document.category._ref } : null,
       hasAgeGroups: !!document.ageGroups && document.ageGroups.length > 0,
-      ageGroupRefs: document.ageGroups ? document.ageGroups.map((ag: any) => ({ _type: ag._type, _ref: ag._ref })) : null,
       ageGroupCount: document.ageGroups?.length || 0,
     });
     
-    const result = await sanityWriteClient.create(document);
+    const result = await sanityWriteClient.createIfNotExists(document);
     
     if (!result || !result._id) {
-      logger.error("Sanity create() returned invalid result", { result });
+      logger.error("Sanity createIfNotExists() returned invalid result", { result });
       return null;
     }
     
@@ -222,7 +229,11 @@ export async function createQADraftInSanity(
 export async function deleteQADocumentFromSanity(
   documentId: string
 ): Promise<boolean> {
-  if (!sanityWriteClient) {
+  let sanityWriteClient;
+  
+  try {
+    sanityWriteClient = getSanityWriteClient();
+  } catch (error) {
     logger.error("Sanity write client not configured for deletion");
     return false;
   }

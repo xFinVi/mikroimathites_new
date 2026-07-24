@@ -6,8 +6,18 @@ import { generateImageUrl } from "@/lib/sanity/image-url";
 import { DRASTIRIOTITES_CONSTANTS } from "@/lib/constants";
 import Image from "next/image";
 import type { PortableTextBlock } from "@portabletext/types";
-import { ActivityCarousel } from "./activity-carousel";
+import dynamic from "next/dynamic";
 import { logger } from "@/lib/utils/logger";
+
+// Lazy load carousel component (heavy, only needed when carousel is enabled)
+// Use loading placeholder to prevent layout shift
+const LazyActivityCarousel = dynamic(
+  () => import("./activity-carousel").then(mod => ({ default: mod.ActivityCarousel })),
+  { 
+    ssr: false,
+    loading: () => <div className="min-h-[400px] w-full bg-background-light rounded-lg" aria-label="Loading image carousel" />
+  }
+);
 
 interface ActivityContentProps {
   activity: Activity;
@@ -292,9 +302,9 @@ export function ActivityContent({ activity, secondaryImageUrl }: ActivityContent
         </div>
       )}
 
-      {/* Image Carousel - Full Width Below */}
+      {/* Image Carousel - Full Width Below - Lazy loaded */}
       {activity.enableCarousel && activity.carouselImages && activity.carouselImages.length >= 3 && (
-        <ActivityCarousel
+        <LazyActivityCarousel
           images={activity.carouselImages}
           title="Περισσότερες Φωτογραφίες"
         />

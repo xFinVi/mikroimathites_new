@@ -1,3 +1,11 @@
+/**
+ * Analytics Queries - Functions to query view and download analytics from Supabase
+ * 
+ * Provides functions to get view counts, download counts, and trending content
+ * from the Supabase database. Used by components and admin dashboard to display
+ * analytics data.
+ */
+
 import { supabaseAdmin } from "@/lib/supabase/server";
 import { logger } from "@/lib/utils/logger";
 

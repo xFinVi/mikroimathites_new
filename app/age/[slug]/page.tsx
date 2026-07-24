@@ -45,8 +45,9 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     }
 
     return {
-      title: `${ageGroup.title} | Μικροί Μαθητές`,
+      title: ageGroup.title,
       description: `Περιεχόμενο, δραστηριότητες και συμβουλές για παιδιά ${ageGroup.title.toLowerCase()}`,
+      alternates: { canonical: `/age/${slug}` },
       openGraph: {
         title: `${ageGroup.title} | Μικροί Μαθητές`,
         description: `Περιεχόμενο, δραστηριότητες και συμβουλές για παιδιά ${ageGroup.title.toLowerCase()}`,

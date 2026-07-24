@@ -1,3 +1,11 @@
+/**
+ * "For Parents" Hub Page - Lists articles and recipes for parents
+ * 
+ * Displays filtered and searchable content from Sanity (articles, recipes).
+ * Supports filtering by age group, category, and search queries.
+ * Includes pagination and sorting options (latest, A-Z, views).
+ */
+
 import { Container } from "@/components/ui/container";
 import { PageWrapper } from "@/components/pages/page-wrapper";
 import { PageHeader } from "@/components/pages/page-header";
@@ -91,7 +99,7 @@ export async function generateMetadata({
 export const revalidate = 600;
 
 interface PageProps {
-  searchParams?: Promise<{ age?: string; category?: string; search?: string; tag?: string; page?: string }>;
+  searchParams?: Promise<{ age?: string; category?: string; search?: string; tag?: string; page?: string; sort?: string }>;
 }
 
 
@@ -130,6 +138,7 @@ export default async function GiaGoneisPage({ searchParams }: PageProps) {
       tag: params.tag,
       page: 1, // Always start with page 1
       pageSize: INITIAL_PAGE_SIZE, // Show only 9 items initially
+      sortBy: (params.sort as "latest" | "popular" | "alphabetical") || "latest",
     }),
   ]);
 
@@ -261,9 +270,6 @@ export default async function GiaGoneisPage({ searchParams }: PageProps) {
           <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
             <div>
               <h3 className="text-xl font-bold text-text-dark">Στείλτε μας ιδέα ή ερώτηση</h3>
-              <p className="text-text-medium">
-                Όλα θα συνδεθούν με την υποβολή στο CMS/Supabase.
-              </p>
             </div>
             <Link
               href="/epikoinonia"

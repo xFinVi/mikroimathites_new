@@ -1,3 +1,10 @@
+/**
+ * ContentList Component - Displays a list of content items (articles, recipes, activities)
+ * 
+ * Renders a grid of content cards with appropriate card component for each content type.
+ * Used on hub pages (gia-goneis, drastiriotites) to display filtered content lists.
+ */
+
 import { Article, Recipe, Activity } from "@/lib/content";
 import { ArticleCard } from "@/components/articles/article-card";
 import { ActivityCard } from "@/components/activities/activity-card";

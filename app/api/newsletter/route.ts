@@ -1,3 +1,10 @@
+/**
+ * Newsletter API Route - Handles newsletter email subscriptions
+ * 
+ * POST: Subscribes an email address to the newsletter. Stores subscription in
+ * Supabase newsletter_subscriptions table. Prevents duplicate subscriptions.
+ */
+
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase/server";
 import { logger } from "@/lib/utils/logger";

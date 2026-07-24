@@ -79,8 +79,8 @@ export function NewsletterSection({ source = "homepage" }: NewsletterSectionProp
       setTimeout(() => {
         setIsSubmitted(false);
       }, 5000);
-    } catch (err: any) {
-      const errorMsg = err.message || "Κάτι πήγε στραβά";
+    } catch (err: unknown) {
+      const errorMsg = err instanceof Error ? err.message : "Κάτι πήγε στραβά";
       setError(errorMsg);
       toast.error("Αποτυχία εγγραφής", {
         description: errorMsg,

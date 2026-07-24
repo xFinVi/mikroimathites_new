@@ -74,18 +74,6 @@ const portableTextComponents = {
 export function PrintableContent({ printable }: PrintableContentProps) {
   return (
     <div className="space-y-8">
-      {/* Download Button - Mobile Only (Desktop has it in sidebar) */}
-      {printable.file && (
-        <div className="lg:hidden bg-gradient-to-br from-primary-pink to-accent-yellow rounded-2xl shadow-2xl border-2 border-white/50 p-4 sm:p-6 text-white text-center">
-          <h3 className="text-xl sm:text-2xl font-bold mb-2">Κατεβάστε το εκτυπώσιμο</h3>
-          <p className="text-white/90 text-sm mb-4">
-            Κάντε κλικ στο παρακάτω κουμπί για να κατεβάσετε το PDF
-          </p>
-          <div className="flex justify-center">
-            <PrintableDownloadButton slug={printable.slug} variant="gradient" />
-          </div>
-        </div>
-      )}
 
       {/* Instructions */}
       {printable.instructions && (

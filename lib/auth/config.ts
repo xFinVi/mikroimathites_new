@@ -1,13 +1,26 @@
+/**
+ * NextAuth Configuration - Authentication setup for admin access
+ * 
+ * Configures NextAuth.js v5 with credentials provider. Validates admin users
+ * against Supabase database and creates secure sessions. Used to protect
+ * /admin/* routes via middleware.
+ */
+
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import { supabaseAdmin } from "@/lib/supabase/server";
 import { logger } from "@/lib/utils/logger";
 
 // Validate required environment variables
-const nextAuthSecret = process.env.NEXTAUTH_SECRET;
+// During build time, provide a dummy secret to allow build to complete
+// At runtime, the real secret will be loaded from environment
+const nextAuthSecret = process.env.NEXTAUTH_SECRET || 
+  (process.env.NODE_ENV === 'production' ? undefined : 'dummy-secret-for-build-only');
 const nextAuthUrl = process.env.NEXTAUTH_URL || process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
 
-if (!nextAuthSecret) {
+// Only log warning at runtime (not during build)
+if (typeof window === 'undefined' && process.env.NODE_ENV === 'production' && !process.env.NEXTAUTH_SECRET) {
+  // This will only execute at runtime in production, not during build
   logger.error(
     "❌ NEXTAUTH_SECRET is missing in .env.local\n" +
     "   Generate a secret by running: openssl rand -base64 32\n" +

@@ -41,6 +41,22 @@ export async function GET(
       );
     }
 
+    // Debug logging - log submission data when viewed in dashboard
+    logger.info("Submission data fetched for dashboard", {
+      id: data.id,
+      type: data.type,
+      name: data.name,
+      email: data.email,
+      hasEmail: !!data.email,
+      emailLength: data.email?.length || 0,
+      messagePreview: data.message?.substring(0, 50) + "...",
+      child_age_group: data.child_age_group,
+      topic: data.topic,
+      is_approved: data.is_approved,
+      created_at: data.created_at,
+      allFields: Object.keys(data),
+    });
+
     return NextResponse.json({ submission: data });
   } catch (error) {
     logger.error("Error in GET /api/admin/submissions/[id]", error);

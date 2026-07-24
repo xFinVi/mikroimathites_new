@@ -1,3 +1,12 @@
+/**
+ * Analytics Views API Route - Tracks and retrieves content view analytics
+ * 
+ * POST: Tracks a content view (called by ContentTracker component)
+ * GET: Retrieves view counts for content items (used by admin dashboard)
+ * 
+ * Stores view data in Supabase content_views table with bot detection.
+ */
+
 import { NextRequest, NextResponse } from "next/server";
 import { getContentViewCounts } from "@/lib/analytics/queries";
 import { supabaseAdmin } from "@/lib/supabase/server";

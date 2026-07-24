@@ -65,8 +65,8 @@ export function FeedbackFormTab() {
       toast.success("Επιτυχία! 🎉", {
         description: "Το feedback σας είναι πολύτιμο! Ευχαριστούμε.",
       });
-    } catch (err: any) {
-      const errorMsg = err.message || "Κάτι πήγε στραβά";
+    } catch (err: unknown) {
+      const errorMsg = err instanceof Error ? err.message : "Κάτι πήγε στραβά";
       setError(errorMsg);
       toast.error("Αποτυχία αποστολής", {
         description: errorMsg,
@@ -195,6 +195,7 @@ export function FeedbackFormTab() {
           size="lg"
           disabled={isSubmitting || (!formData.what_liked && !formData.what_improve)}
           className="w-full sm:w-auto bg-primary-pink hover:bg-primary-pink/90 text-white text-lg px-8 py-6 rounded-button shadow-lg hover:shadow-xl transition-all"
+          aria-label="Υποβολή φόρμας σχολίων"
         >
           {isSubmitting ? "Αποστολή..." : "Στείλτε το feedback"}
         </Button>

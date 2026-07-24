@@ -1,10 +1,13 @@
+/**
+ * Next.js Middleware - Protects admin routes with authentication
+ * 
+ * Intercepts requests to /admin/* routes and checks for valid admin session.
+ * Redirects unauthenticated users to login page, and non-admin users to homepage.
+ */
+
 import { auth } from "@/lib/auth/config";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-
-/**
- * Next.js middleware to protect admin routes
- */
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 

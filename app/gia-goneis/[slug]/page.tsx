@@ -1,3 +1,11 @@
+/**
+ * Article Detail Page - Displays individual article content
+ * 
+ * Fetches article by slug from Sanity, displays full content with PortableText,
+ * tracks view analytics, and shows related articles. Uses static generation with
+ * on-demand generation for less popular articles.
+ */
+
 import { notFound } from "next/navigation";
 import { Container } from "@/components/ui/container";
 import { PageWrapper } from "@/components/pages/page-wrapper";
@@ -21,8 +29,9 @@ interface PageProps {
 }
 
 export async function generateStaticParams() {
+  // Limit to first 30 articles for faster builds (remaining generated on-demand)
   const articles = await getArticles();
-  return articles.map((article) => ({
+  return articles.slice(0, 30).map((article) => ({
     slug: article.slug,
   }));
 }
@@ -61,7 +70,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       images: ogImage ? [ogImage] : undefined,
     },
     robots: seo?.noIndex ? "noindex, nofollow" : undefined,
-    alternates: seo?.canonicalUrl ? { canonical: seo.canonicalUrl } : undefined,
+    alternates: { canonical: seo?.canonicalUrl || `/gia-goneis/${slug}` },
   };
 }
 

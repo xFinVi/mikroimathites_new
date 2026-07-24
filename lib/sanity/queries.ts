@@ -1,3 +1,11 @@
+/**
+ * Sanity GROQ Queries - Defines all queries for fetching content from Sanity CMS
+ * 
+ * Contains GROQ (Graph-Relational Object Queries) definitions for articles, recipes,
+ * activities, printables, and other content types. These queries are used by
+ * lib/content/index.ts to fetch data from Sanity.
+ */
+
 import { groq } from "next-sanity";
 
 // Standardized fields for all content types
@@ -186,9 +194,10 @@ export const printableBySlugQuery = groq`*[_type == "printable" && slug.current 
 export const featuredPrintablesQuery = groq`*[_type == "printable" && featured == true && defined(slug.current) && defined(coverImage) && !(_id in path("drafts.**"))]|order(publishedAt desc)[0...10]{${printableFields}}`;
 
 // QA Item queries
-// Show published items (not in drafts path)
-// Note: publishedAt is optional - if not set, we use _updatedAt for ordering
-export const qaItemsQuery = groq`*[_type == "qaItem" && !(_id in path("drafts.**"))]|order(coalesce(publishedAt, _updatedAt) desc)[0...10]{${QAItemFields}}`;
+// Only show items that have been explicitly published from Sanity Studio
+// (publishedAt is set by the custom qa-publish-action when admin clicks Publish)
+// Items created via the API start as "drafts.*" and only appear here after Studio publish
+export const qaItemsQuery = groq`*[_type == "qaItem" && defined(publishedAt) && !(_id in path("drafts.**"))]|order(publishedAt desc)[0...10]{${QAItemFields}}`;
 
 // Curated Collection queries
 export const curatedCollectionFields = `

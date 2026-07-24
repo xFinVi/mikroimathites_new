@@ -336,13 +336,13 @@ export function SubmissionDetail({
       <div className="space-y-6">
         {/* Management Section - Top Row */}
         <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Διαχείριση</h3>
+          <h3 className="text-lg text-center font-semibold text-gray-900 mb-4">Διαχείριση</h3>
           
           <div className="flex flex-row items-end gap-4">
             <div className="flex-1 space-y-2">
-              <Label htmlFor="status" className="text-base font-semibold text-text-dark">
+              {/* <Label htmlFor="status" className="text-base font-semibold text-text-dark">
                 Κατάσταση
-              </Label>
+              </Label> */}
               <Select value={status} onValueChange={setStatus}>
                 <SelectTrigger id="status">
                   <SelectValue />
@@ -369,7 +369,7 @@ export function SubmissionDetail({
                   Αποθήκευση...
                 </>
               ) : (
-                "💾 Αποθήκευση (Κατάσταση)"
+                "💾 Αποθήκευση"
               )}
             </Button>
           </div>

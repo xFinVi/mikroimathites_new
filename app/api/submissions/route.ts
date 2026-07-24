@@ -1,3 +1,10 @@
+/**
+ * Submissions API Route - Handles user form submissions (Q&A, feedback, contact)
+ * 
+ * POST: Creates a new submission in Supabase and sends email notification to admin.
+ * Submissions are stored in the submissions table and can be moderated in /admin/submissions.
+ */
+
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase/server";
 import { logger } from "@/lib/utils/logger";

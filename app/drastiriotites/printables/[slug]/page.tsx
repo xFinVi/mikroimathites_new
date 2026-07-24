@@ -21,8 +21,9 @@ interface PageProps {
 }
 
 export async function generateStaticParams() {
+  // Limit to first 30 printables for faster builds (remaining generated on-demand)
   const printables = await getPrintables();
-  return printables.map((printable) => ({
+  return printables.slice(0, 30).map((printable) => ({
     slug: printable.slug,
   }));
 }
@@ -60,7 +61,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       images: ogImage ? [ogImage] : undefined,
     },
     robots: seo?.noIndex ? "noindex, nofollow" : undefined,
-    alternates: seo?.canonicalUrl ? { canonical: seo.canonicalUrl } : undefined,
+    alternates: { canonical: seo?.canonicalUrl || `/drastiriotites/printables/${slug}` },
   };
 }
 
@@ -196,7 +197,7 @@ export default async function PrintablePage({ params }: PageProps) {
               </div>
             </div>
 
-            {/* Download Section - Prominent Button */}
+            {/* Download Section - Consistent button across all screen sizes */}
             {printable.file && (
               <div className="flex justify-center mb-8 mt-6">
                 <PrintableDownloadButton slug={printable.slug} variant="bright-green" />

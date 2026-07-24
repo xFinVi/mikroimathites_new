@@ -16,8 +16,9 @@ interface PageProps {
 }
 
 export async function generateStaticParams() {
+  // Limit to first 20 recipes for faster builds (remaining generated on-demand)
   const recipes = await getRecipes();
-  return recipes.map((recipe) => ({
+  return recipes.slice(0, 20).map((recipe) => ({
     slug: recipe.slug,
   }));
 }
@@ -56,7 +57,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       images: ogImage ? [ogImage] : undefined,
     },
     robots: seo?.noIndex ? "noindex, nofollow" : undefined,
-    alternates: seo?.canonicalUrl ? { canonical: seo.canonicalUrl } : undefined,
+    alternates: { canonical: seo?.canonicalUrl || `/gia-goneis/recipes/${slug}` },
   };
 }
 

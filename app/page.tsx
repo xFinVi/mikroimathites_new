@@ -1,3 +1,11 @@
+/**
+ * Homepage Route - Main landing page
+ * 
+ * Fetches featured content from Sanity CMS (articles, activities, printables, hero section)
+ * and renders the HomePage component with curated content sections.
+ * Uses ISR (Incremental Static Regeneration) with 10-minute revalidation.
+ */
+
 import { generateMetadataFor } from "@/lib/seo/generate-metadata";
 import { HomePage } from "@/components/home/home-page";
 import { 
@@ -11,12 +19,14 @@ import {
   getFeaturedContentSection,
   getForParentsSection,
   getActivitiesPrintablesSection,
+  getFeaturedVideosSection,
   getSponsors,
 } from "@/lib/content";
+import { getApprovedTestimonials } from "@/lib/testimonials";
 import { generateImageUrl } from "@/lib/sanity/image-url";
 import { HOME_PAGE_LIMITS, HOME_PAGE_IMAGE_SIZES } from "@/lib/constants";
 import { logger } from "@/lib/utils/logger";
-import { type Sponsor } from "@/components/sponsors";
+import { type Sponsor } from "@/components/sponsors/sponsor-card";
 
 export const metadata = generateMetadataFor("home");
 
@@ -71,7 +81,8 @@ function getFeaturedContentWithFallback(
           imageUrl: generateImageUrl(
             content.coverImage,
             HOME_PAGE_IMAGE_SIZES.FEATURED_CONTENT.width,
-            HOME_PAGE_IMAGE_SIZES.FEATURED_CONTENT.height
+            HOME_PAGE_IMAGE_SIZES.FEATURED_CONTENT.height,
+            { format: 'auto', quality: 75 }
           ),
         };
       })
@@ -86,7 +97,8 @@ function getFeaturedContentWithFallback(
     imageUrl: generateImageUrl(
       article.coverImage,
       HOME_PAGE_IMAGE_SIZES.FEATURED_CONTENT.width,
-      HOME_PAGE_IMAGE_SIZES.FEATURED_CONTENT.height
+      HOME_PAGE_IMAGE_SIZES.FEATURED_CONTENT.height,
+      { format: 'auto', quality: 75 }
     ),
   }));
 }
@@ -228,7 +240,8 @@ export default async function Home() {
         imageUrl: generateImageUrl(
           content.coverImage,
           HOME_PAGE_IMAGE_SIZES.CARD.width,
-          HOME_PAGE_IMAGE_SIZES.CARD.height
+          HOME_PAGE_IMAGE_SIZES.CARD.height,
+          { format: 'auto', quality: 75 }
         ),
       };
     })
@@ -236,10 +249,12 @@ export default async function Home() {
     .slice(0, HOME_PAGE_LIMITS.FEATURED_PRINTABLES) || [];
 
   // Pre-generate image URL for home hero to avoid hydration mismatches
+  // Optimize with auto=format (WebP/AVIF) and q=75 for faster LCP
   const homeHeroImageUrl = generateImageUrl(
     homeHero?.image,
     HOME_PAGE_IMAGE_SIZES.HERO.width,
-    HOME_PAGE_IMAGE_SIZES.HERO.height
+    HOME_PAGE_IMAGE_SIZES.HERO.height,
+    { format: 'auto', quality: 75 }
   );
 
   // Fetch real sponsors from Sanity (only active, synced sponsors)
@@ -249,6 +264,18 @@ export default async function Home() {
   } catch (error) {
     logger.error('Failed to fetch sponsors for home page:', error);
     // Continue with empty array - section will just not show sponsors
+  }
+
+  // Fetch approved parent reviews from Supabase (getApprovedTestimonials returns [] on error)
+  const testimonials = await getApprovedTestimonials();
+
+  // Fetch Sanity-managed featured videos (fetched separately so it keeps a proper type;
+  // the homepage falls back to the built-in video list when this is null/empty)
+  let featuredVideosSection: Awaited<ReturnType<typeof getFeaturedVideosSection>> = null;
+  try {
+    featuredVideosSection = await getFeaturedVideosSection();
+  } catch (error) {
+    logger.error('Failed to fetch featured videos for home page:', error);
   }
 
   return (
@@ -274,6 +301,13 @@ export default async function Home() {
         items: activitiesPrintablesItems,
       } : undefined}
       sponsors={sponsors}
+      testimonials={testimonials}
+      featuredVideos={featuredVideosSection ? {
+        title: featuredVideosSection.title,
+        subtitle: featuredVideosSection.subtitle,
+        youtubeChannelUrl: featuredVideosSection.youtubeChannelUrl,
+        videos: featuredVideosSection.videos,
+      } : undefined}
     />
   );
 }

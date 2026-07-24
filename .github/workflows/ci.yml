@@ -41,10 +41,14 @@ jobs:
         run: npm run build
         env:
           # Use dummy values for build - actual values needed only at runtime
+          # NEXT_PUBLIC_* variables must be available at build time
           NEXT_PUBLIC_SANITY_PROJECT_ID: dummy
           NEXT_PUBLIC_SANITY_DATASET: production
-          SANITY_API_VERSION: 2024-03-01
           NEXT_PUBLIC_SUPABASE_URL: https://dummy.supabase.co
+          NEXT_PUBLIC_ADSENSE_CLIENT: ca-pub-dummy
+          NEXT_PUBLIC_GA_ID: G-DUMMY
+          NEXT_PUBLIC_SITE_URL: http://localhost:3000
+          SANITY_API_VERSION: 2024-03-01
           SUPABASE_SERVICE_ROLE_KEY: dummy
           NEXTAUTH_SECRET: dummy
           NEXTAUTH_URL: http://localhost:3000

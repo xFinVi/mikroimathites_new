@@ -3,20 +3,28 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      args:
+        # Pass NEXT_PUBLIC_* variables as build args so they're available at build time
+        - NEXT_PUBLIC_ADSENSE_CLIENT=${NEXT_PUBLIC_ADSENSE_CLIENT}
+        - NEXT_PUBLIC_GA_ID=${NEXT_PUBLIC_GA_ID}
+        - NEXT_PUBLIC_SANITY_PROJECT_ID=${NEXT_PUBLIC_SANITY_PROJECT_ID}
+        - NEXT_PUBLIC_SANITY_DATASET=${NEXT_PUBLIC_SANITY_DATASET}
+        - NEXT_PUBLIC_SUPABASE_URL=${NEXT_PUBLIC_SUPABASE_URL}
+        - NEXT_PUBLIC_SITE_URL=${NEXT_PUBLIC_SITE_URL}
     container_name: mikroimathites-app
     restart: unless-stopped
     ports:
-      - "3000:3000"
+      # Bind to localhost only — the app must be reached through nginx (TLS, headers)
+      - "127.0.0.1:3000:3000"
     environment:
       # These will be overridden by .env file or environment variables
       - NODE_ENV=production
       - NEXT_TELEMETRY_DISABLED=1
-    env_file:
-      - .env.production
     networks:
       - app-network
     healthcheck:
-      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3000/api/health || exit 1"]
+      # CMD-SHELL so "|| exit 1" is shell logic, not part of the URL (exec form bug)
+      test: ["CMD-SHELL", "wget --quiet --tries=1 --spider http://localhost:3000/api/health || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 3

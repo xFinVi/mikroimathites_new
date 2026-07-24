@@ -5,15 +5,15 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { cn } from "@/lib/utils";
-import { Home, Users, Activity, Mail, Info, Heart, LayoutDashboard } from "lucide-react";
+import { Home, Baby, Puzzle, MessageCircle, BookOpen, HeartHandshake, LayoutDashboard } from "lucide-react";
 
 const navItems = [
   { href: "/", label: "Αρχική", icon: Home },
-  { href: "/gia-goneis", label: "Για Γονείς", icon: Users },
-  { href: "/drastiriotites", label: "Δραστηριότητες", icon: Activity },
-  { href: "/epikoinonia", label: "Επικοινωνία", icon: Mail },
-  { href: "/sxetika", label: "Σχετικά", icon: Info },
-  { href: "/support", label: "Στήριξη", icon: Heart },
+  { href: "/gia-goneis", label: "Για Γονείς", icon: Baby },
+  { href: "/drastiriotites", label: "Δραστηριότητες", icon: Puzzle },
+  { href: "/epikoinonia", label: "Επικοινωνία", icon: MessageCircle },
+  { href: "/sxetika", label: "Σχετικά", icon: BookOpen },
+  { href: "/support", label: "Στήριξη", icon: HeartHandshake },
 ];
 
 export function MobileMenu() {
@@ -97,7 +97,7 @@ export function MobileMenu() {
       <button
         onClick={toggleMenu}
         className="lg:hidden relative p-2 rounded-lg text-white hover:bg-white/10 active:bg-white/20 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-accent-yellow/50"
-        aria-label={isOpen ? "Close menu" : "Open menu"}
+        aria-label={isOpen ? "Κλείσιμο μενού" : "Άνοιγμα μενού"}
         aria-expanded={isOpen}
       >
         <div className="w-6 h-5 relative">
@@ -187,7 +187,7 @@ export function MobileMenu() {
               <button
                 onClick={closeMenu}
                 className="p-2 rounded-lg text-white hover:bg-white/10 active:bg-white/20 transition-colors"
-                aria-label="Close menu"
+                aria-label="Κλείσιμο μενού"
               >
                 <svg
                   className="w-6 h-6"
@@ -206,7 +206,7 @@ export function MobileMenu() {
             </div>
 
             {/* Navigation Items with staggered animation */}
-            <nav className="flex-1 overflow-y-auto overflow-x-visible py-6 px-4">
+            <nav className="flex-1 overflow-y-auto overflow-x-visible py-6 px-4" aria-label="Κύρια πλοήγηση">
               <div className="space-y-2">
                 {navItems.map((item, index) => {
                   const Icon = item.icon;

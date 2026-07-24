@@ -1,3 +1,11 @@
+/**
+ * Activities Hub Page - Lists activities and printables for kids
+ * 
+ * Displays filtered and searchable content from Sanity (activities, printables).
+ * Supports filtering by age group, content type, and search queries.
+ * Includes pagination and sorting options (latest, A-Z, downloads).
+ */
+
 import { Container } from "@/components/ui/container";
 import { PageWrapper } from "@/components/pages/page-wrapper";
 import { PageHeader } from "@/components/pages/page-header";
@@ -22,7 +30,7 @@ import { redirect } from "next/navigation";
 export async function generateMetadata({
   searchParams,
 }: {
-  searchParams?: Promise<{ age?: string; type?: string; search?: string; page?: string }>;
+  searchParams?: Promise<{ age?: string; type?: string; search?: string; page?: string; sort?: string }>;
 }): Promise<Metadata> {
   const resolvedSearchParams = await searchParams;
   const params = (resolvedSearchParams ?? {}) as {
@@ -30,6 +38,7 @@ export async function generateMetadata({
     type?: string;
     search?: string;
     page?: string;
+    sort?: string;
   };
   const base = generateMetadataFor("drastiriotites");
 
@@ -107,6 +116,7 @@ export default async function DrastiriotitesPage({ searchParams }: PageProps) {
       type: params.type,
       page: currentPage,
       pageSize: DRASTIRIOTITES_CONSTANTS.PAGE_SIZE,
+      sortBy: (params.sort as "latest" | "popular" | "alphabetical") || "latest",
     }),
   ]);
 
@@ -231,9 +241,6 @@ export default async function DrastiriotitesPage({ searchParams }: PageProps) {
           <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
             <div>
               <h3 className="text-xl font-bold text-text-dark">Στείλτε μας ιδέα ή ερώτηση</h3>
-              <p className="text-text-medium">
-                Όλα θα συνδεθούν με την υποβολή στο CMS/Supabase.
-              </p>
             </div>
             <Link
               href="/epikoinonia"
