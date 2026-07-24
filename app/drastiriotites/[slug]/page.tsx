@@ -18,11 +18,18 @@ interface PageProps {
 }
 
 export async function generateStaticParams() {
-  // Limit to first 30 activities for faster builds (remaining generated on-demand)
-  const activities = await getActivities();
-  return activities.slice(0, 30).map((activity) => ({
-    slug: activity.slug,
-  }));
+  // Limit to first 30 activities for faster builds (remaining generated on-demand).
+  // Tolerate the CMS being unreachable (e.g. CI builds with dummy Sanity creds);
+  // pages are still generated on-demand at runtime.
+  try {
+    const activities = await getActivities();
+    return activities.slice(0, 30).map((activity) => ({
+      slug: activity.slug,
+    }));
+  } catch (error) {
+    console.error("generateStaticParams (activities) failed; generating on-demand:", error);
+    return [];
+  }
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {

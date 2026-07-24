@@ -29,11 +29,18 @@ interface PageProps {
 }
 
 export async function generateStaticParams() {
-  // Limit to first 30 articles for faster builds (remaining generated on-demand)
-  const articles = await getArticles();
-  return articles.slice(0, 30).map((article) => ({
-    slug: article.slug,
-  }));
+  // Limit to first 30 articles for faster builds (remaining generated on-demand).
+  // Tolerate the CMS being unreachable (e.g. CI builds with dummy Sanity creds);
+  // pages are still generated on-demand at runtime.
+  try {
+    const articles = await getArticles();
+    return articles.slice(0, 30).map((article) => ({
+      slug: article.slug,
+    }));
+  } catch (error) {
+    console.error("generateStaticParams (articles) failed; generating on-demand:", error);
+    return [];
+  }
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {

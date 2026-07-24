@@ -16,11 +16,18 @@ interface PageProps {
 }
 
 export async function generateStaticParams() {
-  // Limit to first 20 recipes for faster builds (remaining generated on-demand)
-  const recipes = await getRecipes();
-  return recipes.slice(0, 20).map((recipe) => ({
-    slug: recipe.slug,
-  }));
+  // Limit to first 20 recipes for faster builds (remaining generated on-demand).
+  // Tolerate the CMS being unreachable (e.g. CI builds with dummy Sanity creds);
+  // pages are still generated on-demand at runtime.
+  try {
+    const recipes = await getRecipes();
+    return recipes.slice(0, 20).map((recipe) => ({
+      slug: recipe.slug,
+    }));
+  } catch (error) {
+    console.error("generateStaticParams (recipes) failed; generating on-demand:", error);
+    return [];
+  }
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {

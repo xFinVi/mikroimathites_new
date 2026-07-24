@@ -26,14 +26,25 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   ];
 
   // Dynamic routes from CMS
-  // Note: Sitemap includes all items for SEO, but pages are generated on-demand
-  const [articles, activities, printables, recipes, ageGroups] = await Promise.all([
-    getArticles(),
-    getActivities(),
-    getPrintables(),
-    getRecipes(),
-    getAgeGroups(),
-  ]);
+  // Note: Sitemap includes all items for SEO, but pages are generated on-demand.
+  // Tolerate the CMS being unreachable (e.g. CI builds with dummy Sanity creds):
+  // fall back to static routes only rather than failing the whole build.
+  let articles: Awaited<ReturnType<typeof getArticles>> = [];
+  let activities: Awaited<ReturnType<typeof getActivities>> = [];
+  let printables: Awaited<ReturnType<typeof getPrintables>> = [];
+  let recipes: Awaited<ReturnType<typeof getRecipes>> = [];
+  let ageGroups: Awaited<ReturnType<typeof getAgeGroups>> = [];
+  try {
+    [articles, activities, printables, recipes, ageGroups] = await Promise.all([
+      getArticles(),
+      getActivities(),
+      getPrintables(),
+      getRecipes(),
+      getAgeGroups(),
+    ]);
+  } catch (error) {
+    console.error("sitemap: CMS fetch failed; emitting static routes only:", error);
+  }
 
   const articleRoutes: MetadataRoute.Sitemap = articles.map((article) => ({
     url: `${baseUrl}/gia-goneis/${article.slug}`,
