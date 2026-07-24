@@ -57,7 +57,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       images: ogImage ? [ogImage] : undefined,
     },
     robots: seo?.noIndex ? "noindex, nofollow" : undefined,
-    alternates: seo?.canonicalUrl ? { canonical: seo.canonicalUrl } : undefined,
+    alternates: { canonical: seo?.canonicalUrl || `/gia-goneis/recipes/${slug}` },
   };
 }
 

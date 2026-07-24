@@ -44,8 +44,41 @@ const getBaseUrl = () => {
 
 export const metadata: Metadata = {
   metadataBase: new URL(getBaseUrl()),
-  title: "Μικροί Μαθητές",
-  description: "Parent Hub - Practical tips and activities for parents with children 0-6 years old",
+  title: {
+    default: "Μικροί Μαθητές",
+    template: "%s | Μικροί Μαθητές",
+  },
+  description:
+    "Parent Hub για γονείς με παιδιά 0-6 ετών. Συμβουλές, δραστηριότητες και εκτυπώσιμα.",
+  manifest: "/site.webmanifest",
+  openGraph: {
+    type: "website",
+    siteName: "Μικροί Μαθητές",
+    locale: "el_GR",
+  },
+};
+
+// Organization + WebSite structured data — feeds Google's brand name/logo display
+const structuredData = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": `${getBaseUrl()}/#organization`,
+      name: "Μικροί Μαθητές",
+      url: getBaseUrl(),
+      logo: `${getBaseUrl()}/icon.png`,
+      sameAs: ["https://www.youtube.com/@MikroiMathites"],
+    },
+    {
+      "@type": "WebSite",
+      "@id": `${getBaseUrl()}/#website`,
+      name: "Μικροί Μαθητές",
+      url: getBaseUrl(),
+      inLanguage: "el",
+      publisher: { "@id": `${getBaseUrl()}/#organization` },
+    },
+  ],
 };
 
 export default function RootLayout({
@@ -67,6 +100,12 @@ export default function RootLayout({
         <link rel="preconnect" href="https://cdn.sanity.io" crossOrigin="anonymous" />
       </head>
       <body className={`${inter.variable} ${poppins.variable} font-sans antialiased`}>
+        {/* Organization + WebSite JSON-LD. Kept in <body> (not <head>) so it doesn't
+            share head-reconciliation with the beforeInteractive AdSense script. */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+        />
         {/* AdSense script - beforeInteractive strategy moves it to <head> automatically */}
         {adsenseClient && <AdSenseHeadScript client={adsenseClient} />}
         <Providers>
