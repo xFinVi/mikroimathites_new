@@ -2,14 +2,13 @@
 
 import { useState, useEffect } from "react";
 import { signIn } from "next-auth/react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
 
 export function LoginForm() {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl") || "/admin/dashboard";
   const registered = searchParams.get("registered") === "true";
@@ -59,9 +58,13 @@ export function LoginForm() {
         return;
       }
 
-      // Successful login
-      router.push(callbackUrl);
-      router.refresh();
+      // Successful login — use a full navigation (not router.push) so the
+      // freshly-set session cookie is sent with the request to the
+      // middleware-protected route. A client-side push can race the cookie
+      // and bounce to an error/login page until a manual refresh.
+      // Only allow relative callback paths to avoid open-redirects.
+      const target = callbackUrl.startsWith("/") ? callbackUrl : "/admin/dashboard";
+      window.location.href = target;
     } catch (err) {
       setError("Κάτι πήγε στραβά. Παρακαλώ δοκιμάστε ξανά.");
       setIsLoading(false);
