@@ -139,16 +139,6 @@ export function LoginForm() {
             {isLoading ? "Σύνδεση..." : "Σύνδεση"}
           </Button>
         </form>
-
-        <div className="mt-6 text-center text-sm text-text-medium">
-          Δεν έχετε λογαριασμό;{" "}
-          <Link
-            href="/auth/register"
-            className="text-primary-pink hover:underline font-semibold"
-          >
-            Εγγραφή
-          </Link>
-        </div>
       </div>
     </div>
   );
