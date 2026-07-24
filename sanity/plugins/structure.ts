@@ -9,6 +9,7 @@ const SINGLETONS = [
   { title: "Featured Content Section", type: "featuredContentSection", id: "featuredContentSection" },
   { title: "For Parents Section", type: "forParentsSection", id: "forParentsSection" },
   { title: "Activities & Printables Section", type: "activitiesPrintablesSection", id: "activitiesPrintablesSection" },
+  { title: "Featured Videos Section", type: "featuredVideosSection", id: "featuredVideosSection" },
 ] as const;
 
 /**

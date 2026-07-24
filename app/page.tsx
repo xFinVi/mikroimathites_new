@@ -19,8 +19,10 @@ import {
   getFeaturedContentSection,
   getForParentsSection,
   getActivitiesPrintablesSection,
+  getFeaturedVideosSection,
   getSponsors,
 } from "@/lib/content";
+import { getApprovedTestimonials } from "@/lib/testimonials";
 import { generateImageUrl } from "@/lib/sanity/image-url";
 import { HOME_PAGE_LIMITS, HOME_PAGE_IMAGE_SIZES } from "@/lib/constants";
 import { logger } from "@/lib/utils/logger";
@@ -264,6 +266,18 @@ export default async function Home() {
     // Continue with empty array - section will just not show sponsors
   }
 
+  // Fetch approved parent reviews from Supabase (getApprovedTestimonials returns [] on error)
+  const testimonials = await getApprovedTestimonials();
+
+  // Fetch Sanity-managed featured videos (fetched separately so it keeps a proper type;
+  // the homepage falls back to the built-in video list when this is null/empty)
+  let featuredVideosSection: Awaited<ReturnType<typeof getFeaturedVideosSection>> = null;
+  try {
+    featuredVideosSection = await getFeaturedVideosSection();
+  } catch (error) {
+    logger.error('Failed to fetch featured videos for home page:', error);
+  }
+
   return (
     <HomePage
       homeHeroImage={homeHeroImageUrl}
@@ -287,6 +301,13 @@ export default async function Home() {
         items: activitiesPrintablesItems,
       } : undefined}
       sponsors={sponsors}
+      testimonials={testimonials}
+      featuredVideos={featuredVideosSection ? {
+        title: featuredVideosSection.title,
+        subtitle: featuredVideosSection.subtitle,
+        youtubeChannelUrl: featuredVideosSection.youtubeChannelUrl,
+        videos: featuredVideosSection.videos,
+      } : undefined}
     />
   );
 }

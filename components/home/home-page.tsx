@@ -15,7 +15,9 @@ import type React from "react";
 import dynamic from "next/dynamic";
 import { Container } from "@/components/ui/container";
 import { PageWrapper } from "@/components/pages/page-wrapper";
-import { Article, Activity, Printable } from "@/lib/content";
+import { Article, Activity, Printable, type FeaturedVideo } from "@/lib/content";
+import { type Testimonial } from "@/lib/testimonials";
+import { TestimonialsSection } from "@/components/home/testimonials-section";
 import { ArticleCard } from "@/components/articles/article-card";
 import { ActivityCard } from "@/components/activities/activity-card";
 import { type Sponsor } from "@/components/sponsors/sponsor-card";
@@ -139,6 +141,13 @@ interface HomePageProps {
     items?: Array<(Activity | Printable) & { imageUrl?: string | null; _contentType?: 'activity' | 'printable' }>;
   };
   sponsors?: Sponsor[];
+  testimonials?: Testimonial[];
+  featuredVideos?: {
+    title?: string;
+    subtitle?: string;
+    youtubeChannelUrl?: string;
+    videos?: FeaturedVideo[];
+  };
 }
 
 // Featured Content Section Component
@@ -353,20 +362,33 @@ export function HomePage({
   forParentsSection,
   activitiesPrintablesSection,
   sponsors = [],
+  testimonials = [],
+  featuredVideos,
 }: HomePageProps) {
+  // Prefer Sanity-managed videos; fall back to the built-in list when none are set,
+  // so the section never renders empty during content setup.
+  const videoSources = (featuredVideos?.videos && featuredVideos.videos.length > 0
+    ? featuredVideos.videos
+    : YOUTUBE_VIDEO_IDS.map((video) => ({
+        youtubeId: video.id,
+        title: video.title,
+        startTime: video.startTime,
+      }))
+  ).map((video) => ({
+    type: "youtube" as const,
+    url: video.youtubeId,
+    title: video.title,
+    startTime: video.startTime,
+  }));
+
   return (
     <PageWrapper mainClassName="bg-[#0d1330]">
       {/* Section 1: Video Sneak Peek - Primary landing component (swapped back) */}
       <VideoSneakPeek
-        videos={YOUTUBE_VIDEO_IDS.map((video) => ({
-          type: "youtube" as const,
-          url: video.id,
-          title: video.title,
-          startTime: video.startTime,
-        }))}
-        title="Sneak Peek από το κανάλι μας"
-        subtitle="Δείτε τι μπορείτε να δείτε στο YouTube μας - 3 σύντομα βίντεο που δείχνουν το περιεχόμενο μας"
-        youtubeChannelUrl="https://www.youtube.com/@MikroiMathites"
+        videos={videoSources}
+        title={featuredVideos?.title || "Sneak Peek από το κανάλι μας"}
+        subtitle={featuredVideos?.subtitle || "Δείτε τι μπορείτε να δείτε στο YouTube μας - 3 σύντομα βίντεο που δείχνουν το περιεχόμενο μας"}
+        youtubeChannelUrl={featuredVideos?.youtubeChannelUrl || "https://www.youtube.com/@MikroiMathites"}
       />
 
       {/* Section 2: Home Hero Image (from Sanity) - Below video */}
@@ -498,7 +520,10 @@ export function HomePage({
         showBecomeSponsor={true}
       />
 
-      {/* Section 8: Community CTA */}
+      {/* Section 8: Testimonials - approved parent reviews (only renders when present) */}
+      <TestimonialsSection testimonials={testimonials} />
+
+      {/* Section 9: Community CTA */}
       <section className="relative bg-[#0d1330] py-16 md:py-20 overflow-hidden">
         <Container className="relative z-10">
           <div className="max-w-3xl mx-auto">

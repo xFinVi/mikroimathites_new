@@ -757,6 +757,43 @@ export async function getActivitiesPrintablesSection(): Promise<ActivitiesPrinta
   return result;
 }
 
+// Featured Videos Section
+export interface FeaturedVideo {
+  youtubeId: string;
+  title: string;
+  startTime?: number;
+}
+
+export interface FeaturedVideosSection {
+  title?: string;
+  subtitle?: string;
+  youtubeChannelUrl?: string;
+  videos?: FeaturedVideo[];
+}
+
+export async function getFeaturedVideosSection(): Promise<FeaturedVideosSection | null> {
+  if (!safeClient) return null;
+  const result = await safeClient.fetch<FeaturedVideosSection | null>(
+    `*[_type == "featuredVideosSection" && !(_id in path("drafts.**"))][0]{
+      title,
+      subtitle,
+      youtubeChannelUrl,
+      "videos": videos[]{
+        youtubeId,
+        title,
+        startTime
+      }
+    }`
+  );
+
+  // Drop any entries without a YouTube ID
+  if (result?.videos) {
+    result.videos = result.videos.filter((video) => video?.youtubeId);
+  }
+
+  return result;
+}
+
 // Category functions
 export async function getCategories(): Promise<Category[]> {
   if (!safeClient) return [];

@@ -13,6 +13,7 @@ import { homeHero } from "./documents/homeHero";
 import { featuredContentSection } from "./documents/featuredContentSection";
 import { forParentsSection } from "./documents/forParentsSection";
 import { activitiesPrintablesSection } from "./documents/activitiesPrintablesSection";
+import { featuredVideosSection } from "./documents/featuredVideosSection";
 import { sponsor } from "./documents/sponsor";
 import { seo } from "./objects/seo";
 import { hero } from "./objects/hero";
@@ -38,6 +39,7 @@ const schemas = [
   featuredContentSection,
   forParentsSection,
   activitiesPrintablesSection,
+  featuredVideosSection,
   sponsor,
   // Objects
   seo,
